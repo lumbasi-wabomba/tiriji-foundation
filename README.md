@@ -26,7 +26,6 @@ The platform includes:
 - **Events** — List of events with detail views and related events suggestions
 - **News** — News grid and detailed news articles to keep visitors informed
 - **Resources** — Educational and vocational resources with detail pages
-- **Testimonials** — Feedback from supporters and beneficiaries, displayed in grid and detail views
 - **Team & Partners** — Profiles of team members and partner organizations
 - **Volunteer Sign-up** — Forms to register volunteers
 - **Donations** — Structured donation options to support the foundation
@@ -39,7 +38,7 @@ Based on the current GitHub repository (Tiriji Foundation):
 
 ### Frontend
 - Fully styled pages using `style.css`
-- Responsive grid layouts for programs, events, news, resources, testimonials, and partners
+- Responsive grid layouts for programs, events, news, resources, and partners
 - Interactive call-to-action buttons (`.btn-primary`, `.btn-secondary`, `.btn-outline`)
 - Hover effects for cards and buttons for enhanced UX
 - Dedicated sections for volunteer signup, donations, and suggested programs/resources
@@ -51,7 +50,6 @@ Based on the current GitHub repository (Tiriji Foundation):
 
 ### Pending / Next Steps
 - Integration of dynamic image uploads and media handling for program/event galleries
-- Completion of testimonial submission form functionality
 - Full deployment setup and hosting configuration
 - SEO optimizations and accessibility enhancements
 
@@ -88,7 +86,7 @@ Based on the current GitHub repository (Tiriji Foundation):
 
 - Access programs, events, and resources via the navigation menu.  
 - Submit volunteer applications or donations through the provided forms.  
-- Administrators can log in via `/admin` to manage content.  
+- Administrators can log in via `staff login` at the footer of the resource page to manage content .  
 
 ## Contributing
 
