@@ -18,14 +18,14 @@
     <div class="event-grid">
         {% for event in events %}
         <div class="event-card">
-            {% if event.image %}
-                <img src="{{ event.image.url }}" alt="{{ event.title }}">
+            {% if event.image_url %}
+                <img src="{{ event.image_url }}" alt="{{ event.title }}">
             {% endif %}
             <h3>{{ event.title }}</h3>
-            <p><strong>Date:</strong> {{ event.date }}</p>
-            <p><strong>Location:</strong> {{ event.location }}</p>
-            <p>{{ event.description|truncatewords:20 }}</p>
-            <a href="{% url 'event_detail' event.id %}" class="text-link">Read More →</a>
+            <p><strong>Date:</strong> {{ event.event_date }}</p>
+            <p><strong>Location:</strong> {{ event.event_location }}</p>
+            <p>{{ event.events_description|truncatewords:20 }}</p>
+            <a href="{% url 'event_detail' event.event_id %}" class="text-link">Read More →</a>
         </div>
         {% empty %}
         <p>No upcoming events at the moment.</p>
