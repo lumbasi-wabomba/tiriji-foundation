@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ action_label }} {{ section_name }} | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>{{ action_label }} {{ section_name }}</h1>
+            <p class="subtitle">Fill in the form below to {{ action_label|lower }} {{ section_name|lower }} details.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url return_url %}" class="btn btn-outline">Back</a>
+        </div>
+    </div>
+    <div class="card admin-form-card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="field-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary form-button">{{ action_label }}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

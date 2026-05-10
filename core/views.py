@@ -1,6 +1,21 @@
-from django.shortcuts import render , redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import program, volunteer
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
+from .models import program, volunteer, events as Event, news as News, resources as Resource
+from .forms import ProgramForm, EventForm, NewsForm, ResourceForm
+import os
+from django.conf import settings
+from .models import resources
+
+
+def user_in_group(user):
+    return user.is_authenticated and (user.is_superuser or user.groups.filter(name__in=['admin', 'secretary', 'director']).exists())
+
+
+def group_required(view_func):
+    return login_required(user_passes_test(user_in_group, login_url='login')(view_func), login_url='login')
+
 
 def home(request):
     programs = program.objects.all()
@@ -56,9 +71,6 @@ def resources(request):
 
 def faq(request):
     return render(request, 'core/faq.html')
-
-def testimonials(request):
-    return render(request, 'core/testimonials.html')
 
 def gallery(request):
     return render(request, 'core/gallery.html')
@@ -119,10 +131,6 @@ def resource_detail(request, resource_id):
     # Placeholder for resource detail view
     return render(request, 'core/resource_detail.html', {'resource_id': resource_id})
 
-def testimonial_detail(request, testimonial_id):
-    # Placeholder for testimonial detail view
-    return render(request, 'core/testimonial_detail.html', {'testimonial_id': testimonial_id})
-
 def gallery_detail(request, gallery_id):
     # Placeholder for gallery detail view
     return render(request, 'core/gallery_detail.html', {'gallery_id': gallery_id})  
@@ -146,4 +154,208 @@ def blog_detail(request, blog_id):
     # Placeholder for blog detail view
     return render(request, 'core/blog_detail.html', {'blog_id': blog_id})
 
+
+@group_required
+def admin_portal(request):
+    context = {
+        'program_count': program.objects.count(),
+        'event_count': Event.objects.count(),
+        'news_count': News.objects.count(),
+        'resource_count': Resource.objects.count(),
+    }
+    return render(request, 'core/admin.html', context)
+
+
+def admin_form_view(request, form_class, instance=None, section_name='', action_label='Create', return_url='admin_portal'):
+    if request.method == 'POST':
+        form = form_class(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'{section_name} saved successfully.')
+            return redirect(return_url)
+    else:
+        form = form_class(instance=instance)
+
+    return render(request, 'core/admin_form.html', {
+        'form': form,
+        'section_name': section_name,
+        'action_label': action_label,
+        'return_url': return_url,
+    })
+
+
+@group_required
+def admin_programs(request):
+    items = program.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Programs',
+        'section_label': 'Program',
+        'add_url': 'admin_program_add',
+        'headers': ['ID', 'Title', 'Created'],
+        'rows': [
+            {
+                'cols': [item.program_id, item.title, item.created_at.strftime('%Y-%m-%d')],
+                'edit_url': reverse('admin_program_edit', args=[item.program_id]),
+                'delete_url': reverse('admin_program_delete', args=[item.program_id]),
+            }
+            for item in items
+        ],
+    })
+
+
+@group_required
+def admin_program_add(request):
+    return admin_form_view(request, ProgramForm, section_name='Program', action_label='Add', return_url='admin_programs')
+
+
+@group_required
+def admin_program_edit(request, program_id):
+    instance = get_object_or_404(program, program_id=program_id)
+    return admin_form_view(request, ProgramForm, instance=instance, section_name='Program', action_label='Update', return_url='admin_programs')
+
+
+@group_required
+def admin_program_delete(request, program_id):
+    instance = get_object_or_404(program, program_id=program_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Program deleted successfully.')
+        return redirect('admin_programs')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Program',
+        'object_name': instance.title,
+        'return_url': 'admin_programs',
+    })
+
+
+@group_required
+def admin_events(request):
+    items = Event.objects.select_related('program_id').all().order_by('-event_date')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Events',
+        'section_label': 'Event',
+        'add_url': 'admin_event_add',
+        'headers': ['ID', 'Title', 'Program', 'Date'],
+        'rows': [
+            {
+                'cols': [item.event_id, item.title, item.program_id.title if item.program_id else '-', item.event_date.strftime('%Y-%m-%d')],
+                'edit_url': reverse('admin_event_edit', args=[item.event_id]),
+                'delete_url': reverse('admin_event_delete', args=[item.event_id]),
+            }
+            for item in items
+        ],
+    })
+
+
+@group_required
+def admin_event_add(request):
+    return admin_form_view(request, EventForm, section_name='Event', action_label='Add', return_url='admin_events')
+
+
+@group_required
+def admin_event_edit(request, event_id):
+    instance = get_object_or_404(Event, event_id=event_id)
+    return admin_form_view(request, EventForm, instance=instance, section_name='Event', action_label='Update', return_url='admin_events')
+
+
+@group_required
+def admin_event_delete(request, event_id):
+    instance = get_object_or_404(Event, event_id=event_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Event deleted successfully.')
+        return redirect('admin_events')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Event',
+        'object_name': instance.title,
+        'return_url': 'admin_events',
+    })
+
+
+@group_required
+def admin_news(request):
+    items = News.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'News',
+        'section_label': 'News item',
+        'add_url': 'admin_news_add',
+        'headers': ['ID', 'Title', 'Program', 'Event'],
+        'rows': [
+            {
+                'cols': [item.news_id, item.title, item.program_id.title if item.program_id else '-', item.event_id.title if item.event_id else '-'],
+                'edit_url': reverse('admin_news_edit', args=[item.news_id]),
+                'delete_url': reverse('admin_news_delete', args=[item.news_id]),
+            }
+            for item in items
+        ],
+    })
+
+
+@group_required
+def admin_news_add(request):
+    return admin_form_view(request, NewsForm, section_name='News item', action_label='Add', return_url='admin_news')
+
+
+@group_required
+def admin_news_edit(request, news_id):
+    instance = get_object_or_404(News, news_id=news_id)
+    return admin_form_view(request, NewsForm, instance=instance, section_name='News item', action_label='Update', return_url='admin_news')
+
+
+@group_required
+def admin_news_delete(request, news_id):
+    instance = get_object_or_404(News, news_id=news_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'News item deleted successfully.')
+        return redirect('admin_news')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'News item',
+        'object_name': instance.title,
+        'return_url': 'admin_news',
+    })
+
+
+@group_required
+def admin_resources(request):
+    items = Resource.objects.select_related('program_id').all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Resources',
+        'section_label': 'Resource',
+        'add_url': 'admin_resource_add',
+        'headers': ['ID', 'Title', 'Program', 'Uploaded'],
+        'rows': [
+            {
+                'cols': [item.resource_id, item.title, item.program_id.title if item.program_id else '-', item.created_at.strftime('%Y-%m-%d')],
+                'edit_url': reverse('admin_resource_edit', args=[item.resource_id]),
+                'delete_url': reverse('admin_resource_delete', args=[item.resource_id]),
+            }
+            for item in items
+        ],
+    })
+
+
+@group_required
+def admin_resource_add(request):
+    return admin_form_view(request, ResourceForm, section_name='Resource', action_label='Add', return_url='admin_resources')
+
+
+@group_required
+def admin_resource_edit(request, resource_id):
+    instance = get_object_or_404(Resource, resource_id=resource_id)
+    return admin_form_view(request, ResourceForm, instance=instance, section_name='Resource', action_label='Update', return_url='admin_resources')
+
+
+@group_required
+def admin_resource_delete(request, resource_id):
+    instance = get_object_or_404(Resource, resource_id=resource_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Resource deleted successfully.')
+        return redirect('admin_resources')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Resource',
+        'object_name': instance.title,
+        'return_url': 'admin_resources',
+    })
  

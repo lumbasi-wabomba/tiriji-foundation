@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admin Portal | Tiriji Foundation{% endblock %}
+
+{% block content %}
+<div class="container admin-dashboard">
+    <div class="admin-header card">
+        <div>
+            <h1>Admin Portal</h1>
+            <p class="subtitle">A clean, simplified dashboard for administrators, secretaries, and directors.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+        </div>
+    </div>
+
+    <div class="admin-summary grid grid-250">
+        <div class="admin-card">
+            <h3>Programs</h3>
+            <p>{{ program_count }}</p>
+            <a href="{% url 'admin_programs' %}" class="btn btn-primary">Manage</a>
+        </div>
+        <div class="admin-card">
+            <h3>Events</h3>
+            <p>{{ event_count }}</p>
+            <a href="{% url 'admin_events' %}" class="btn btn-primary">Manage</a>
+        </div>
+        <div class="admin-card">
+            <h3>News</h3>
+            <p>{{ news_count }}</p>
+            <a href="{% url 'admin_news' %}" class="btn btn-primary">Manage</a>
+        </div>
+        <div class="admin-card">
+            <h3>Resources</h3>
+            <p>{{ resource_count }}</p>
+            <a href="{% url 'admin_resources' %}" class="btn btn-primary">Manage</a>
+        </div>
+    </div>
+
+    <div class="admin-tips card">
+        <h2>Quick actions</h2>
+        <p>Use these tiles to quickly add new content or keep the website synchronized with the latest programs, stories, events and resources.</p>
+        <div class="admin-tile-grid grid grid-250">
+            <a href="{% url 'admin_program_add' %}" class="admin-tile">Add a Program</a>
+            <a href="{% url 'admin_event_add' %}" class="admin-tile">Add an Event</a>
+            <a href="{% url 'admin_news_add' %}" class="admin-tile">Add News</a>
+            <a href="{% url 'admin_resource_add' %}" class="admin-tile">Upload Resource</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

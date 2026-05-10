@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ section_name }} | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>{{ section_name }}</h1>
+            <p class="subtitle">Manage {{ section_name|lower }} with add, edit, and delete actions.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'admin_portal' %}" class="btn btn-outline">Dashboard</a>
+            <a href="{% url add_url %}" class="btn btn-primary">Add {{ section_label }}</a>
+        </div>
+    </div>
+
+    <div class="card admin-table-card">
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        {% for header in headers %}
+                            <th>{{ header }}</th>
+                        {% endfor %}
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            {% for col in row.cols %}
+                                <td>{{ col }}</td>
+                            {% endfor %}
+                            <td class="actions">
+                                <a href="{{ row.edit_url }}" class="btn btn-outline">Edit</a>
+                                <a href="{{ row.delete_url }}" class="btn btn-secondary">Delete</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{{ headers|length|add:'1' }}">No items found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

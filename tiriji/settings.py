@@ -39,6 +39,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_interface',
+    'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,7 +54,6 @@ INSTALLED_APPS = [
     'storages', 
     'rest_framework',
     'cloudinary',
-    'cloudinary_storage',
     
 ]
 
@@ -111,11 +112,11 @@ DATABASES = {
     }
 }
 
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-}
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+#     },
+# }
 
 # cloudinary settings & config 
 cloudinary.config( 
@@ -160,6 +161,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
@@ -169,7 +173,16 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'admin_portal'
+LOGOUT_REDIRECT_URL = 'home'
+
+# Session settings
+SESSION_COOKIE_AGE = 600  # 10 minutes in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 #for production
 if not DEBUG:

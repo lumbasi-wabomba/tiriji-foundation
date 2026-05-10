@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Delete {{ section_name }} | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>Delete {{ section_name }}</h1>
+            <p class="subtitle">Confirm that you want to permanently delete this {{ section_name|lower }}.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url return_url %}" class="btn btn-outline">Back</a>
+        </div>
+    </div>
+    <div class="card admin-form-card">
+        <p>Are you sure you want to delete <strong>{{ object_name }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">Confirm Delete</button>
+            <a href="{% url return_url %}" class="btn btn-outline">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

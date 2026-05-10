@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login | Tiriji Foundation{% endblock %}
+
+{% block content %}
+<div class="container auth-panel">
+    <div class="card auth-card">
+        <h1>Sign in</h1>
+        <p>Please use your admin credentials to enter the portal.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                <input type="text" name="username" autofocus required id="id_username" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                <input type="password" name="password" required id="id_password" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary form-button">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
