@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Tiriji Foundation{% endblock %}</title>
+
+    <!-- Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="site-header">
+    <div class=" nav-wrapper">
+
+        <a href="{% url 'home' %}" class="brand">
+            <img src="{% static 'images/logo-1.png' %}" alt="Logo" class="logo">
+            <span class="brand-name">Tiriji Foundation</span>
+        </a>
+
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            ☰
+        </button>
+
+        <nav class="nav-menu">
+            <ul class="nav-list">
+                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'children' %}">Children</a></li>
+                <li><a href="{% url 'women' %}">Women</a></li>
+                <li><a href="{% url 'programs' %}">Programs</a></li>
+                <li><a href="{% url 'events' %}">Events</a></li>
+                <li><a href="{% url 'news' %}">News</a></li>
+                <li><a href="{% url 'resources' %}">Resources</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+            </ul>
+        </nav>
+
+    </div>
+</header>
+
+<!-- ===== FLASH MESSAGES ===== -->
+<div class="container mt-3">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="py-4">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-dark text-light text-center py-3 mt-5">
+    <div class="container" style="display: none;">
+        <p class="mb-0">
+            &copy; {% now "Y" %} Tiriji Foundation. All rights reserved.
+        </p>
+    </div>
+</footer>
+
+<script src= "{% static 'js/script.js'%}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

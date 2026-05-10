@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Support Our Mission</h1>
+        <p>Your contribution empowers communities, youth, and sustainable initiatives.</p>
+    </div>
+</section>
+
+<!-- DONATION OPTIONS -->
+<section class="container donation-options">
+    <h2 class="section-title">Ways to Donate</h2>
+
+    <div class="grid-2">
+
+        <div class="donation-card">
+            <h3>One-Time Donation</h3>
+            <p>
+                Make a single contribution to support any of our programs.
+            </p>
+            <a href="{% url 'donate_success' %}" class="btn btn-primary">Donate Now</a>
+        </div>
+
+        <div class="donation-card">
+            <h3>Monthly Supporter</h3>
+            <p>
+                Become a regular supporter and help us plan sustainable long-term projects.
+            </p>
+            <a href="{% url 'donate_success' %}" class="btn btn-secondary">Join Monthly</a>
+        </div>
+
+    </div>
+
+    <!-- Suggested Programs -->
+    <div class="suggested-programs">
+        <h3>Donate to Specific Programs</h3>
+        <div class="program-grid">
+            {% for program in programs %}
+            <div class="program-card">
+                {% if program.image %}
+                    <img src="{{ program.image.url }}" alt="{{ program.title }}">
+                {% endif %}
+                <h4>{{ program.title }}</h4>
+                <p>{{ program.description|truncatewords:15 }}</p>
+                <a href="{% url 'program_detail' program.id %}" class="text-link">Learn More →</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Every Contribution Counts</h2>
+        <p>Your support helps us transform lives and build regenerative communities.</p>
+        <a href="{% url 'donate_success' %}" class="btn btn-primary">Donate Today</a>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "core/base.html" %}
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>Thank You, {{ name }}!</h1>
+        <p>Your volunteer application has been received. We’ll contact you soon.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Return Home</a>
+    </div>
+</section>
+{% endblock %}

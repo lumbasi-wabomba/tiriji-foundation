@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Latest News</h1>
+        <p>Stay up-to-date with our latest initiatives, achievements, and stories.</p>
+    </div>
+</section>
+
+<!-- NEWS GRID -->
+<section class="container news-section">
+    <h2 class="section-title">All News</h2>
+
+    <div class="news-grid">
+        {% for item in news %}
+        <div class="news-card">
+            {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            {% endif %}
+            <h3>{{ item.title }}</h3>
+            <p><strong>Published:</strong> {{ item.published_at }}</p>
+            <p>{{ item.description|truncatewords:20 }}</p>
+            <a href="{% url 'news_detail' item.id %}" class="text-link">Read More →</a>
+        </div>
+        {% empty %}
+        <p>No news articles available at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

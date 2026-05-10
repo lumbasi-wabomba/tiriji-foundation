@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Resources</h1>
+        <p>Access our guides, reports, and tools to learn and engage with our initiatives.</p>
+    </div>
+</section>
+
+<!-- RESOURCES GRID -->
+<section class="container resources-section">
+    <h2 class="section-title">All Resources</h2>
+
+    <div class="resources-grid">
+        {% for resource in resources %}
+        <div class="resource-card">
+            {% if resource.image %}
+                <img src="{{ resource.image.url }}" alt="{{ resource.title }}">
+            {% endif %}
+            <h3>{{ resource.title }}</h3>
+            <p>{{ resource.description|truncatewords:20 }}</p>
+            {% if resource.file %}
+            <a href="{{ resource.file.url }}" class="text-link" target="_blank">Download →</a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>No resources available at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

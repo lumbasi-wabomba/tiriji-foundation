@@ -1,0 +1,33 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ news_item.title }}</h1>
+        <p>{{ news_item.description|truncatewords:25 }}</p>
+    </div>
+</section>
+
+<!-- NEWS DETAILS -->
+<section class="container news-detail">
+    {% if news_item.image %}
+        <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-main-image">
+    {% endif %}
+
+    <div class="news-info">
+        <p><strong>Published:</strong> {{ news_item.published_at }}</p>
+        <div class="news-description">
+            {{ news_item.description|linebreaks }}
+        </div>
+    </div>
+
+    <div class="news-cta" style="text-align:center; margin-top:30px;">
+        <a href="{% url 'volunteer_signup' %}" class="btn btn-secondary">Volunteer</a>
+        <a href="{% url 'donate' %}" class="btn btn-primary">Support Our Work</a>
+    </div>
+</section>
+
+{% endblock %}

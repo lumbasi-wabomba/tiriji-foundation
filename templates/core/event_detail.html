@@ -1,0 +1,34 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ event.title }}</h1>
+        <p>{{ event.description|truncatewords:25 }}</p>
+    </div>
+</section>
+
+<!-- EVENT DETAILS -->
+<section class="container event-detail">
+    {% if event.image %}
+        <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-main-image">
+    {% endif %}
+
+    <div class="event-info">
+        <p><strong>Date:</strong> {{ event.date }}</p>
+        <p><strong>Location:</strong> {{ event.location }}</p>
+        <div class="event-description">
+            {{ event.description|linebreaks }}
+        </div>
+    </div>
+
+    <div class="event-cta" style="text-align:center; margin-top:30px;">
+        <a href="{% url 'volunteer_signup' %}" class="btn btn-secondary">Volunteer for this Event</a>
+        <a href="{% url 'donate' %}" class="btn btn-primary">Support Our Work</a>
+    </div>
+</section>
+
+{% endblock %}

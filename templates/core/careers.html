@@ -1,0 +1,100 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero vocation-hero">
+    <div class="container">
+        <h1>Careers & Calling</h1>
+        <p>
+            At one point in life, we all search for direction. 
+            This foundation has been a vocation center — a place where 
+            passion met purpose.
+        </p>
+    </div>
+</section>
+
+<!-- VOCATION STORY -->
+<section class="container vocation-story">
+    <h2 class="section-title">More Than a Workplace</h2>
+
+    <div class="story-content">
+        <p>
+            This organization has been a turning point for many. 
+            A place where individuals discovered their strengths, 
+            refined their skills, and stepped into leadership.
+        </p>
+
+        <p>
+            For some, it was their first professional experience. 
+            For others, it became a lifelong mission.
+        </p>
+
+        <p>
+            We don’t just offer roles — we offer growth, mentorship, 
+            responsibility, and impact.
+        </p>
+    </div>
+</section>
+
+<!-- OPEN POSITIONS -->
+<section class="container careers-section">
+    <h2 class="section-title">Open Opportunities</h2>
+
+    <div class="careers-grid">
+        {% for job in careers %}
+        {% if job.is_open %}
+        <div class="career-card">
+            <h3>{{ job.title }}</h3>
+            {% if job.location %}
+            <p class="location">{{ job.location }}</p>
+            {% endif %}
+            <p>{{ job.description|truncatewords:25 }}</p>
+            <a href="{% url 'career_detail' job.id %}" class="text-link">Learn More →</a>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p>No open positions at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- PATHWAYS -->
+<section class="container vocation-pathways">
+    <h2 class="section-title">Pathways Into Purpose</h2>
+
+    <div class="grid-2">
+        <div>
+            <h3>Internships</h3>
+            <p>
+                Gain hands-on experience while contributing to meaningful
+                community impact.
+            </p>
+        </div>
+
+        <div>
+            <h3>Volunteer-to-Career</h3>
+            <p>
+                Many of our leaders began as volunteers. Your journey
+                could start here.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Find Your Direction</h2>
+        <p>
+            If you are seeking purpose, growth, and real impact —
+            this could be your next chapter.
+        </p>
+        <a href="{% url 'contact' %}" class="btn btn-primary">
+            Get in Touch
+        </a>
+    </div>
+</section>
+
+{% endblock %}

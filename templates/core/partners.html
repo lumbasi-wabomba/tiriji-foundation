@@ -1,0 +1,39 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Our Partners</h1>
+        <p>We collaborate with these organizations to amplify our impact.</p>
+    </div>
+</section>
+
+<!-- PARTNERS GRID -->
+<section class="container partners-section">
+    <h2 class="section-title">Partners</h2>
+
+    <div class="partners-grid">
+        {% for partner in partners %}
+        <div class="partner-card">
+            {% if partner.logo %}
+                <img src="{{ partner.logo.url }}" alt="{{ partner.name }}">
+            {% endif %}
+            <h4>{{ partner.name }}</h4>
+            {% if partner.description %}
+            <p>{{ partner.description|truncatewords:20 }}</p>
+            {% endif %}
+            {% if partner.website %}
+            <a href="{{ partner.website }}" target="_blank" class="text-link">Visit Website →</a>
+            {% endif %}
+            <a href="{% url 'partner_detail' partner.id %}" class="text-link">Read More →</a>
+        </div>
+        {% empty %}
+        <p>No partners available at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

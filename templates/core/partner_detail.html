@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ partner.name }}</h1>
+    </div>
+</section>
+
+<!-- PARTNER DETAILS -->
+<section class="container partner-detail">
+    {% if partner.logo %}
+        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
+    {% endif %}
+
+    {% if partner.description %}
+    <div class="partner-description">
+        <p>{{ partner.description|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    {% if partner.website %}
+    <div class="partner-website" style="text-align:center; margin-top:20px;">
+        <a href="{{ partner.website }}" class="btn btn-primary" target="_blank">Visit Website</a>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

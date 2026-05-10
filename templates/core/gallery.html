@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Gallery</h1>
+        <p>Explore our events, programs, and community initiatives through our photo gallery.</p>
+    </div>
+</section>
+
+<!-- GALLERY GRID -->
+<section class="container gallery-section">
+    <h2 class="section-title">Photo Gallery</h2>
+
+    <div class="gallery-grid">
+        {% for item in gallery %}
+        <div class="gallery-card">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            {% if item.title %}
+            <h4>{{ item.title }}</h4>
+            {% endif %}
+            {% if item.description %}
+            <p>{{ item.description|truncatewords:15 }}</p>
+            {% endif %}
+            <a href="{% url 'gallery_detail' item.id %}" class="text-link">View →</a>
+        </div>
+        {% empty %}
+        <p>No images available at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

@@ -1,11 +1,27 @@
-from django.db import models 
+from django.db import models
+import cloudinary
+import cloudinary.uploader
+import os
+from .media_compress import compress_image, compress_video 
 
 class program(models.Model):
     program_id = models.IntegerField(primary_key=True, db_index=True)
     title = models.CharField(max_length=50, null=False, blank=False)
     program_description = models.TextField()
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
     image_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image_url:
+            compressed_path = compress_image(self.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                self.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(self.image.path)
+                self.image = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -33,10 +49,22 @@ class events(models.Model):
     event_id = models.IntegerField(primary_key=True, db_index=True)
     title = models.CharField(max_length=50, null=False, blank=False)
     events_description = models.TextField()
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
     image_url = models.URLField(max_length=250, null=True, blank=True)
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='events')
     event_location = models.CharField(max_length=100)
     event_date = models.DateField()
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image_url:
+            compressed_path = compress_image(self.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                self.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(self.image.path)
+                self.image = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} event scheduled for {self.event_date} at {self.location} under {self.program_id.title} program"
@@ -46,10 +74,22 @@ class news(models.Model):
     news_id = models.IntegerField(primary_key=True, db_index=True)
     title = models.CharField(max_length=50, null=False, blank=False)
     news_description = models.TextField()
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
     image_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='news')
     event_id = models.ForeignKey(events, on_delete=models.CASCADE, null=True, blank=True, related_name='news')
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image_url:
+            compressed_path = compress_image(self.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                self.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(self.image.path)
+                self.image = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
         if self.program_id and self.event_id:
@@ -65,11 +105,40 @@ class resources(models.Model):
     resource_id = models.IntegerField(primary_key=True, db_index=True)
     title = models.CharField(max_length=50, null=False, blank=False)
     resources_description = models.TextField()
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
     image_url = models.URLField(max_length=250, null=True, blank=True)
+    file = models.FileField(upload_to='temp/', blank=True, null=True)
     file_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='resources')
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image_url:
+            compressed_path = compress_image(self.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                self.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(self.image.path)
+                self.image = None
+        if self.file and not self.file_url:
+            # check if video
+            if self.file.name.lower().endswith(('.mp4', '.avi', '.mov', '.mkv')):
+                compressed_path = compress_video(self.file.path)
+                if compressed_path:
+                    result = cloudinary.uploader.upload(compressed_path, resource_type='video')
+                    self.file_url = result['secure_url']
+                    os.remove(compressed_path)
+                    os.remove(self.file.path)
+                    self.file = None
+            else:
+                # for other files, upload directly
+                result = cloudinary.uploader.upload(self.file.path)
+                self.file_url = result['secure_url']
+                os.remove(self.file.path)
+                self.file = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} resource related to {self.program_id.title} program"

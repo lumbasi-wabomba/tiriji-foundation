@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Message Received</h1>
+        <p>
+            Thank you for contacting Tiriji Foundation.
+            Your message has been successfully sent.
+        </p>
+    </div>
+</section>
+
+<!-- FEEDBACK MESSAGE -->
+<section class="container section-center">
+
+    <div class="card" style="max-width:600px;margin:0 auto;">
+
+        <h2>Thank You!</h2>
+
+        <p>
+            We appreciate you taking the time to reach out to us.
+            A member of our team will review your message and respond
+            as soon as possible.
+        </p>
+
+        <p>
+            If your inquiry is urgent, you can also reach us directly
+            through our contact information.
+        </p>
+
+        <div style="margin-top:20px;">
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                Back to Home
+            </a>
+
+            <a href="{% url 'contact' %}" class="btn btn-outline">
+                Send Another Message
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

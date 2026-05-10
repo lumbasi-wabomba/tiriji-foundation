@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ member.name }}</h1>
+        <p>{{ member.role }}</p>
+    </div>
+</section>
+
+<!-- TEAM MEMBER DETAILS -->
+<section class="container team-detail">
+    {% if member.image %}
+        <img src="{{ member.image.url }}" alt="{{ member.name }}" class="team-main-image">
+    {% endif %}
+
+    {% if member.bio %}
+    <div class="team-bio">
+        <p>{{ member.bio|linebreaks }}</p>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Upcoming Events</h1>
+        <p>Join our initiatives and community activities to make a difference.</p>
+    </div>
+</section>
+
+<!-- EVENTS GRID -->
+<section class="container events-section">
+    <h2 class="section-title">All Events</h2>
+
+    <div class="event-grid">
+        {% for event in events %}
+        <div class="event-card">
+            {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.title }}">
+            {% endif %}
+            <h3>{{ event.title }}</h3>
+            <p><strong>Date:</strong> {{ event.date }}</p>
+            <p><strong>Location:</strong> {{ event.location }}</p>
+            <p>{{ event.description|truncatewords:20 }}</p>
+            <a href="{% url 'event_detail' event.id %}" class="text-link">Read More →</a>
+        </div>
+        {% empty %}
+        <p>No upcoming events at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

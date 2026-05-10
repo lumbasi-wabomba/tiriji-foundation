@@ -14,7 +14,7 @@ from pathlib import Path
 import dj_database_url
 import os
 from dotenv import load_dotenv
-
+from urllib.parse import urlparse, parse_qsl
 # Load environment variables from .env file
 load_dotenv()
 
@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dctz_si%7zcyfpaoj$=46n!(j0u^pq!a(hlv_%b5gk3v9ci)rf'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -69,7 +69,7 @@ ROOT_URLCONF = 'tiriji.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -94,17 +94,19 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     # 'default': dj_database_url.config(
-#     #     default='postgresql://tiriji_database_user:923vIckEUAt4BbeqXmgETAHxq9rs0ZwX@dpg-d6bdjc14tr6s73dsselg-a.oregon-postgres.render.com/tiriji_database',
-#     #     conn_max_age=600,
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
-#     # )
-#     # 'default': dj_database_url.config(
-#     #     default = os.getenv('DATABASE_URL'),
-#     #     conn_max_age=600,   
-#     #     )
-# }   
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
+        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+    }
+}
 
 
 # Password validation
@@ -142,6 +144,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 #for production
 if not DEBUG:
