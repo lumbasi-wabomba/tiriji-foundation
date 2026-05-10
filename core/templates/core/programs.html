@@ -18,7 +18,7 @@
     <h2 class="section-title">All Programs</h2>
 
     <div class="program-grid">
-        {% for program in programs %}
+        {% for program in program %}
         <div class="program-card">
             {% if program.image %}
                 <img src="{{ program.image.url }}" alt="{{ program.title }}">
