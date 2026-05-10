@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ resource.title }}</h1>
+        <p>{{ resource.description|truncatewords:25 }}</p>
+    </div>
+</section>
+
+<!-- RESOURCE DETAILS -->
+<section class="container resource-detail">
+    {% if resource.image %}
+        <img src="{{ resource.image.url }}" alt="{{ resource.title }}" class="resource-main-image">
+    {% endif %}
+
+    <div class="resource-description">
+        {{ resource.description|linebreaks }}
+    </div>
+
+    {% if resource.file %}
+    <div class="resource-download" style="margin-top:30px; text-align:center;">
+        <a href="{{ resource.file.url }}" class="btn btn-primary" target="_blank">Download Resource</a>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ testimonial.name }}</h1>
+        {% if testimonial.role %}
+        <p>{{ testimonial.role }}</p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- TESTIMONIAL DETAILS -->
+<section class="container testimonial-detail">
+    {% if testimonial.image %}
+        <img src="{{ testimonial.image.url }}" alt="{{ testimonial.name }}" class="testimonial-main-image">
+    {% endif %}
+
+    <div class="testimonial-message">
+        <p>"{{ testimonial.message|linebreaks }}"</p>
+    </div>
+</section>
+
+{% endblock %}

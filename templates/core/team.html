@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Meet Our Team</h1>
+        <p>Our dedicated staff, volunteers, and leaders drive our mission forward.</p>
+    </div>
+</section>
+
+<!-- TEAM GRID -->
+<section class="container team-section">
+    <h2 class="section-title">Our Team</h2>
+
+    <div class="team-grid">
+        {% for member in team %}
+        <div class="team-card">
+            {% if member.image %}
+                <img src="{{ member.image.url }}" alt="{{ member.name }}">
+            {% endif %}
+            <h4>{{ member.name }}</h4>
+            <p class="role">{{ member.role }}</p>
+            {% if member.bio %}
+            <p>{{ member.bio|truncatewords:20 }}</p>
+            {% endif %}
+            <a href="{% url 'team_member_detail' member.id %}" class="text-link">View Profile →</a>
+        </div>
+        {% empty %}
+        <p>No team members available at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

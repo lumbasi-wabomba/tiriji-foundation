@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Become a Volunteer</h1>
+        <p>
+            Join Tiriji Foundation in making a lasting impact. Fill the form below
+            and we’ll get in touch with you.
+        </p>
+    </div>
+</section>
+
+<!-- VOLUNTEER FORM -->
+<section class="contact-form container">
+    <h2>Sign Up to Volunteer</h2>
+    <form action="" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="Your email" required>
+        </div>
+        <div class="form-group">
+            <label for="message">Why do you want to volunteer?</label>
+            <textarea id="message" name="message" rows="5" placeholder="Tell us a bit about yourself" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</section>
+
+{% endblock %}

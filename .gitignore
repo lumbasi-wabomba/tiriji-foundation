@@ -22,3 +22,5 @@ staticfiles/
 
 # Environment Variables
 .env
+
+.wrangler/

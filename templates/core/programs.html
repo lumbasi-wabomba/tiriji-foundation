@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero">
+    <div class="container">
+        <h1>Our Programs</h1>
+        <p>
+            Explore our diverse initiatives empowering communities, youth, and the environment.
+        </p>
+    </div>
+</section>
+
+<!-- PROGRAMS GRID -->
+<section class="container programs-section">
+    <h2 class="section-title">All Programs</h2>
+
+    <div class="program-grid">
+        {% for program in program %}
+        <div class="program-card">
+            {% if program.image %}
+                <img src="{{ program.image.url }}" alt="{{ program.title }}">
+            {% endif %}
+            <h3>{{ program.title }}</h3>
+            <p>{{ program.program_description|truncatewords:25 }}</p>
+            <a href="{% url 'program_detail' program.program_id %}" class="text-link">
+                Read More →
+            </a>
+        </div>
+        {% empty %}
+        <p>No programs available at the moment.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Want to Get Involved?</h2>
+        <p>Support our programs or volunteer to make a lasting impact.</p>
+        <a href="{% url 'donate' %}" class="btn btn-primary">Donate</a>
+        <a href="{% url 'volunteer_signup' %}" class="btn btn-secondary">Volunteer</a>
+    </div>
+</section>
+
+{% endblock %}
