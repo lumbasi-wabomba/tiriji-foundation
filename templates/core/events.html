@@ -16,7 +16,7 @@
     <h2 class="section-title">All Events</h2>
 
     <div class="event-grid">
-        {% for event in events %}
+        {% for event in eventss %}
         <div class="event-card">
             {% if event.image %}
                 <img src="{{ event.image.url }}" alt="{{ event.title }}">

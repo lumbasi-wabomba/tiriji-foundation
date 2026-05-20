@@ -2,7 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
-from .models import program, volunteer, events as Event, news as News, resources as Resource ,Transaction
+from .models import (
+    program,
+    volunteer,
+    events as Event,
+    news as News,
+    resources as Resource,
+    Transaction,
+    VolunteerPayment,)
 from .forms import ProgramForm, EventForm, NewsForm, ResourceForm , VolunteerForm , DonationForm 
 import os
 from django.conf import settings
@@ -50,18 +57,55 @@ def volunteer(request):
 def volunteer_signup(request):
 
     if request.method == 'POST':
+
         form = VolunteerForm(request.POST)
 
         if form.is_valid():
-            volunteer = form.save()
-            return render(
-                request,
-                'core/volunteer_success.html',
-                {
-                    'volunteer': volunteer
-                }
+
+            # =========================
+            # CREATE VOLUNTEER
+            # =========================
+            volunteer_instance = form.save(commit=False)
+
+            # Freeze calculated fee
+            volunteer_instance.calculated_fee = (
+                volunteer_instance.fee
             )
+
+            # Initial workflow status
+            volunteer_instance.status = 'payment_pending'
+
+            volunteer_instance.save()
+
+            # =========================
+            # CREATE TRANSACTION
+            # =========================
+            transaction = Transaction.objects.create(
+                amount=volunteer_instance.calculated_fee,
+                payment_method='mpesa',
+                status='pending'
+            )
+
+            # =========================
+            # CREATE PAYMENT RECORD
+            # =========================
+            VolunteerPayment.objects.create(
+                volunteer=volunteer_instance,
+                transaction=transaction,
+                amount=volunteer_instance.calculated_fee,
+                status='pending'
+            )
+
+            # =========================
+            # REDIRECT TO PAYMENT PAGE
+            # =========================
+            return redirect(
+                'volunteer_payment_summary',
+                volunteer_email=volunteer_instance.email
+            )
+
     else:
+
         form = VolunteerForm()
 
     return render(
@@ -70,7 +114,19 @@ def volunteer_signup(request):
         {
             'form': form
         }
+    )
 
+def volunteer_payment_summary(request, volunteer_email):
+    volunteer_instance = get_object_or_404(volunteer, email=volunteer_email)
+    payment = get_object_or_404(VolunteerPayment, volunteer=volunteer_instance)
+
+    return render(
+        request,
+        'core/volunteer_payment_summary.html',
+        {
+            'volunteer': volunteer_instance,
+            'payment': payment
+        }
     )
 
 
@@ -100,27 +156,28 @@ def donate(request):
         {'form': form}
     )
 
+
+# def donate(request):
+#     if request.method == 'POST':
+#         form = DonationForm(request.POST)
+
+#         if form.is_valid():
+#             amount = request.POST.get('amount')
+#             transaction = Transaction.objects.create( amount=amount, payment_method=request.POST.get('payment_method'))
+#             donation = form.save(commit=False)
+#             donation.transaction = transaction
+#             donation.save()
+#             return redirect('donation_success')
+
+#     else:
+#         form = DonationForm()
+#     return render(request, 'core/donate.html', {'form': form })
+
 def donate_success(request):
     return render(request, 'core/donate_success.html')
 
 def donate_cancel(request):
     return render(request, 'core/donate_cancel.html')
-
-def donate(request):
-    if request.method == 'POST':
-        form = DonationForm(request.POST)
-
-        if form.is_valid():
-            amount = request.POST.get('amount')
-            transaction = Transaction.objects.create( amount=amount, payment_method=request.POST.get('payment_method'))
-            donation = form.save(commit=False)
-            donation.transaction = transaction
-            donation.save()
-            return redirect('donation_success')
-
-    else:
-        form = DonationForm()
-    return render(request, 'core/donate.html', {'form': form })
 
 
 def events(request):

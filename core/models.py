@@ -2,10 +2,12 @@ from django.db import models
 import cloudinary
 import cloudinary.uploader
 import os
+import math
 from .media_compress import compress_image, compress_video
 from django.db.models.signals import post_save
 from django.dispatch import receiver 
 from datetime import timedelta
+from django.core.exceptions import ValidationError
 
 class program(models.Model):
     program_id = models.AutoField(primary_key=True)
@@ -43,6 +45,9 @@ class program(models.Model):
 #         return f"{self.first_name} {self.last_name} registered for {self.program_id.title} program that starts on {self.start_date} and ends on {self.end_date}"
 
 class volunteer(models.Model): # Revised version of this model
+
+
+
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
     email = models.EmailField(primary_key=True)
@@ -61,37 +66,80 @@ class volunteer(models.Model): # Revised version of this model
     program_id = models.ForeignKey( program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    APPLICATION_STATUS = [
+        ('submitted', 'Submitted'),
+        ('payment_pending', 'Payment Pending'),
+        ('paid', 'Paid'),
+        ('under_review', 'Under Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+    ]
+
+    status = models.CharField(
+        max_length=30,
+        choices=APPLICATION_STATUS,
+        default='submitted'
+    )
+
+    calculated_fee = models.DecimalField( max_digits=10, decimal_places=2, null=True, blank=True)
 
     @property
     def duration_weeks(self):
+        total_days = (self.end_date - self.starting_date).days
+        return math.ceil(total_days / 7)
     
-        return (
-            (self.end_date - self.starting_date).days // 7
-        )
     
     @property
     def fee(self):
+        if not self.program_id:
+            return 0
 
         if self.duration_weeks <= 2:
-            return self.program.two_week_fee
+            return self.program_id.two_week_fee
 
         elif self.duration_weeks <= 4:
-            return self.program.four_week_fee
+            return self.program_id.four_week_fee
+
         elif self.duration_weeks <= 8:
-            return self.program.eight_week_fee
+            return self.program_id.eight_week_fee
+
         else:
             extra_weeks = self.duration_weeks - 8
-            extra_fee = extra_weeks * (self.program.eight_week_fee / 8)
-            return self.program.eight_week_fee + extra_fee
+
+            extra_fee = (
+                extra_weeks *
+                self.program_id.extra_week_fee
+            )
+
+            return (
+                self.program_id.eight_week_fee +
+                extra_fee
+            )
+
+    def clean(self):
+        if self.end_date <= self.starting_date:
+
+            raise ValidationError(
+                "End date must be after starting date."
+            )
         
+        # if not self.program_id:
+        #     raise ValidationError(
+        #         "Volunteer must select a program."
+        #     )
 
     def __str__(self):
+        program_title = self.program_id.title if self.program_id else "No Program"
         return (
             f"{self.first_name} {self.last_name} "
-            f"registered for {self.program_id.title} "
+            f"registered for {program_title} "
             f"program from {self.starting_date} "
             f"to {self.end_date}"
         )
+    
 class Transaction(models.Model):
 
     PAYMENT_METHODS = [
@@ -209,11 +257,23 @@ class SponsorPayment:
 
 
 class VolunteerPayment(models.Model):
+   
 
     volunteer = models.OneToOneField( volunteer, on_delete=models.CASCADE, related_name='payment')
     transaction = models.OneToOneField( Transaction, on_delete=models.CASCADE, related_name='volunteer_payment')
     amount = models.DecimalField( max_digits=10, decimal_places=2)
-    paid = models.BooleanField(default=False)
+
+    PAYMENT_STATUS = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+        ('refunded', 'Refunded'),
+        ]
+
+    status = models.CharField( max_length=20, choices=PAYMENT_STATUS, default='pending')
+    # paid = models.BooleanField(default=False)
+
     payment_reference = models.CharField( max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -235,8 +295,8 @@ class events(models.Model):
     event_location = models.CharField(max_length=100)
     event_date = models.DateField()
 
-    def __str__(self):
-        return f"{self.title} event scheduled for {self.event_date} at {self.event_location} under {self.program_id.title} program"
+def __str__(self):
+        return f"{self.title} event scheduled for {self.event_date} at {self.event_location} under {self.program_id.title if self.program_id else 'No Program'} program"
 
 class event_registration(models.Model):
     registration_id = models.AutoField(primary_key=True)
@@ -250,11 +310,23 @@ class event_registration(models.Model):
         return f"{self.name} registered for {self.event_id.title} event"
 
 class event_payment(models.Model):
+    PAYMENT_STATUS = [
+    ('pending', 'Pending'),
+    ('paid', 'Paid'),
+    ('failed', 'Failed'),
+    ('cancelled', 'Cancelled'),
+    ('refunded', 'Refunded'),
+    ]
+
+    status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS,
+        default='pending'
+    )
     registration = models.OneToOneField( event_registration, on_delete=models.CASCADE)
 
     amount = models.DecimalField( max_digits=10, decimal_places=2)
 
-    paid = models.BooleanField(default=False)
 
     payment_reference = models.CharField( max_length=100, blank=True)
 
@@ -296,7 +368,7 @@ class resources(models.Model):
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='resources')
 
     def __str__(self):
-        return f"{self.title} resource related to {self.program_id.title} program"
+        return f"{self.title} resource related to {self.program_id.title if self.program_id else 'No Program'} program"
 
 
 class employees(models.Model):
@@ -329,10 +401,11 @@ class partners(models.Model):
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='partners')
 
     def __str__(self):
+        program_title = self.program_id.title if self.program_id else "No Program"
         if self.assigned_employee:
-            return f"{self.name} partner related to {self.program_id.title} program and assigned to {self.assigned_employee.first_name} {self.assigned_employee.last_name}" 
+            return f"{self.name} partner related to {program_title} program and assigned to {self.assigned_employee.first_name} {self.assigned_employee.last_name}"
         else:
-            return f"{self.name} partner related to {self.program_id.title} program"
+            return f"{self.name} partner related to {program_title} program"
 
 
 class gallery(models.Model):

@@ -97,6 +97,22 @@ class VolunteerForm(forms.ModelForm):
                 'class': 'form-control'
             }),
         }
+        
+    def clean(self):
+        cleaned_data = super().clean()
+
+        start_date = cleaned_data.get('starting_date')
+        end_date = cleaned_data.get('end_date')
+
+        if start_date and end_date:
+
+            if end_date <= start_date:
+
+                raise forms.ValidationError(
+                    "End date must be after start date."
+                )
+
+        return cleaned_data
 
 class DonationForm(forms.ModelForm):
 
