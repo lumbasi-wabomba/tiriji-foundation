@@ -5,6 +5,7 @@ import os
 from .media_compress import compress_image, compress_video
 from django.db.models.signals import post_save
 from django.dispatch import receiver 
+from datetime import timedelta
 
 class program(models.Model):
     program_id = models.AutoField(primary_key=True)
@@ -14,26 +15,214 @@ class program(models.Model):
     image_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Pricing Data
+    two_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    four_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    eight_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    extra_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+
     def __str__(self):
         return self.title
 
-class volunteer(models.Model):
+# class volunteer(models.Model): # Capitalized volunteer to avoid conflict with volunteer view
+#     first_name = models.CharField(max_length=50, null=False, blank=False)
+#     last_name = models.CharField(max_length=50, null=False, blank=False)
+#     email = models.EmailField(primary_key=True)
+#     occupation = models.CharField(max_length=100)
+#     phone_number = models.CharField(max_length=20)
+#     id_pass_no = models.CharField(max_length=50, verbose_name="ID/Passport No")
+#     starting_date = models.DateField()
+#     end_date = models.DateField()
+#     residence = models.CharField(max_length=100)
+#     emergency_contact_name = models.CharField(max_length=100)
+#     emergency_contact_phone = models.CharField(max_length=20)
+#     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
+
+
+#     def __str__(self):
+#         return f"{self.first_name} {self.last_name} registered for {self.program_id.title} program that starts on {self.start_date} and ends on {self.end_date}"
+
+class volunteer(models.Model): # Revised version of this model
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
     email = models.EmailField(primary_key=True)
     occupation = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
     id_pass_no = models.CharField(max_length=50, verbose_name="ID/Passport No")
+
     starting_date = models.DateField()
     end_date = models.DateField()
+
     residence = models.CharField(max_length=100)
+
     emergency_contact_name = models.CharField(max_length=100)
     emergency_contact_phone = models.CharField(max_length=20)
-    program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
 
+    program_id = models.ForeignKey( program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def duration_weeks(self):
+    
+        return (
+            (self.end_date - self.starting_date).days // 7
+        )
+    
+    @property
+    def fee(self):
+
+        if self.duration_weeks <= 2:
+            return self.program.two_week_fee
+
+        elif self.duration_weeks <= 4:
+            return self.program.four_week_fee
+        elif self.duration_weeks <= 8:
+            return self.program.eight_week_fee
+        else:
+            extra_weeks = self.duration_weeks - 8
+            extra_fee = extra_weeks * (self.program.eight_week_fee / 8)
+            return self.program.eight_week_fee + extra_fee
+        
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} registered for {self.program_id.title} program that starts on {self.start_date} and ends on {self.end_date}"
+        return (
+            f"{self.first_name} {self.last_name} "
+            f"registered for {self.program_id.title} "
+            f"program from {self.starting_date} "
+            f"to {self.end_date}"
+        )
+class Transaction(models.Model):
+
+    PAYMENT_METHODS = [
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Card'),
+        ('paypal', 'PayPal'),
+        ('stripe', 'Stripe'),
+        ('bank', 'Bank Transfer'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+    payment_method = models.CharField( max_length=20, choices=PAYMENT_METHODS, default='mpesa')
+    status = models.CharField( max_length=20, choices=STATUS_CHOICES, default='pending')
+    transaction_reference = models.CharField( max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField( auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    
+
+    def __str__(self):
+        return (
+            f"{self.payment_method} "
+            f"- {self.amount} "
+            f"- {self.status}"
+        )
+
+
+class donation(models.Model):
+    DONATION_TYPES = [
+        ('general', 'General Fund'),
+        ('children', 'Children Program'),
+        ('women', 'Women Empowerment'),
+        ('community', 'Regenerative Communities'),
+        ('volunteer', 'Volunteer Sponsorship'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    PAYMENT_METHODS = [
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Card'),
+        ('paypal', 'PayPal'),
+        ('stripe', 'Stripe'),
+        ('bank', 'Bank Transfer'),
+    ]
+
+    # =========================
+    # IDENTIFIERS
+    # =========================
+    donation_id = models.CharField( max_length=50, primary_key=True)
+    merchant_reference_id = models.CharField( max_length=100, unique=True )
+    pesapal_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+
+    # =========================
+    # DONOR INFORMATION
+    # =========================
+    donor_name = models.CharField( max_length=100, blank=True, null=True)
+    donor_email = models.EmailField( blank=True, null=True )
+    donor_phone_number = models.CharField( max_length=20, blank=True, null=True)
+
+
+    # =========================
+    # DONATION DETAILS
+    # =========================
+    donation_type = models.CharField( max_length=20, choices=DONATION_TYPES, default='general' )
+    donation_reason = models.CharField( max_length=255, blank=True, null=True)
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+    currency = models.CharField( max_length=10, default='KES')
+    is_monthly = models.BooleanField( default=False)
+    payment_method = models.CharField( max_length=20, choices=PAYMENT_METHODS, default='mpesa')
+    status = models.CharField( max_length=20, choices=STATUS_CHOICES, default ='pending')
+
+    # =========================
+    # PAYMENT DETAILS
+    # =========================
+    transaction = models.OneToOneField( Transaction, on_delete=models.CASCADE, related_name='donation', null=True, blank=True)
+    authorization_code = models.CharField( max_length=100, blank=True, null=True)
+    payment_reference = models.CharField( max_length=100, blank=True, null=True)
+    payment_date = models.DateTimeField( blank=True, null=True) 
+    amount_paid = models.DecimalField( max_digits=10, decimal_places=2, blank=True, null=True)
+    payer_phone_number = models.CharField( max_length=20, blank=True, null=True)
+    payer_email = models.EmailField( blank=True, null=True)
+    payer_name = models.CharField( max_length=100, blank=True, null=True)
+
+
+    # =========================
+    # TIMESTAMPS
+    # =========================
+    created_at = models.DateTimeField( auto_now_add=True)
+    updated_at = models.DateTimeField( auto_now=True)
+
+    def __str__(self):
+        donor = ( self.donor_name if self.donor_name else "Anonymous")
+
+        return (
+            f"{donor} donated "
+            f"{self.amount} "
+            f"{self.currency}"
+        )
+
+class SponsorPayment:
+    f""
+
+
+
+class VolunteerPayment(models.Model):
+
+    volunteer = models.OneToOneField( volunteer, on_delete=models.CASCADE, related_name='payment')
+    transaction = models.OneToOneField( Transaction, on_delete=models.CASCADE, related_name='volunteer_payment')
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+    paid = models.BooleanField(default=False)
+    payment_reference = models.CharField( max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return (
+            f"{self.volunteer.first_name} {self.volunteer.last_name} - ${self.amount}"
+        )
+           
+
 
 
 class events(models.Model):
@@ -49,6 +238,30 @@ class events(models.Model):
     def __str__(self):
         return f"{self.title} event scheduled for {self.event_date} at {self.event_location} under {self.program_id.title} program"
 
+class event_registration(models.Model):
+    registration_id = models.AutoField(primary_key=True)
+    event_id = models.ForeignKey(events, on_delete=models.CASCADE, related_name='registrations')
+    name = models.CharField(max_length=100, null=False, blank=False)
+    email = models.EmailField(null=True, blank=True)
+    phone_number = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} registered for {self.event_id.title} event"
+
+class event_payment(models.Model):
+    registration = models.OneToOneField( event_registration, on_delete=models.CASCADE)
+
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+
+    paid = models.BooleanField(default=False)
+
+    payment_reference = models.CharField( max_length=100, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.registration} - ${self.amount}"
 
 class news(models.Model):
     news_id = models.AutoField(primary_key=True)
@@ -140,25 +353,8 @@ class gallery(models.Model):
         elif self.event_id:
             return f"{self.title} image related to {self.event_id.title} event"
         else:
-            return self.title    
+            return self.title            
 
-
-class donations(models.Model):
-    donations_id  = models.CharField(max_length=50, primary_key=True)
-    merchant_reference_id = models.CharField(max_length=100, null=False, blank=False)
-    pesapal_transaction_id = models.CharField(max_length=100, null=False, blank=False)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=10)
-    status = models.CharField(max_length=20)
-    payment_method = models.CharField(max_length=50)
-    donation_reason = models.CharField(max_length=255, null=True, blank=True)
-    donor_email = models.EmailField(null=True, blank=True)
-    donor_phone_number = models.CharField(max_length=20, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Donation {self.donations_id} of {self.amount} {self.currency} via {self.payment_method} with status {self.status}"
 
 
 class feedback(models.Model):

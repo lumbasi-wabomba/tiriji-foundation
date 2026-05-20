@@ -1,38 +1,154 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block title %}
+Volunteer Application | Tiriji Foundation
+{% endblock %}
+
 {% block content %}
 
 <!-- HERO -->
 <section class="page-hero">
     <div class="container">
-        <h1>Become a Volunteer</h1>
+
+        <h1>Volunteer Application</h1>
+
         <p>
-            Join Tiriji Foundation in making a lasting impact. Fill the form below
-            and we’ll get in touch with you.
+            Join our regenerative movement and become part
+            of community transformation in Kenya.
         </p>
+
     </div>
 </section>
 
-<!-- VOLUNTEER FORM -->
-<section class="contact-form container">
-    <h2>Sign Up to Volunteer</h2>
-    <form action="" method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" placeholder="Your full name" required>
+
+<!-- APPLICATION FORM -->
+<section class="section volunteer-form">
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2 class="section-title">
+                Volunteer Registration
+            </h2>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <!-- PERSONAL INFO -->
+                <h3>Personal Information</h3>
+
+                <div class="grid grid-2">
+
+                    <div class="form-group">
+                        <label>First Name</label>
+                        {{ form.first_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        {{ form.phone_number }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Occupation</label>
+                        {{ form.occupation }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Residence</label>
+                        {{ form.residence }}
+                    </div>
+
+                </div>
+
+
+                <!-- PROGRAM -->
+                <h3>Volunteer Program</h3>
+
+                <div class="grid grid-2">
+
+                    <div class="form-group">
+                        <label>Select Program</label>
+                        {{ form.program }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>ID / Passport Number</label>
+                        {{ form.id_pass_no }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Starting Date</label>
+                        {{ form.starting_date }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>End Date</label>
+                        {{ form.end_date }}
+                    </div>
+
+                </div>
+
+
+                <!-- EMERGENCY -->
+                <h3>Emergency Contact</h3>
+
+                <div class="grid grid-2">
+
+                    <div class="form-group">
+                        <label>Emergency Contact Name</label>
+                        {{ form.emergency_contact_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Emergency Contact Phone</label>
+                        {{ form.emergency_contact_phone }}
+                    </div>
+
+                </div>
+
+
+                <!-- ERRORS -->
+                {% if form.errors %}
+
+                    <div class="alert alert-error">
+
+                        Please correct the errors below.
+
+                        {{ form.errors }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- SUBMIT -->
+                <button type="submit"
+                        class="btn btn-primary form-button" >
+
+                    Submit Application
+
+                </button>
+
+            </form>
+
         </div>
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="Your email" required>
-        </div>
-        <div class="form-group">
-            <label for="message">Why do you want to volunteer?</label>
-            <textarea id="message" name="message" rows="5" placeholder="Tell us a bit about yourself" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+
+    </div>
+
 </section>
 
 {% endblock %}

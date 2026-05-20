@@ -10,9 +10,11 @@
 
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
 
-    {% block extra_css %}{% endblock %}
+    <!-- Extra CSS -->
+    {% block extra_css %}
+    {% endblock %}
 </head>
 <body>
 
@@ -36,10 +38,12 @@
                 <li><a href="{% url 'children' %}">Children</a></li>
                 <li><a href="{% url 'women' %}">Women</a></li>
                 <li><a href="{% url 'programs' %}">Programs</a></li>
+                <li><a href="{% url 'volunteer' %}">Volunteer</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
                 <li><a href="{% url 'events' %}">Events</a></li>
                 <li><a href="{% url 'news' %}">News</a></li>
                 <li><a href="{% url 'resources' %}">Resources</a></li>
-                <li><a href="{% url 'contact' %}">Contact</a></li>
+                
             </ul>
         </nav>
 

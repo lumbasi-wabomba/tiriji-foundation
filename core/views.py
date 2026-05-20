@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
-from .models import program, volunteer, events as Event, news as News, resources as Resource
-from .forms import ProgramForm, EventForm, NewsForm, ResourceForm
+from .models import program, volunteer, events as Event, news as News, resources as Resource ,Transaction
+from .forms import ProgramForm, EventForm, NewsForm, ResourceForm , VolunteerForm , DonationForm 
 import os
 from django.conf import settings
 from .models import resources
@@ -34,9 +34,6 @@ def women(request):
     return render(request, 'core/women.html')   
 
 
-def volunteer(request):
-    return render(request, 'core/volunteer.html')
-
 def programs(request):
     programs = program.objects.all()
     return render(request, 'core/programs.html', {'programs': programs})
@@ -45,20 +42,86 @@ def program_detail(request, program_id):
     program_detail = program.objects.get(program_id=program_id)
     return render(request, 'core/program_detail.html', {'program': program_detail})
 
+
+def volunteer(request):
+    return render(request, 'core/volunteer.html')
+
+
 def volunteer_signup(request):
+
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        message = request.POST.get('message')
+        form = VolunteerForm(request.POST)
 
-        # Save volunteer information to the database
-        volunteer.objects.create(name=name, email=email, message=message)
+        if form.is_valid():
+            volunteer = form.save()
+            return render(
+                request,
+                'core/volunteer_success.html',
+                {
+                    'volunteer': volunteer
+                }
+            )
+    else:
+        form = VolunteerForm()
 
-        return render(request, 'core/volunteer_success.html', {'name': name})
-    return render(request, 'core/volunteer_signup.html')
+    return render(
+        request,
+        'core/volunteer_signup.html',
+        {
+            'form': form
+        }
+
+    )
+
+
 
 def donate(request):
-    return render(request, 'core/donate.html') 
+    if request.method == 'POST':
+        form = DonationForm(request.POST)
+        if form.is_valid():
+            amount = request.POST.get('amount')
+            transaction = Transaction.objects.create(
+                amount=amount,
+                status='pending',
+                payment_method=request.POST.get('payment_method', 'mpesa')
+            )
+            donation = form.save(commit=False)
+            donation.transaction = transaction
+            donation.save()
+
+            # Simulated redirect to payment gateway step
+            return redirect('donate_success')
+    else:
+        form = DonationForm()
+        
+    return render(
+        request,
+        'core/donate.html',
+        {'form': form}
+    )
+
+def donate_success(request):
+    return render(request, 'core/donate_success.html')
+
+def donate_cancel(request):
+    return render(request, 'core/donate_cancel.html')
+
+def donate(request):
+    if request.method == 'POST':
+        form = DonationForm(request.POST)
+
+        if form.is_valid():
+            amount = request.POST.get('amount')
+            transaction = Transaction.objects.create( amount=amount, payment_method=request.POST.get('payment_method'))
+            donation = form.save(commit=False)
+            donation.transaction = transaction
+            donation.save()
+            return redirect('donation_success')
+
+    else:
+        form = DonationForm()
+    return render(request, 'core/donate.html', {'form': form })
+
 
 def events(request):
     return render(request, 'core/events.html')  
@@ -113,11 +176,7 @@ def feedback(request):
 def newsletter(request):
     return render(request, 'core/newsletter.html')
 
-def donate_success(request):
-    return render(request, 'core/donate_success.html')
 
-def donate_cancel(request):
-    return render(request, 'core/donate_cancel.html')
 
 def event_detail(request, event_id):
     # Placeholder for event detail view

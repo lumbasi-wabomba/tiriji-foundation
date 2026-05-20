@@ -1,0 +1,34 @@
+{% extends "core/base.html" %}
+
+{% block title %}Donation Cancelled{% endblock %}
+
+{% block content %}
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="card section-center">
+
+            <h1>Donation Not Completed</h1>
+
+            <p>
+                Your donation was cancelled or not completed.
+                No payment has been processed.
+            </p>
+
+            <p>
+                You can try again anytime — your support matters.
+            </p>
+
+            <a href="{% url 'donate' %}" class="btn btn-primary">
+                Try Again
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

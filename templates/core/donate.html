@@ -1,65 +1,116 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block title %}Donate | Tiriji Foundation{% endblock %}
+
 {% block content %}
 
 <!-- HERO -->
 <section class="page-hero">
     <div class="container">
-        <h1>Support Our Mission</h1>
-        <p>Your contribution empowers communities, youth, and sustainable initiatives.</p>
+
+        <h1>Support Regenerative Change</h1>
+
+        <p>
+            Your donation helps empower communities,
+            support children, and build sustainable futures.
+        </p>
+
     </div>
 </section>
 
-<!-- DONATION OPTIONS -->
-<section class="container donation-options">
-    <h2 class="section-title">Ways to Donate</h2>
+<!-- IMPACT SECTION -->
+<section class="section">
 
-    <div class="grid-2">
-
-        <div class="donation-card">
-            <h3>One-Time Donation</h3>
-            <p>
-                Make a single contribution to support any of our programs.
-            </p>
-            <a href="{% url 'donate_success' %}" class="btn btn-primary">Donate Now</a>
-        </div>
-
-        <div class="donation-card">
-            <h3>Monthly Supporter</h3>
-            <p>
-                Become a regular supporter and help us plan sustainable long-term projects.
-            </p>
-            <a href="{% url 'donate_success' %}" class="btn btn-secondary">Join Monthly</a>
-        </div>
-
-    </div>
-
-    <!-- Suggested Programs -->
-    <div class="suggested-programs">
-        <h3>Donate to Specific Programs</h3>
-        <div class="program-grid">
-            {% for program in programs %}
-            <div class="program-card">
-                {% if program.image %}
-                    <img src="{{ program.image.url }}" alt="{{ program.title }}">
-                {% endif %}
-                <h4>{{ program.title }}</h4>
-                <p>{{ program.description|truncatewords:15 }}</p>
-                <a href="{% url 'program_detail' program.id %}" class="text-link">Learn More →</a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section">
     <div class="container">
-        <h2>Every Contribution Counts</h2>
-        <p>Your support helps us transform lives and build regenerative communities.</p>
-        <a href="{% url 'donate_success' %}" class="btn btn-primary">Donate Today</a>
+
+        <h2 class="section-title">Your Impact</h2>
+
+        <div class="grid grid-300">
+
+            <div class="card section-center">
+                <h3>$25</h3>
+                <p>Supports school supplies for children</p>
+            </div>
+
+            <div class="card section-center">
+                <h3>$100</h3>
+                <p>Funds leadership and mentorship programs</p>
+            </div>
+
+            <div class="card section-center">
+                <h3>$500</h3>
+                <p>Supports community regeneration projects</p>
+            </div>
+
+        </div>
+
     </div>
+
+</section>
+
+<!-- DONATION FORM -->
+<section class="section section-light">
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2 class="section-title">Make a Donation</h2>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="grid grid-2">
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        {{ form.donor_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        {{ form.donor_email }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Donation Type</label>
+                        {{ form.donation_type }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount (USD)</label>
+                        <input type="number"
+                               name="amount"
+                               class="form-control"
+                               required>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label>Message (Optional)</label>
+                    {{ form.message }}
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        {{ form.is_monthly }}
+                        Make this a monthly donation
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Donate Now
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
 </section>
 
 {% endblock %}

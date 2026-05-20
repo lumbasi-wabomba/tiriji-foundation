@@ -1,10 +1,11 @@
 from django import forms
-from .models import program, events, news, resources
+from .models import program, events, news, resources ,volunteer , donation 
 
 class ProgramForm(forms.ModelForm):
     class Meta:
         model = program
-        fields = ['program_id', 'title', 'program_description', 'image']
+        fields = [ 'title', 'program_description', 'image', 'two_week_fee', 'four_week_fee', 'eight_week_fee', 'extra_week_fee',]
+        
         widgets = {
             'program_description': forms.Textarea(attrs={'rows': 4}),
         }
@@ -35,4 +36,108 @@ class ResourceForm(forms.ModelForm):
         fields = ['resource_id', 'title', 'resources_description', 'image', 'file', 'program_id']
         widgets = {
             'resources_description': forms.Textarea(attrs={'rows': 4}),
+        }
+
+class VolunteerForm(forms.ModelForm):
+
+    class Meta:
+
+        model = volunteer
+
+        fields = ['first_name', 'last_name', 'email', 'occupation', 'phone_number', 'id_pass_no', 'residence', 'starting_date', 'end_date', 'emergency_contact_name', 'emergency_contact_phone', 'program_id', ]
+
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'occupation': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'id_pass_no': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'residence': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'starting_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+
+            'end_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+
+            'emergency_contact_name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'emergency_contact_phone': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'program': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+        }
+
+class DonationForm(forms.ModelForm):
+
+    amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    class Meta:
+
+        model = donation
+
+        fields = [
+            'donor_name',
+            'donor_email',
+            'donor_phone_number',
+            'donation_type',
+            'donation_reason',
+            'amount',
+            'payment_method',
+            'is_monthly',
+        ]
+
+        widgets = {
+
+            'donor_name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'donor_email': forms.EmailInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'donation_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+
+            'message': forms.Textarea(attrs={
+                'class': 'form-control'
+            }),
         }
