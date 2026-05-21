@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Respond to Feedback | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>Respond to Feedback</h1>
+            <p class="subtitle">Add a response to feedback from {{ feedback.name }}</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'admin_feedback' %}" class="btn btn-outline">Back to Feedback List</a>
+        </div>
+    </div>
+    
+    <div class="card admin-form-card">
+        <div class="feedback-preview">
+            <h3>Original Feedback</h3>
+            <p><strong>From:</strong> {{ feedback.name }} ({{ feedback.email|default:"Not provided" }})</p>
+            <p><strong>Received:</strong> {{ feedback.created_at|date:"M d, Y H:i" }}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote>{{ feedback.message }}</blockquote>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="response_message">Your Response</label>
+                <textarea id="response_message" name="response_message" rows="5" required></textarea>
+                <small class="form-text">Enter your response to this feedback.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Response</button>
+            <a href="{% url 'admin_feedback' %}" class="btn btn-outline">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

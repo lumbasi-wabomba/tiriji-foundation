@@ -12,6 +12,7 @@ urlpatterns = [
     path('programs/', views.programs, name='programs'),
     path('programs/<int:program_id>/', views.program_detail, name='program_detail'),
     path('volunteer/signup/', views.volunteer_signup, name='volunteer_signup'),
+    path('volunteer/payment/<str:volunteer_email>/volunteer_payment_summary/', views.volunteer_payment_summary, name='volunteer_payment_summary'),
     path('donate/', views.donate, name='donate'),
     path('events/', views.events, name='events'),
     path('news/', views.news, name='news'),
@@ -50,6 +51,25 @@ urlpatterns = [
     path('admin-portal/resources/add/', views.admin_resource_add, name='admin_resource_add'),
     path('admin-portal/resources/<int:resource_id>/edit/', views.admin_resource_edit, name='admin_resource_edit'),
     path('admin-portal/resources/<int:resource_id>/delete/', views.admin_resource_delete, name='admin_resource_delete'),
+    path('admin-portal/volunteers/<int:volunteer_id>/payment-summary/', views.volunteer_payment_summary, name='volunteer_payment_summary'),
+
+    path('admin-portal/volunteers/', views.admin_volunteers, name='admin_volunteers'),
+    path('admin-portal/volunteers/<int:volunteer_id>/edit/', views.admin_volunteer_edit, name='admin_volunteer_edit'),
+    path('admin-portal/volunteers/<int:volunteer_id>/delete/', views.admin_volunteer_delete, name='admin_volunteer_delete'),
+
+    path('admin-portal/feedback/', views.admin_feedback, name='admin_feedback'),
+    path('admin-portal/feedback/<int:feedback_id>/delete/', views.admin_feedback_delete, name='admin_feedback_delete'),
+    path('admin-portal/feedback/<int:feedback_id>/respond/', views.admin_feedback_respond, name='admin_feedback_respond'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-addressed/', views.admin_feedback_mark_addressed, name='admin_feedback_mark_addressed'), 
+    path('admin-portal/feedback/<int:feedback_id>/mark-unaddressed/', views.admin_feedback_mark_unaddressed, name='admin_feedback_mark_unaddressed'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-in-progress/', views.admin_feedback_mark_in_progress, name='admin_feedback_mark_in_progress'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-resolved/', views.admin_feedback_mark_resolved, name='admin_feedback_mark_resolved'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-rejected/', views.admin_feedback_mark_rejected, name='admin_feedback_mark_rejected'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-duplicate/', views.admin_feedback_mark_duplicate, name='admin_feedback_mark_duplicate'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-wontfix/', views.admin_feedback_mark_wontfix, name='admin_feedback_mark_wontfix'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-needsinfo/', views.admin_feedback_mark_needsinfo, name='admin_feedback_mark_needsinfo'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-accepted/', views.admin_feedback_mark_accepted, name='admin_feedback_mark_accepted'),
+    path('admin-portal/feedback/<int:feedback_id>/mark-reopened/', views.admin_feedback_mark_reopened, name='admin_feedback_mark_reopened'),
 
     #path('feedback/success/', views.feedback_success, name='feedback_success'), 
 ]

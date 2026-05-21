@@ -93,7 +93,7 @@ class VolunteerForm(forms.ModelForm):
                 'class': 'form-control'
             }),
 
-            'program': forms.Select(attrs={
+            'program_id': forms.Select(attrs={
                 'class': 'form-control'
             }),
         }

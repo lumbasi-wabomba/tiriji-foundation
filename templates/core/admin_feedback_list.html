@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Feedback Management | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>Feedback Management</h1>
+            <p class="subtitle">View and manage user feedback submissions.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'admin_portal' %}" class="btn btn-outline">Back to Admin Portal</a>
+        </div>
+    </div>
+    
+    {% if feedback_list %}
+    <div class="card admin-table-card">
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Message Preview</th>
+                        <th>Date Received</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in feedback_list %}
+                    <tr>
+                        <td>{{ feedback.feedback_id }}</td>
+                        <td>{{ feedback.name }}</td>
+                        <td>{{ feedback.email|default:"Not provided" }}</td>
+                        <td>{{ feedback.message|truncatewords:15 }}</td>
+                        <td>{{ feedback.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'admin_feedback_respond' feedback.feedback_id %}" class="btn btn-sm btn-primary">Respond</a>
+                                <a href="{% url 'admin_feedback_mark_addressed' feedback.feedback_id %}" class="btn btn-sm btn-success">Addressed</a>
+                                <a href="{% url 'admin_feedback_mark_in_progress' feedback.feedback_id %}" class="btn btn-sm btn-warning">In Progress</a>
+                                <a href="{% url 'admin_feedback_mark_resolved' feedback.feedback_id %}" class="btn btn-sm btn-info">Resolved</a>
+                                <a href="{% url 'admin_feedback_delete' feedback.feedback_id %}" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card admin-empty-state">
+        <h2>No Feedback Found</h2>
+        <p>No feedback submissions have been received yet.</p>
+        <a href="{% url 'admin_portal' %}" class="btn btn-outline">Back to Admin Portal</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

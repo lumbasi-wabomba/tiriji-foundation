@@ -8,7 +8,6 @@
     <!-- Meta -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
 
@@ -21,7 +20,7 @@
 {% if not request.path|slice:":12" == "/admin-portal" %}
 <!-- ===== NAVBAR ===== -->
 <header class="site-header">
-    <div class=" nav-wrapper">
+    <div class="nav-wrapper">
 
         <a href="{% url 'home' %}" class="brand">
             <img src="{% static 'images/logo-1.png' %}" alt="Logo" class="logo">
@@ -40,10 +39,19 @@
                 <li><a href="{% url 'programs' %}">Programs</a></li>
                 <li><a href="{% url 'volunteer' %}">Volunteer</a></li>
                 <li><a href="{% url 'contact' %}">Contact</a></li>
-                <li><a href="{% url 'events' %}">Events</a></li>
-                <li><a href="{% url 'news' %}">News</a></li>
-                <li><a href="{% url 'resources' %}">Resources</a></li>
                 
+                <!-- Collapsible Resources Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-dropdown-toggle">
+                        Resources
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="{% url 'events' %}">Events</a></li>
+                        <li><a href="{% url 'news' %}">News</a></li>
+                        <li><a href="{% url 'resources' %}">Materials</a></li>
+                    </ul>
+                </li>
             </ul>
         </nav>
 
@@ -82,7 +90,7 @@
     </div>
 </footer>
 
-<script src= "{% static 'js/script.js'%}"></script>
+<script src="{% static 'js/script.js' %}"></script>
 
 {% block extra_js %}{% endblock %}
 

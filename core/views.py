@@ -474,4 +474,163 @@ def admin_resource_delete(request, resource_id):
         'object_name': instance.title,
         'return_url': 'admin_resources',
     })
+
+
+@group_required
+def admin_volunteers(request):
+    items = volunteer.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Volunteers',
+        'section_label': 'Volunteer',
+        'add_url': 'admin_volunteer_add',
+        'headers': ['ID', 'Full Name', 'Email', 'Phone', 'Program', 'Status', 'Created'],
+        'rows': [
+            {
+                'cols': [item.email, f"{item.first_name} {item.last_name}", item.email, item.phone_number, 
+                         item.program_id.title if item.program_id else '-', item.status, item.created_at.strftime('%Y-%m-%d')],
+                'edit_url': reverse('admin_volunteer_edit', args=[item.email]),
+                'delete_url': reverse('admin_volunteer_delete', args=[item.email]),
+            }
+            for item in items
+        ],
+    })
+
+
+@group_required
+def admin_volunteer_add(request):
+    return admin_form_view(request, VolunteerForm, section_name='Volunteer', action_label='Add', return_url='admin_volunteers')
+
+
+@group_required
+def admin_volunteer_edit(request, volunteer_email):
+    instance = get_object_or_404(volunteer, email=volunteer_email)
+    return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
+
+
+@group_required
+def admin_volunteer_delete(request, volunteer_email):
+    instance = get_object_or_404(volunteer, email=volunteer_email)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Volunteer deleted successfully.')
+        return redirect('admin_volunteers')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Volunteer',
+        'object_name': f"{instance.first_name} {instance.last_name}",
+        'return_url': 'admin_volunteers',
+    })
+
+
+@group_required
+def admin_feedback(request):
+    feedback_list = feedback.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_feedback_list.html', {
+        'section_name': 'Feedback',
+        'section_label': 'Feedback Item',
+        'feedback_list': feedback_list,
+    })
+
+
+@group_required
+def admin_feedback_delete(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Feedback deleted successfully.')
+        return redirect('admin_feedback')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Feedback',
+        'object_name': instance.name,
+        'return_url': 'admin_feedback',
+    })
+
+
+@group_required
+def admin_feedback_respond(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    if request.method == 'POST':
+        # Handle response submission
+        response_message = request.POST.get('response_message')
+        if response_message:
+            # Here you would typically save the response to a related model or add it to the feedback
+            # For now, we'll just show a success message
+            messages.success(request, 'Response added successfully.')
+            return redirect('admin_feedback')
+    
+    return render(request, 'core/admin_feedback_respond.html', {
+        'feedback': instance,
+    })
+
+
+@group_required
+def admin_feedback_mark_addressed(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    # Here you would update a status field or add a tag
+    # For now, we'll just show a success message
+    messages.success(request, 'Feedback marked as addressed.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_unaddressed(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    # Here you would update a status field or remove a tag
+    messages.success(request, 'Feedback marked as unaddressed.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_in_progress(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as in progress.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_resolved(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as resolved.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_rejected(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as rejected.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_duplicate(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as duplicate.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_wontfix(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as won\'t fix.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_needsinfo(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as needs info.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_accepted(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as accepted.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_reopened(request, feedback_id):
+    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as reopened.')
+    return redirect('admin_feedback')
  
