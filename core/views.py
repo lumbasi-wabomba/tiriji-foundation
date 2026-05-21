@@ -2,15 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
-from .models import (
-    program,
-    volunteer,
-    events as Event,
-    news as News,
-    resources as Resource,
-    Transaction,
-    VolunteerPayment,)
-from .forms import ProgramForm, EventForm, NewsForm, ResourceForm , VolunteerForm , DonationForm 
+from .models import program, volunteer, events as Event, news as News, resources as Resource, Transaction, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
+from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm
 import os
 from django.conf import settings
 from .models import resources
@@ -34,11 +27,24 @@ def about(request):
 def contact(request):
     return render(request, 'core/contact.html')
 
+def impact_page_context(page):
+    return {
+        'impact_metrics': ImpactMetric.objects.filter(page=page, is_active=True),
+        'featured_person': FeaturedPerson.objects.filter(page=page, is_featured=True).first(),
+        'stories': SuccessStory.objects.filter(page=page)[:6],
+        'videos': InspirationVideo.objects.filter(page=page)[:4],
+        'media_items': PageMedia.objects.filter(page=page)[:8],
+    }
+
+
 def children(request):
-    return render(request, 'core/children.html')
+    context = impact_page_context('children')
+    return render(request, 'core/children.html', context)
+
 
 def women(request):
-    return render(request, 'core/women.html')   
+    context = impact_page_context('women')
+    return render(request, 'core/women.html', context)   
 
 
 def programs(request):
@@ -157,21 +163,21 @@ def donate(request):
     )
 
 
-# def donate(request):
-#     if request.method == 'POST':
-#         form = DonationForm(request.POST)
+def donate(request):
+    if request.method == 'POST':
+        form = DonationForm(request.POST)
 
-#         if form.is_valid():
-#             amount = request.POST.get('amount')
-#             transaction = Transaction.objects.create( amount=amount, payment_method=request.POST.get('payment_method'))
-#             donation = form.save(commit=False)
-#             donation.transaction = transaction
-#             donation.save()
-#             return redirect('donation_success')
+        if form.is_valid():
+            amount = request.POST.get('amount')
+            transaction = Transaction.objects.create( amount=amount, payment_method=request.POST.get('payment_method'))
+            donation = form.save(commit=False)
+            donation.transaction = transaction
+            donation.save()
+            return redirect('donation_success')
 
-#     else:
-#         form = DonationForm()
-#     return render(request, 'core/donate.html', {'form': form })
+    else:
+        form = DonationForm()
+    return render(request, 'core/donate.html', {'form': form })
 
 def donate_success(request):
     return render(request, 'core/donate_success.html')

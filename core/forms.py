@@ -1,5 +1,5 @@
 from django import forms
-from .models import program, events, news, resources ,volunteer , donation 
+from .models import program, events, news, resources, volunteer, donation, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
 
 class ProgramForm(forms.ModelForm):
     class Meta:
@@ -93,7 +93,7 @@ class VolunteerForm(forms.ModelForm):
                 'class': 'form-control'
             }),
 
-            'program_id': forms.Select(attrs={
+            'program': forms.Select(attrs={
                 'class': 'form-control'
             }),
         }
@@ -156,4 +156,87 @@ class DonationForm(forms.ModelForm):
             'message': forms.Textarea(attrs={
                 'class': 'form-control'
             }),
+
+            'payment_method': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'is_monthly': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'donor_phone_number': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'donation_reason': forms.Textarea(attrs={
+                'class': 'form-control'
+            }), 
+        }
+
+class ImpactMetricForm(forms.ModelForm):
+    class Meta:
+        model = ImpactMetric
+        fields = ['page', 'label', 'value', 'description', 'display_order', 'is_active']
+        widgets = {
+            'page': forms.Select(attrs={'class': 'form-control'}),
+            'label': forms.TextInput(attrs={'class': 'form-control'}),
+            'value': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class FeaturedPersonForm(forms.ModelForm):
+    class Meta:
+        model = FeaturedPerson
+        fields = ['page', 'feature_type', 'name', 'age', 'headline', 'short_bio', 'achievement', 'dream_or_goal', 'quote', 'image', 'is_featured']
+        widgets = {
+            'page': forms.Select(attrs={'class': 'form-control'}),
+            'feature_type': forms.Select(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'age': forms.NumberInput(attrs={'class': 'form-control'}),
+            'headline': forms.TextInput(attrs={'class': 'form-control'}),
+            'short_bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'achievement': forms.TextInput(attrs={'class': 'form-control'}),
+            'dream_or_goal': forms.TextInput(attrs={'class': 'form-control'}),
+            'quote': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class SuccessStoryForm(forms.ModelForm):
+    class Meta:
+        model = SuccessStory
+        fields = ['page', 'title', 'person_name', 'challenge', 'intervention', 'outcome', 'quote', 'image', 'is_featured']
+        widgets = {
+            'page': forms.Select(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'person_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'challenge': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'intervention': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'outcome': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'quote': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class InspirationVideoForm(forms.ModelForm):
+    class Meta:
+        model = InspirationVideo
+        fields = ['page', 'title', 'description', 'video_url', 'thumbnail', 'is_featured']
+        widgets = {
+            'page': forms.Select(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'video_url': forms.URLInput(attrs={'class': 'form-control'}),
+        }
+
+
+class PageMediaForm(forms.ModelForm):
+    class Meta:
+        model = PageMedia
+        fields = ['page', 'media_type', 'title', 'description', 'image', 'video_url', 'display_order']
+        widgets = {
+            'page': forms.Select(attrs={'class': 'form-control'}),
+            'media_type': forms.Select(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'video_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
         }

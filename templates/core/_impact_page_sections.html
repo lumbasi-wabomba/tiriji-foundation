@@ -1,0 +1,120 @@
+{% load static %}
+
+<!-- IMPACT METRICS -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Our Impact</h2>
+        <div class="grid grid-300">
+            {% for metric in impact_metrics %}
+                <div class="card section-center">
+                    <h3>{{ metric.value }}</h3>
+                    <p><strong>{{ metric.label }}</strong></p>
+                    {% if metric.description %}<p>{{ metric.description }}</p>{% endif %}
+                </div>
+            {% empty %}
+                <p>No impact metrics have been added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED PERSON -->
+{% if featured_person %}
+<section class="section section-light">
+    <div class="container">
+        <h2 class="section-title">{{ featured_person.get_feature_type_display }}</h2>
+        <div class="grid grid-2 card">
+            <div>
+                {% if featured_person.image_url %}
+                    <img src="{{ featured_person.image_url }}" alt="{{ featured_person.name }}" class="img-fluid">
+                {% elif featured_person.image %}
+                    <img src="{{ featured_person.image.url }}" alt="{{ featured_person.name }}" class="img-fluid">
+                {% endif %}
+            </div>
+            <div>
+                <h3>{{ featured_person.name }}</h3>
+                <h4>{{ featured_person.headline }}</h4>
+                <p>{{ featured_person.short_bio }}</p>
+                {% if featured_person.achievement %}<p><strong>Achievement:</strong> {{ featured_person.achievement }}</p>{% endif %}
+                {% if featured_person.dream_or_goal %}<p><strong>Goal:</strong> {{ featured_person.dream_or_goal }}</p>{% endif %}
+                {% if featured_person.quote %}<blockquote>“{{ featured_person.quote }}”</blockquote>{% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- STORIES -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Transformation Stories</h2>
+        <div class="grid grid-300">
+            {% for story in stories %}
+                <article class="card">
+                    {% if story.image_url %}
+                        <img src="{{ story.image_url }}" alt="{{ story.title }}" class="img-fluid">
+                    {% elif story.image %}
+                        <img src="{{ story.image.url }}" alt="{{ story.title }}" class="img-fluid">
+                    {% endif %}
+                    <h3>{{ story.title }}</h3>
+                    {% if story.person_name %}<p><strong>{{ story.person_name }}</strong></p>{% endif %}
+                    <p><strong>Challenge:</strong> {{ story.challenge }}</p>
+                    <p><strong>Support:</strong> {{ story.intervention }}</p>
+                    <p><strong>Outcome:</strong> {{ story.outcome }}</p>
+                    {% if story.quote %}<blockquote>“{{ story.quote }}”</blockquote>{% endif %}
+                </article>
+            {% empty %}
+                <p>No stories have been added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- VIDEOS -->
+<section class="section section-light">
+    <div class="container">
+        <h2 class="section-title">Inspiration Videos</h2>
+        <div class="grid grid-300">
+            {% for video in videos %}
+                <div class="card">
+                    {% if video.thumbnail_url %}
+                        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="img-fluid">
+                    {% elif video.thumbnail %}
+                        <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="img-fluid">
+                    {% endif %}
+                    <h3>{{ video.title }}</h3>
+                    {% if video.description %}<p>{{ video.description }}</p>{% endif %}
+                    <a href="{{ video.video_url }}" class="btn btn-primary" target="_blank" rel="noopener">Watch Video</a>
+                </div>
+            {% empty %}
+                <p>No videos have been added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- MEDIA GALLERY -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Photos & Moments</h2>
+        <div class="grid grid-300">
+            {% for item in media_items %}
+                <div class="card">
+                    {% if item.media_type == 'photo' %}
+                        {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="{{ item.title }}" class="img-fluid">
+                        {% elif item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="img-fluid">
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ item.video_url }}" target="_blank" rel="noopener">Watch {{ item.title }}</a>
+                    {% endif %}
+                    <h3>{{ item.title }}</h3>
+                    {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+                </div>
+            {% empty %}
+                <p>No media has been added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>

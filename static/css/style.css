@@ -1,34 +1,67 @@
 :root {
     /* ==== GLOBAL VARIABLES ==== */
 
-    /* === COLORS === */
-    --primary: #095d2c;
-    --secondary: #2980b9;
-    --dark: #095c10;
-    --light: #f4f4f4;
+    --primary: #095d2c;          /* Green - Main brand color */
+    --primary-light: #0d7a3a;    /* Darker green */
+    --primary-lighter: #e8f5e9;  /* Light green background */
+    
+    --secondary: #2980b9;        /* Blue - Secondary actions */
+    --secondary-light: #3498db;  /* Lighter blue */
+    
+    --dark: #1a1a1a;             /* Deep dark for text */
+    --dark-bg: #095c10;          /* Dark background */
+    
+    --light: #f5f5f5;            /* Light gray background */
+    --light-border: #e0e0e0;     /* Light borders */
+    
     --border: #ddd;
-    --text-muted: #555;
+    --text-muted: #666;
+    --text-light: #999;
     --white: #ffffff;
-
+    
+    --success: #4caf50;
+    --warning: #ff9800;
+    --danger: #f44336;
+    --info: #2196f3;
+    
     /* === TYPOGRAPHY === */
-    --font-base: Arial, sans-serif;
+    --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-base: 16px;
+    --font-size-small: 14px;
+    --font-size-large: 18px;
+
 
     /* === SPACING SCALE === */
     --space-xs: 5px;
-    --space-sm: 10px;
+    --space-sm: 8px;
     --space-md: 20px;
     --space-lg: 30px;
     --space-xl: 60px;
+    --space-xxl: 100px;
 
     /* === RADIUS === */
     --radius-sm: 6px;  
     --radius-md: 8px;
+    --radius-lg: 12px;
+
 
     /* === SHADOWS === */
     --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.2);
 
     /* === TRANSITIONS === */
     --transition-default: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
+    --transition-slow: all 0.5s ease;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
 }
 
 *, *::before, *::after {
@@ -53,26 +86,46 @@ a {
     display: inline-block;
     border-radius: var(--radius-sm);
     transition: var(--transition-default);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-default);
+    text-decoration: none;
+    white-space: nowrap;
+    gap: 8px;
+
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(9, 93, 44, 0.2);
 }
 
 .btn-primary {
     background: var(--primary);
     color: var(--white);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary {
     background: var(--secondary);
     color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-outline {
-    border: 2px solid var(--primary);
+    border: 2px solid var(--white);
     color: var(--primary);
+    background: transparent;
 }
 
 .btn-outline:hover {
-    background: var(--primary);
-    color: var(--white);
+    background: var(--primary-lighter);
+    border-radius: var(--primary-light);
 }
 
 .btn:hover {
@@ -266,7 +319,11 @@ a {
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    transition: all 0.3s ease;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    transition: var(--transition-default);
 }
 
 /* Brand */
@@ -295,6 +352,8 @@ a {
     font-size: 1.8rem;
     color: var(--white);
     cursor: pointer;
+    display: none;
+    padding: var(--space-md);
 }
 
 /* Menu */
@@ -709,11 +768,14 @@ a {
 
 
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
+    font-family: var(--font-base);
+    font-size: var(--font-size-base);
     line-height: 1.6;
+    color: var(--dark);
+    background: var(--white);
+    margin: 0;
+    padding: 0;
 }
-
 .container {
     width: 90%;
     max-width: 1200px;
@@ -848,7 +910,8 @@ body {
     font-weight: bold;
     color: var(--primary);
 }
-/* Program Details */
+
+
 /* ===== PROGRAMS GRID ===== */
 
 
@@ -927,7 +990,7 @@ body {
 }
 
 .program-card:hover .program-card-image img {
-    transform: scale(1.08);
+    transform: scale(.8);
 }
 
 /* Image Placeholder */
@@ -980,7 +1043,7 @@ body {
 }
 
 .program-card:hover .program-card-details {
-    max-height: 300px;
+    max-height: 150px;
 }
 
 .program-pricing h4 {
