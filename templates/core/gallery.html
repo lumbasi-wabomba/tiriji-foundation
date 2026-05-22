@@ -16,16 +16,20 @@
     <h2 class="section-title">Photo Gallery</h2>
 
     <div class="gallery-grid">
-        {% for item in gallery %}
+        {% for item in gallery_items %}
         <div class="gallery-card">
-            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.title }}">
+            {% elif item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            {% endif %}
             {% if item.title %}
             <h4>{{ item.title }}</h4>
             {% endif %}
-            {% if item.description %}
-            <p>{{ item.description|truncatewords:15 }}</p>
+            {% if item.image_description %}
+            <p>{{ item.image_description|truncatewords:15 }}</p>
             {% endif %}
-            <a href="{% url 'gallery_detail' item.id %}" class="text-link">View →</a>
+            <a href="{% url 'gallery_detail' item.image_id %}" class="text-link">View →</a>
         </div>
         {% empty %}
         <p>No images available at the moment.</p>

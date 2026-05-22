@@ -3,9 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.utils import timezone
 from django.urls import reverse
-from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, feedback as Feedback
-from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, AdminUserForm
+from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, employees as Employee, partners as Partner, gallery as Gallery, feedback as Feedback
+from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 
 
@@ -230,16 +231,15 @@ def sitemap(request):
 
 def feedback(request):
     if request.method == "POST":
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        message = request.POST.get("message")
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your message was sent successfully!")
+            return redirect("feedback")
+    else:
+        form = FeedbackForm()
 
-        # process message (save/email etc)
-
-        messages.success(request, "Your message was sent successfully!")
-        return redirect("feedback")
-
-    return render(request, "core/feedback.html")
+    return render(request, "core/feedback.html", {'form': form})
 
 
 def newsletter(request):
@@ -248,8 +248,8 @@ def newsletter(request):
 
 
 def event_detail(request, event_id):
-    # Placeholder for event detail view
-    return render(request, 'core/event_detail.html', {'event_id': event_id})
+    event = get_object_or_404(Event.objects.select_related('program_id'), event_id=event_id)
+    return render(request, 'core/event_detail.html', {'event': event})
 
 def news_detail(request, news_id):
     news_item = get_object_or_404(News, news_id=news_id)
@@ -260,16 +260,16 @@ def resource_detail(request, resource_id):
     return render(request, 'core/resource_detail.html', {'resource': resource})
 
 def gallery_detail(request, gallery_id):
-    # Placeholder for gallery detail view
-    return render(request, 'core/gallery_detail.html', {'gallery_id': gallery_id})  
+    gallery_item = get_object_or_404(Gallery.objects.select_related('program_id', 'event_id'), image_id=gallery_id)
+    return render(request, 'core/gallery_detail.html', {'gallery_item': gallery_item})  
 
 def team_member_detail(request, member_id):
-    # Placeholder for team member detail view
-    return render(request, 'core/team_member_detail.html', {'member_id': member_id})
+    member = get_object_or_404(Employee, email=member_id)
+    return render(request, 'core/team_member_detail.html', {'member': member})
 
 def partner_detail(request, partner_id):
-    # Placeholder for partner detail view
-    return render(request, 'core/partner_detail.html', {'partner_id': partner_id})
+    partner = get_object_or_404(Partner.objects.select_related('program_id', 'assigned_employee'), pk=partner_id)
+    return render(request, 'core/partner_detail.html', {'partner': partner})
 
 def career_detail(request, career_id):
     # Placeholder for career detail view

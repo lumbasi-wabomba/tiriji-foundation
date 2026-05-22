@@ -7,21 +7,26 @@
 <section class="page-hero">
     <div class="container">
         <h1>{{ event.title }}</h1>
-        <p>{{ event.description|truncatewords:25 }}</p>
+        <p>{{ event.events_description|truncatewords:25 }}</p>
     </div>
 </section>
 
 <!-- EVENT DETAILS -->
 <section class="container event-detail">
-    {% if event.image %}
+    {% if event.image_url %}
+        <img src="{{ event.image_url }}" alt="{{ event.title }}" class="event-main-image">
+    {% elif event.image %}
         <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-main-image">
     {% endif %}
 
     <div class="event-info">
-        <p><strong>Date:</strong> {{ event.date }}</p>
-        <p><strong>Location:</strong> {{ event.location }}</p>
+        <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
+        <p><strong>Location:</strong> {{ event.event_location }}</p>
+        {% if event.program_id %}
+        <p><strong>Program:</strong> {{ event.program_id.title }}</p>
+        {% endif %}
         <div class="event-description">
-            {{ event.description|linebreaks }}
+            {{ event.events_description|linebreaks }}
         </div>
     </div>
 

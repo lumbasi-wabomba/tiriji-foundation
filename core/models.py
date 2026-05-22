@@ -92,10 +92,6 @@ class volunteer(models.Model): # Revised version of this model
         total_days = (self.end_date - self.starting_date).days
         return math.ceil(total_days / 7)
     
-        return (
-            (self.end_date - self.starting_date).days // 7
-        )
-    
     @property
     def fee(self):
         if not self.program_id:
@@ -284,7 +280,8 @@ class events(models.Model):
     event_date = models.DateField()
 
     def __str__(self):
-        return f"{self.title} event scheduled for {self.event_date} at {self.event_location} under {self.program_id.title} program"
+        program_title = self.program_id.title if self.program_id else "No Program"
+        return f"{self.title} event scheduled for {self.event_date} at {self.event_location} under {program_title} program"
 
 class event_registration(models.Model):
     registration_id = models.AutoField(primary_key=True)
@@ -592,10 +589,26 @@ def upload_page_media_image(sender, instance, **kwargs):
 
 
 class feedback(models.Model):
-    feedback_id = models.IntegerField(primary_key=True, db_index=True)
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('in_progress', 'In Progress'),
+        ('addressed', 'Addressed'),
+        ('resolved', 'Resolved'),
+        ('rejected', 'Rejected'),
+        ('duplicate', 'Duplicate'),
+        ('wontfix', "Won't Fix"),
+        ('needsinfo', 'Needs Info'),
+        ('accepted', 'Accepted'),
+        ('reopened', 'Reopened'),
+    ]
+
+    feedback_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, null=False, blank=False)
     email = models.EmailField(null=True, blank=True)
     message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    response_message = models.TextField(blank=True, null=True)
+    responded_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

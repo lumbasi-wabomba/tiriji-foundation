@@ -1,5 +1,5 @@
 from django import forms
-from .models import program, events, news, resources, volunteer, donation, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
+from .models import program, events, news, resources, volunteer, donation, feedback, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
 from .admin_roles import ADMIN_ROLE_CHOICES
 
 class ProgramForm(forms.ModelForm):
@@ -15,7 +15,7 @@ class ProgramForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = events
-        fields = ['event_id', 'title', 'events_description', 'image', 'program_id', 'event_location', 'event_date']
+        fields = ['title', 'events_description', 'image', 'program_id', 'event_location', 'event_date']
         widgets = {
             'events_description': forms.Textarea(attrs={'rows': 4}),
             'event_date': forms.DateInput(attrs={'type': 'date'}),
@@ -25,7 +25,7 @@ class EventForm(forms.ModelForm):
 class NewsForm(forms.ModelForm):
     class Meta:
         model = news
-        fields = ['news_id', 'title', 'news_description', 'image', 'program_id', 'event_id']
+        fields = ['title', 'news_description', 'image', 'program_id', 'event_id']
         widgets = {
             'news_description': forms.Textarea(attrs={'rows': 4}),
         }
@@ -34,7 +34,7 @@ class NewsForm(forms.ModelForm):
 class ResourceForm(forms.ModelForm):
     class Meta:
         model = resources
-        fields = ['resource_id', 'title', 'resources_description', 'image', 'file', 'program_id']
+        fields = ['title', 'resources_description', 'image', 'file', 'program_id']
         widgets = {
             'resources_description': forms.Textarea(attrs={'rows': 4}),
         }
@@ -170,6 +170,17 @@ class DonationForm(forms.ModelForm):
             'donation_reason': forms.Textarea(attrs={
                 'class': 'form-control'
             }), 
+        }
+
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = feedback
+        fields = ['name', 'email', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
         }
 
 

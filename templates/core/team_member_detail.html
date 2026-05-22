@@ -6,15 +6,17 @@
 <!-- HERO -->
 <section class="page-hero">
     <div class="container">
-        <h1>{{ member.name }}</h1>
+        <h1>{{ member.first_name }} {{ member.last_name }}</h1>
         <p>{{ member.role }}</p>
     </div>
 </section>
 
 <!-- TEAM MEMBER DETAILS -->
 <section class="container team-detail">
-    {% if member.image %}
-        <img src="{{ member.image.url }}" alt="{{ member.name }}" class="team-main-image">
+    {% if member.profile_image_url %}
+        <img src="{{ member.profile_image_url }}" alt="{{ member.first_name }} {{ member.last_name }}" class="team-main-image">
+    {% elif member.profile_image %}
+        <img src="{{ member.profile_image.url }}" alt="{{ member.first_name }} {{ member.last_name }}" class="team-main-image">
     {% endif %}
 
     {% if member.bio %}

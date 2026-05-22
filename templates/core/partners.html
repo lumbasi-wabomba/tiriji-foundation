@@ -18,15 +18,17 @@
     <div class="partners-grid">
         {% for partner in partners %}
         <div class="partner-card">
-            {% if partner.logo %}
-                <img src="{{ partner.logo.url }}" alt="{{ partner.name }}">
+            {% if partner.profile_logo_url %}
+                <img src="{{ partner.profile_logo_url }}" alt="{{ partner.name }}">
+            {% elif partner.profile_logo %}
+                <img src="{{ partner.profile_logo.url }}" alt="{{ partner.name }}">
             {% endif %}
             <h4>{{ partner.name }}</h4>
-            {% if partner.description %}
-            <p>{{ partner.description|truncatewords:20 }}</p>
+            {% if partner.partners_description %}
+            <p>{{ partner.partners_description|truncatewords:20 }}</p>
             {% endif %}
-            {% if partner.website %}
-            <a href="{{ partner.website }}" target="_blank" class="text-link">Visit Website →</a>
+            {% if partner.website_url %}
+            <a href="{{ partner.website_url }}" target="_blank" class="text-link">Visit Website →</a>
             {% endif %}
             <a href="{% url 'partner_detail' partner.id %}" class="text-link">Read More →</a>
         </div>

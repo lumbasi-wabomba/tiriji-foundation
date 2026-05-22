@@ -16,17 +16,19 @@
     <h2 class="section-title">Our Team</h2>
 
     <div class="team-grid">
-        {% for member in team %}
+        {% for member in team_members %}
         <div class="team-card">
-            {% if member.image %}
-                <img src="{{ member.image.url }}" alt="{{ member.name }}">
+            {% if member.profile_image_url %}
+                <img src="{{ member.profile_image_url }}" alt="{{ member.first_name }} {{ member.last_name }}">
+            {% elif member.profile_image %}
+                <img src="{{ member.profile_image.url }}" alt="{{ member.first_name }} {{ member.last_name }}">
             {% endif %}
-            <h4>{{ member.name }}</h4>
+            <h4>{{ member.first_name }} {{ member.last_name }}</h4>
             <p class="role">{{ member.role }}</p>
             {% if member.bio %}
             <p>{{ member.bio|truncatewords:20 }}</p>
             {% endif %}
-            <a href="{% url 'team_member_detail' member.id %}" class="text-link">View Profile →</a>
+            <a href="{% url 'team_member_detail' member.email %}" class="text-link">View Profile →</a>
         </div>
         {% empty %}
         <p>No team members available at the moment.</p>
