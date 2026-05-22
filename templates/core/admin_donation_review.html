@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Review Donation | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>Review Donation</h1>
+            <p class="subtitle">{{ donation.donor_name|default:"Anonymous donor" }} · {{ donation.currency }} {{ donation.amount }}</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'admin_donations' %}" class="btn btn-outline">Back</a>
+        </div>
+    </div>
+
+    <div class="review-layout">
+        <section class="card">
+            <h2>Donor Details</h2>
+            <dl class="detail-list">
+                <div><dt>Name</dt><dd>{{ donation.donor_name|default:"Anonymous" }}</dd></div>
+                <div><dt>Email</dt><dd>{{ donation.donor_email|default:"-" }}</dd></div>
+                <div><dt>Phone</dt><dd>{{ donation.donor_phone_number|default:"-" }}</dd></div>
+                <div><dt>Reason</dt><dd>{{ donation.donation_reason|default:"-" }}</dd></div>
+            </dl>
+        </section>
+
+        <section class="card">
+            <h2>Payment Details</h2>
+            <dl class="detail-list">
+                <div><dt>Donation ID</dt><dd>{{ donation.donation_id }}</dd></div>
+                <div><dt>Reference</dt><dd>{{ donation.merchant_reference_id }}</dd></div>
+                <div><dt>Method</dt><dd>{{ donation.get_payment_method_display }}</dd></div>
+                <div><dt>Type</dt><dd>{{ donation.get_donation_type_display }}</dd></div>
+                <div><dt>Status</dt><dd><span class="status-badge">{{ donation.get_status_display }}</span></dd></div>
+            </dl>
+        </section>
+
+        <section class="card wide">
+            <h2>Finance Action</h2>
+            <form method="post" class="status-action-grid">
+                {% csrf_token %}
+                {% for value, label in status_choices %}
+                <label>
+                    <input type="radio" name="status" value="{{ value }}" {% if donation.status == value %}checked{% endif %}>
+                    <span>{{ label }}</span>
+                </label>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Update Donation</button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

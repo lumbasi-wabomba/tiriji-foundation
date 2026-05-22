@@ -11,7 +11,9 @@
         </div>
         <div class="admin-actions">
             <a href="{% url 'admin_portal' %}" class="btn btn-outline">Dashboard</a>
+            {% if add_url %}
             <a href="{% url add_url %}" class="btn btn-primary">Add {{ section_label }}</a>
+            {% endif %}
         </div>
     </div>
 
@@ -33,8 +35,15 @@
                                 <td>{{ col }}</td>
                             {% endfor %}
                             <td class="actions">
+                                {% if row.review_url %}
+                                <a href="{{ row.review_url }}" class="btn btn-primary">Review</a>
+                                {% endif %}
+                                {% if row.edit_url %}
                                 <a href="{{ row.edit_url }}" class="btn btn-outline">Edit</a>
+                                {% endif %}
+                                {% if row.delete_url %}
                                 <a href="{{ row.delete_url }}" class="btn btn-secondary">Delete</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% empty %}

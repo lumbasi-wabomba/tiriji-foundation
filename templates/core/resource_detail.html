@@ -3,29 +3,38 @@
 
 {% block content %}
 
-<!-- HERO -->
 <section class="page-hero">
     <div class="container">
         <h1>{{ resource.title }}</h1>
-        <p>{{ resource.description|truncatewords:25 }}</p>
+        <p>{{ resource.resources_description|truncatewords:25 }}</p>
     </div>
 </section>
 
-<!-- RESOURCE DETAILS -->
-<section class="container resource-detail">
-    {% if resource.image %}
-        <img src="{{ resource.image.url }}" alt="{{ resource.title }}" class="resource-main-image">
-    {% endif %}
-
-    <div class="resource-description">
-        {{ resource.description|linebreaks }}
+<section class="section">
+    <div class="container editorial-grid">
+        <div class="editorial-media reveal-on-scroll">
+            {% if resource.image_url %}
+                <img src="{{ resource.image_url }}" alt="{{ resource.title }}">
+            {% elif resource.image %}
+                <img src="{{ resource.image.url }}" alt="{{ resource.title }}">
+            {% else %}
+                <img src="{% static 'images/program-kenger.jpg' %}" alt="{{ resource.title }}">
+            {% endif %}
+        </div>
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Resource</p>
+            <h2>{{ resource.title }}</h2>
+            <div class="description">{{ resource.resources_description|linebreaks }}</div>
+            {% if resource.program_id %}
+            <div class="story-meta"><span>{{ resource.program_id.title }}</span></div>
+            {% endif %}
+            {% if resource.file_url %}
+            <a href="{{ resource.file_url }}" class="btn btn-primary" target="_blank" rel="noopener">Download Resource</a>
+            {% elif resource.file %}
+            <a href="{{ resource.file.url }}" class="btn btn-primary" target="_blank" rel="noopener">Download Resource</a>
+            {% endif %}
+        </div>
     </div>
-
-    {% if resource.file %}
-    <div class="resource-download" style="margin-top:30px; text-align:center;">
-        <a href="{{ resource.file.url }}" class="btn btn-primary" target="_blank">Download Resource</a>
-    </div>
-    {% endif %}
 </section>
 
 {% endblock %}

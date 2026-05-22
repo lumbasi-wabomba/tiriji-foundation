@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Review Volunteer Application | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>Review Application</h1>
+            <p class="subtitle">{{ volunteer.first_name }} {{ volunteer.last_name }} - {{ volunteer.program_id.title|default:"No program selected" }}</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'admin_volunteers' %}" class="btn btn-outline">All Applications</a>
+            <a href="{% url 'admin_volunteer_edit' volunteer.email %}" class="btn btn-secondary">Edit Details</a>
+        </div>
+    </div>
+
+    <div class="review-layout">
+        <section class="ops-panel">
+            <div class="panel-heading">
+                <h3>Applicant</h3>
+                <span class="status-badge">{{ volunteer.status|title }}</span>
+            </div>
+            <div class="detail-list">
+                <p><strong>Name</strong><span>{{ volunteer.first_name }} {{ volunteer.last_name }}</span></p>
+                <p><strong>Email</strong><span>{{ volunteer.email }}</span></p>
+                <p><strong>Phone</strong><span>{{ volunteer.phone_number }}</span></p>
+                <p><strong>Occupation</strong><span>{{ volunteer.occupation }}</span></p>
+                <p><strong>Residence</strong><span>{{ volunteer.residence }}</span></p>
+                <p><strong>ID / Passport</strong><span>{{ volunteer.id_pass_no }}</span></p>
+            </div>
+        </section>
+
+        <section class="ops-panel">
+            <div class="panel-heading">
+                <h3>Placement</h3>
+                <span class="status-badge live">{{ volunteer.duration_weeks }} weeks</span>
+            </div>
+            <div class="detail-list">
+                <p><strong>Program</strong><span>{{ volunteer.program_id.title|default:"No program selected" }}</span></p>
+                <p><strong>Start Date</strong><span>{{ volunteer.starting_date }}</span></p>
+                <p><strong>End Date</strong><span>{{ volunteer.end_date }}</span></p>
+                <p><strong>Calculated Fee</strong><span>KES {{ volunteer.calculated_fee }}</span></p>
+                <p><strong>Payment</strong><span>{% if payment.paid %}Paid{% else %}Pending{% endif %}</span></p>
+                <p><strong>Transaction</strong><span>{% if payment %}{{ payment.transaction.id }}{% else %}No payment record{% endif %}</span></p>
+            </div>
+        </section>
+
+        <section class="ops-panel">
+            <div class="panel-heading">
+                <h3>Emergency Contact</h3>
+            </div>
+            <div class="detail-list">
+                <p><strong>Name</strong><span>{{ volunteer.emergency_contact_name }}</span></p>
+                <p><strong>Phone</strong><span>{{ volunteer.emergency_contact_phone }}</span></p>
+            </div>
+        </section>
+
+        <section class="ops-panel">
+            <div class="panel-heading">
+                <h3>Decision</h3>
+            </div>
+            <form method="post" class="status-action-grid">
+                {% csrf_token %}
+                {% for value, label in status_choices %}
+                <button type="submit" name="status" value="{{ value }}" class="btn {% if volunteer.status == value %}btn-primary{% else %}btn-outline{% endif %}">
+                    {{ label }}
+                </button>
+                {% endfor %}
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

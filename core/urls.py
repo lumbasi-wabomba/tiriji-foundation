@@ -16,7 +16,9 @@ urlpatterns = [
     path('donate/', views.donate, name='donate'),
     path('events/', views.events, name='events'),
     path('news/', views.news, name='news'),
+    path('news/<int:news_id>/', views.news_detail, name='news_detail'),
     path('resources/', views.resources, name='resources'),
+    path('resources/<int:resource_id>/', views.resource_detail, name='resource_detail'),
     path('faq/', views.faq, name='faq'),
     path('gallery/', views.gallery, name='gallery'),
     path('team/', views.team, name='team'), 
@@ -32,6 +34,12 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 
     path('admin-portal/', views.admin_portal, name='admin_portal'),
+    path('admin-portal/users/', views.admin_users, name='admin_users'),
+    path('admin-portal/users/add/', views.admin_user_add, name='admin_user_add'),
+    path('admin-portal/users/<int:user_id>/edit/', views.admin_user_edit, name='admin_user_edit'),
+    path('admin-portal/donations/', views.admin_donations, name='admin_donations'),
+    path('admin-portal/donations/<str:donation_id>/review/', views.admin_donation_review, name='admin_donation_review'),
+
     path('admin-portal/programs/', views.admin_programs, name='admin_programs'),
     path('admin-portal/programs/add/', views.admin_program_add, name='admin_program_add'),
     path('admin-portal/programs/<int:program_id>/edit/', views.admin_program_edit, name='admin_program_edit'),
@@ -54,6 +62,8 @@ urlpatterns = [
     path('admin-portal/volunteers/<str:volunteer_email>/payment-summary/', views.volunteer_payment_summary, name='admin_volunteer_payment_summary'),
 
     path('admin-portal/volunteers/', views.admin_volunteers, name='admin_volunteers'),
+    path('admin-portal/volunteers/add/', views.admin_volunteer_add, name='admin_volunteer_add'),
+    path('admin-portal/volunteers/<str:volunteer_email>/review/', views.admin_volunteer_review, name='admin_volunteer_review'),
     path('admin-portal/volunteers/<str:volunteer_email>/edit/', views.admin_volunteer_edit, name='admin_volunteer_edit'),
     path('admin-portal/volunteers/<str:volunteer_email>/delete/', views.admin_volunteer_delete, name='admin_volunteer_delete'),
 

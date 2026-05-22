@@ -34,13 +34,13 @@ Volunteer Application | Tiriji Foundation
     <div class="container">
 
         <div class="application-layout">
-            <aside class="application-sidebar">
+            <aside class="application-sidebar" data-application-progress>
                 <p class="section-label">Progress Tracker</p>
                 <div class="vertical-steps">
-                    <span class="active">Personal Information</span>
-                    <span>Program and Dates</span>
-                    <span>Emergency Contact</span>
-                    <span>Payment Summary</span>
+                    <span class="active" data-step="personal">Personal Information</span>
+                    <span data-step="program">Program and Dates</span>
+                    <span data-step="emergency">Emergency Contact</span>
+                    <span data-step="submit">Payment Summary</span>
                 </div>
                 <p>After submission, the system creates a payment pending status and takes you to your fee summary.</p>
             </aside>
@@ -51,7 +51,7 @@ Volunteer Application | Tiriji Foundation
                 Volunteer Registration
             </h2>
 
-            <form method="POST">
+            <form method="POST" data-volunteer-application-form>
 
                 {% csrf_token %}
 

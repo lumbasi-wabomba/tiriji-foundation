@@ -3,30 +3,117 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
-        <h1>{{ program.title }}</h1>
-        <!-- Use first 25 words as short description -->
-        <p>{{ program.description|truncatewords:25 }}</p>
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div>
+            <h1>{{ program.title }}</h1>
+            <p>{{ program.program_description|truncatewords:28 }}</p>
+            <a href="{% url 'volunteer_signup' %}?program={{ program.program_id }}" class="btn btn-primary">Apply for This Program</a>
+            <a href="{% url 'donate' %}" class="btn btn-glass">Donate to This Program</a>
+        </div>
+        <div class="hero-proof glass-panel">
+            <strong>Program brief</strong>
+            <span>Stories, media, resources, volunteer fees, and an application shortcut in one place.</span>
+        </div>
     </div>
 </section>
 
-<!-- PROGRAM DETAILS -->
-<section class="container program-detail">
-    <div class="program-content">
-        {% if program.image %}
-            <img src="{{ program.image.url }}" alt="{{ program.title }}" class="program-main-image">
-        {% endif %}
-
-        <div class="program-description">
-            {{ program.description|linebreaks }}
+<section class="section editorial-section">
+    <div class="container editorial-grid">
+        <div class="editorial-media reveal-on-scroll">
+            {% if program.image_url %}
+                <img src="{{ program.image_url }}" alt="{{ program.title }}">
+            {% elif program.image %}
+                <img src="{{ program.image.url }}" alt="{{ program.title }}">
+            {% else %}
+                <img src="{% static 'images/program-ngl.jpg' %}" alt="{{ program.title }}">
+            {% endif %}
         </div>
-
-        <div class="program-cta">
-            <a href="{% url 'donate' %}" class="btn btn-primary">Donate to this Program</a>
-            <a href="{% url 'volunteer' %}" class="btn btn-secondary">Volunteer</a>
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Program Story</p>
+            <h2>How this work moves from vision to field action.</h2>
+            <div class="description">{{ program.program_description|linebreaks }}</div>
+            <div class="story-meta">
+                <span>Active program</span>
+                <span>Volunteer pathway</span>
+                <span>Community impact</span>
+            </div>
         </div>
+    </div>
+</section>
+
+<section class="section section-cream">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Volunteer Fees</p>
+            <h2>Plan your placement with clear fee options.</h2>
+        </div>
+        <div class="story-grid">
+            <article class="story-card reveal-on-scroll"><h3>2 Weeks</h3><p>KES {{ program.two_week_fee }}</p></article>
+            <article class="story-card reveal-on-scroll"><h3>4 Weeks</h3><p>KES {{ program.four_week_fee }}</p></article>
+            <article class="story-card reveal-on-scroll"><h3>8 Weeks</h3><p>KES {{ program.eight_week_fee }}</p></article>
+        </div>
+    </div>
+</section>
+
+{% if gallery_items %}
+<section class="section gallery-band">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Program Gallery</p>
+            <h2>Moments from the field.</h2>
+        </div>
+        <div class="mosaic-gallery reveal-on-scroll">
+            {% for item in gallery_items %}
+                {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.title }}">
+                {% elif item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">More Context</p>
+            <h2>Updates, resources, and upcoming activity.</h2>
+        </div>
+        <div class="story-grid">
+            {% for item in program_news %}
+            <article class="story-card reveal-on-scroll">
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.news_description|truncatewords:24 }}</p>
+                <a href="{% url 'news_detail' item.news_id %}" class="text-link">Read update</a>
+            </article>
+            {% endfor %}
+            {% for resource in program_resources %}
+            <article class="story-card reveal-on-scroll">
+                <h3>{{ resource.title }}</h3>
+                <p>{{ resource.resources_description|truncatewords:24 }}</p>
+                <a href="{% url 'resource_detail' resource.resource_id %}" class="text-link">Open resource</a>
+            </article>
+            {% endfor %}
+            {% for event in program_events %}
+            <article class="story-card reveal-on-scroll">
+                <h3>{{ event.title }}</h3>
+                <p>{{ event.events_description|truncatewords:24 }}</p>
+                <p><strong>{{ event.event_date }}</strong> at {{ event.event_location }}</p>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
+    <div class="container">
+        <h2>Ready to serve with {{ program.title }}?</h2>
+        <p>Your application will open with this program pre-selected.</p>
+        <a href="{% url 'volunteer_signup' %}?program={{ program.program_id }}" class="btn btn-primary">Apply for This Program</a>
+        <a href="{% url 'programs' %}" class="btn btn-glass">Back to Programs</a>
     </div>
 </section>
 

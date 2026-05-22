@@ -1373,6 +1373,15 @@ textarea.form-control,
     background: rgba(158, 211, 231, 0.22);
 }
 
+.vertical-steps span.complete {
+    color: var(--white);
+    background: rgba(130, 230, 165, 0.22);
+}
+
+.vertical-steps span.complete::before {
+    content: "✓ ";
+}
+
 .application-card {
     padding: clamp(24px, 4vw, 42px);
     border-radius: var(--radius-xl);
@@ -1474,6 +1483,19 @@ textarea.form-control,
 
 .admin-sidebar h1 {
     margin: 0;
+}
+
+.admin-sidebar h1 a {
+    color: var(--white);
+}
+
+.admin-role-label {
+    margin: -14px 0 4px;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .admin-sidebar nav {
@@ -1616,16 +1638,54 @@ textarea.form-control,
 
 .workflow-row {
     display: grid;
-    grid-template-columns: 110px 1fr 160px;
-    gap: 14px;
+    grid-template-columns: 86px minmax(0, 1.45fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
     padding: 14px 0;
     border-top: 1px solid var(--line);
 }
 
+.workflow-link {
+    color: inherit;
+    transition: background var(--transition), padding var(--transition);
+}
+
+.workflow-link:hover {
+    padding-left: 12px;
+    background: rgba(9, 93, 44, 0.06);
+}
+
 .workflow-row span,
 .workflow-row em {
+    min-width: 0;
     color: var(--muted);
     font-style: normal;
+    line-height: 1.35;
+}
+
+.workflow-row strong {
+    min-width: 0;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.workflow-row span {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(9, 93, 44, 0.08);
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.workflow-row em {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .admin-tile-grid {
@@ -1642,6 +1702,41 @@ textarea.form-control,
     background: rgba(9, 93, 44, 0.08);
     text-align: center;
     font-weight: 900;
+}
+
+.review-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.detail-list {
+    display: grid;
+    gap: 12px;
+}
+
+.detail-list p {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+}
+
+.detail-list strong {
+    color: var(--muted);
+}
+
+.detail-list span {
+    text-align: right;
+    font-weight: 800;
+}
+
+.status-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .table-responsive {
@@ -1714,7 +1809,8 @@ textarea.form-control,
     .story-grid,
     .admin-metrics,
     .admin-summary,
-    .ops-grid {
+    .ops-grid,
+    .review-layout {
         grid-template-columns: repeat(2, 1fr);
     }
 
@@ -1792,6 +1888,7 @@ textarea.form-control,
     .admin-metrics,
     .admin-summary,
     .ops-grid,
+    .review-layout,
     .admin-tile-grid {
         grid-template-columns: 1fr;
     }
@@ -1828,6 +1925,12 @@ textarea.form-control,
 
     .workflow-row {
         grid-template-columns: 1fr;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .workflow-row em {
+        white-space: normal;
     }
 }
 

@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Users & Roles | Admin{% endblock %}
+
+{% block content %}
+<div class="container admin-panel">
+    <div class="admin-header card">
+        <div>
+            <h1>Users & Roles</h1>
+            <p class="subtitle">Add staff users and assign the portal areas they can operate.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{% url 'admin_portal' %}" class="btn btn-outline">Dashboard</a>
+            <a href="{% url 'admin_user_add' %}" class="btn btn-primary">Add User</a>
+        </div>
+    </div>
+
+    <div class="card admin-table-card">
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in user_rows %}
+                    <tr>
+                        <td>{{ row.user.get_full_name|default:row.user.username }}</td>
+                        <td>{{ row.user.username }}</td>
+                        <td>{{ row.user.email|default:"-" }}</td>
+                        <td><span class="status-badge">{{ row.role }}</span></td>
+                        <td>{% if row.user.is_active %}Active{% else %}Inactive{% endif %}</td>
+                        <td class="actions">
+                            <a href="{% url 'admin_user_edit' row.user.id %}" class="btn btn-outline">Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No admin users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -357,7 +357,8 @@ class resources(models.Model):
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='resources')
 
     def __str__(self):
-        return f"{self.title} resource related to {self.program_id.title} program"
+        program_title = self.program_id.title if self.program_id else "No Program"
+        return f"{self.title} resource related to {program_title} program"
 
 
 class employees(models.Model):
@@ -392,9 +393,9 @@ class partners(models.Model):
     def __str__(self):
         program_title = self.program_id.title if self.program_id else "No Program"
         if self.assigned_employee:
-            return f"{self.name} partner related to {self.program_id.title} program and assigned to {self.assigned_employee.first_name} {self.assigned_employee.last_name}" 
+            return f"{self.name} partner related to {program_title} program and assigned to {self.assigned_employee.first_name} {self.assigned_employee.last_name}" 
         else:
-            return f"{self.name} partner related to {self.program_id.title} program"
+            return f"{self.name} partner related to {program_title} program"
 
 
 class gallery(models.Model):

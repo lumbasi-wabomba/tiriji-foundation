@@ -1,20 +1,32 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.urls import reverse
-from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, feedback as Feedback
-from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm
-import os
-from django.conf import settings
-from .models import resources
+from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, feedback as Feedback
+from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, AdminUserForm
+from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 
 
 def user_in_group(user):
-    return user.is_authenticated and (user.is_superuser or user.groups.filter(name__in=['admin', 'secretary', 'director']).exists())
+    return user_has_admin_access(user)
 
 
 def group_required(view_func):
     return login_required(user_passes_test(user_in_group, login_url='login')(view_func), login_url='login')
+
+
+def role_required(*allowed_groups):
+    def decorator(view_func):
+        return login_required(
+            user_passes_test(
+                lambda user: user_has_any_admin_role(user, allowed_groups),
+                login_url='admin_portal'
+            )(view_func),
+            login_url='login'
+        )
+    return decorator
 
 
 def home(request):
@@ -52,8 +64,14 @@ def programs(request):
     return render(request, 'core/programs.html', {'programs': programs})
 
 def program_detail(request, program_id):
-    program_detail = program.objects.get(program_id=program_id)
-    return render(request, 'core/program_detail.html', {'program': program_detail})
+    program_detail = get_object_or_404(program, program_id=program_id)
+    return render(request, 'core/program_detail.html', {
+        'program': program_detail,
+        'gallery_items': program_detail.program_gallery.all()[:6],
+        'program_news': program_detail.news.all()[:3],
+        'program_resources': program_detail.resources.all()[:3],
+        'program_events': program_detail.events.all()[:3],
+    })
 
 
 def volunteer(request):
@@ -111,7 +129,12 @@ def volunteer_signup(request):
 
     else:
 
-        form = VolunteerForm()
+        initial = {}
+        program_id = request.GET.get('program')
+        if program_id and program.objects.filter(program_id=program_id).exists():
+            initial['program_id'] = program_id
+
+        form = VolunteerForm(initial=initial)
 
     return render(
         request,
@@ -164,31 +187,34 @@ def donate_cancel(request):
 
 
 def events(request):
-    events_list = Event.objects.all()
-    return render(request, 'core/events.html', {'events': events_list})
+    event_items = Event.objects.select_related('program_id').all().order_by('event_date')
+    return render(request, 'core/events.html', {'events': event_items})
 
 def news(request):
-    news_list = News.objects.all()
-    return render(request, 'core/news.html', {'news': news_list})
+    news_items = News.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
+    return render(request, 'core/news.html', {'news_items': news_items})
 
 def resources(request):
-    resources_list = Resource.objects.all()
-    return render(request, 'core/resources.html', {'resources': resources_list})
+    resource_items = Resource.objects.select_related('program_id').all().order_by('-created_at')
+    return render(request, 'core/resources.html', {'resource_items': resource_items})
 
 def faq(request):
     return render(request, 'core/faq.html')
 
 def gallery(request):
-    return render(request, 'core/gallery.html')
+    gallery_items = Gallery.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
+    return render(request, 'core/gallery.html', {'gallery_items': gallery_items})
 
 def team(request):
-    return render(request, 'core/team.html')
+    team_members = Employee.objects.all().order_by('first_name', 'last_name')
+    return render(request, 'core/team.html', {'team_members': team_members})
 
 def partners(request):
-    return render(request, 'core/partners.html')
+    partner_items = Partner.objects.select_related('program_id', 'assigned_employee').all().order_by('-created_at')
+    return render(request, 'core/partners.html', {'partners': partner_items})
 
 def careers(request):
-    return render(request, 'core/careers.html')
+    return render(request, 'core/careers.html', {'careers': []})
 
 def privacy_policy(request):
     return render(request, 'core/privacy_policy.html')
@@ -226,12 +252,12 @@ def event_detail(request, event_id):
     return render(request, 'core/event_detail.html', {'event_id': event_id})
 
 def news_detail(request, news_id):
-    # Placeholder for news detail view
-    return render(request, 'core/news_detail.html', {'news_id': news_id})   
+    news_item = get_object_or_404(News, news_id=news_id)
+    return render(request, 'core/news_detail.html', {'news_item': news_item})   
 
 def resource_detail(request, resource_id):
-    # Placeholder for resource detail view
-    return render(request, 'core/resource_detail.html', {'resource_id': resource_id})
+    resource = get_object_or_404(Resource, resource_id=resource_id)
+    return render(request, 'core/resource_detail.html', {'resource': resource})
 
 def gallery_detail(request, gallery_id):
     # Placeholder for gallery detail view
@@ -259,11 +285,20 @@ def blog_detail(request, blog_id):
 
 @group_required
 def admin_portal(request):
+    pending_statuses = ['submitted', 'payment_pending', 'paid', 'under_review']
+    pending_volunteers = Volunteer.objects.select_related('program_id').filter(
+        status__in=pending_statuses
+    ).order_by('-created_at')[:5]
+
     context = {
         'program_count': program.objects.count(),
         'event_count': Event.objects.count(),
         'news_count': News.objects.count(),
         'resource_count': Resource.objects.count(),
+        'donation_count': Donation.objects.count(),
+        'pending_volunteers': pending_volunteers,
+        'pending_volunteer_count': Volunteer.objects.filter(status__in=pending_statuses).count(),
+        'current_role': get_admin_role_label(request.user),
     }
     return render(request, 'core/admin.html', context)
 
@@ -286,7 +321,144 @@ def admin_form_view(request, form_class, instance=None, section_name='', action_
     })
 
 
-@group_required
+@role_required('sys_admin')
+def admin_users(request):
+    users = User.objects.filter(
+        Q(is_staff=True) | Q(groups__name__in=ADMIN_GROUP_NAMES)
+    ).distinct().order_by('first_name', 'username')
+
+    return render(request, 'core/admin_users.html', {
+        'user_rows': [
+            {
+                'user': user,
+                'role': get_admin_role_label(user),
+            }
+            for user in users
+        ],
+    })
+
+
+@role_required('sys_admin')
+def admin_user_add(request):
+    if request.method == 'POST':
+        form = AdminUserForm(request.POST)
+        if form.is_valid():
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
+                first_name=form.cleaned_data['first_name'],
+                last_name=form.cleaned_data['last_name'],
+            )
+            user.is_staff = True
+            user.save(update_fields=['is_staff'])
+            assign_admin_role(user, form.cleaned_data['role'])
+            messages.success(request, 'Admin user created successfully.')
+            return redirect('admin_users')
+    else:
+        form = AdminUserForm()
+
+    return render(request, 'core/admin_form.html', {
+        'form': form,
+        'section_name': 'Admin User',
+        'action_label': 'Add',
+        'return_url': 'admin_users',
+    })
+
+
+@role_required('sys_admin')
+def admin_user_edit(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    current_role = user.groups.filter(name__in=ADMIN_GROUP_NAMES).first()
+    initial = {
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'username': user.username,
+        'email': user.email,
+        'role': current_role.name if current_role else 'manager',
+    }
+
+    if request.method == 'POST':
+        form = AdminUserForm(request.POST, user_instance=user)
+        if form.is_valid():
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.username = form.cleaned_data['username']
+            user.email = form.cleaned_data['email']
+            user.is_staff = True
+            if form.cleaned_data['password']:
+                user.set_password(form.cleaned_data['password'])
+            user.save()
+            assign_admin_role(user, form.cleaned_data['role'])
+            messages.success(request, 'Admin user updated successfully.')
+            return redirect('admin_users')
+    else:
+        form = AdminUserForm(initial=initial, user_instance=user)
+
+    return render(request, 'core/admin_form.html', {
+        'form': form,
+        'section_name': 'Admin User',
+        'action_label': 'Update',
+        'return_url': 'admin_users',
+    })
+
+
+@role_required('finance_manager')
+def admin_donations(request):
+    items = Donation.objects.select_related('transaction').all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Donations',
+        'section_label': 'Donation',
+        'add_url': None,
+        'headers': ['ID', 'Donor', 'Amount', 'Type', 'Method', 'Status', 'Created'],
+        'rows': [
+            {
+                'cols': [
+                    item.donation_id or 'Missing ID',
+                    item.donor_name or 'Anonymous',
+                    f'{item.currency} {item.amount}',
+                    item.get_donation_type_display(),
+                    item.get_payment_method_display(),
+                    item.get_status_display(),
+                    item.created_at.strftime('%Y-%m-%d'),
+                ],
+                'review_url': reverse('admin_donation_review', args=[item.donation_id]) if item.donation_id else None,
+            }
+            for item in items
+        ],
+    })
+
+
+@role_required('finance_manager')
+def admin_donation_review(request, donation_id):
+    instance = get_object_or_404(Donation.objects.select_related('transaction'), donation_id=donation_id)
+
+    if request.method == 'POST':
+        next_status = request.POST.get('status')
+        valid_statuses = dict(Donation.STATUS_CHOICES)
+
+        if next_status in valid_statuses:
+            instance.status = next_status
+            instance.save(update_fields=['status'])
+            if instance.transaction:
+                transaction_status = {
+                    'completed': 'paid',
+                    'cancelled': 'refunded',
+                }.get(next_status, next_status)
+                instance.transaction.status = transaction_status
+                instance.transaction.save(update_fields=['status'])
+            messages.success(request, f'Donation status updated to {valid_statuses[next_status]}.')
+            return redirect('admin_donation_review', donation_id=instance.donation_id)
+
+        messages.error(request, 'Invalid donation status.')
+
+    return render(request, 'core/admin_donation_review.html', {
+        'donation': instance,
+        'status_choices': Donation.STATUS_CHOICES,
+    })
+
+
+@role_required('content_manager', 'events_resources_manager')
 def admin_programs(request):
     items = program.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -305,18 +477,18 @@ def admin_programs(request):
     })
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_program_add(request):
     return admin_form_view(request, ProgramForm, section_name='Program', action_label='Add', return_url='admin_programs')
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_program_edit(request, program_id):
     instance = get_object_or_404(program, program_id=program_id)
     return admin_form_view(request, ProgramForm, instance=instance, section_name='Program', action_label='Update', return_url='admin_programs')
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_program_delete(request, program_id):
     instance = get_object_or_404(program, program_id=program_id)
     if request.method == 'POST':
@@ -330,7 +502,7 @@ def admin_program_delete(request, program_id):
     })
 
 
-@group_required
+@role_required('events_resources_manager', 'content_manager')
 def admin_events(request):
     items = Event.objects.select_related('program_id').all().order_by('-event_date')
     return render(request, 'core/admin_list.html', {
@@ -349,18 +521,18 @@ def admin_events(request):
     })
 
 
-@group_required
+@role_required('events_resources_manager', 'content_manager')
 def admin_event_add(request):
     return admin_form_view(request, EventForm, section_name='Event', action_label='Add', return_url='admin_events')
 
 
-@group_required
+@role_required('events_resources_manager', 'content_manager')
 def admin_event_edit(request, event_id):
     instance = get_object_or_404(Event, event_id=event_id)
     return admin_form_view(request, EventForm, instance=instance, section_name='Event', action_label='Update', return_url='admin_events')
 
 
-@group_required
+@role_required('events_resources_manager', 'content_manager')
 def admin_event_delete(request, event_id):
     instance = get_object_or_404(Event, event_id=event_id)
     if request.method == 'POST':
@@ -374,7 +546,7 @@ def admin_event_delete(request, event_id):
     })
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_news(request):
     items = News.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -393,18 +565,18 @@ def admin_news(request):
     })
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_news_add(request):
     return admin_form_view(request, NewsForm, section_name='News item', action_label='Add', return_url='admin_news')
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_news_edit(request, news_id):
     instance = get_object_or_404(News, news_id=news_id)
     return admin_form_view(request, NewsForm, instance=instance, section_name='News item', action_label='Update', return_url='admin_news')
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_news_delete(request, news_id):
     instance = get_object_or_404(News, news_id=news_id)
     if request.method == 'POST':
@@ -418,7 +590,7 @@ def admin_news_delete(request, news_id):
     })
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_resources(request):
     items = Resource.objects.select_related('program_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -437,18 +609,18 @@ def admin_resources(request):
     })
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_resource_add(request):
     return admin_form_view(request, ResourceForm, section_name='Resource', action_label='Add', return_url='admin_resources')
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_resource_edit(request, resource_id):
     instance = get_object_or_404(Resource, resource_id=resource_id)
     return admin_form_view(request, ResourceForm, instance=instance, section_name='Resource', action_label='Update', return_url='admin_resources')
 
 
-@group_required
+@role_required('content_manager', 'events_resources_manager')
 def admin_resource_delete(request, resource_id):
     instance = get_object_or_404(Resource, resource_id=resource_id)
     if request.method == 'POST':
@@ -462,7 +634,7 @@ def admin_resource_delete(request, resource_id):
     })
 
 
-@group_required
+@role_required('volunteer_manager')
 def admin_volunteers(request):
     items = Volunteer.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -474,6 +646,7 @@ def admin_volunteers(request):
             {
                 'cols': [item.email, f"{item.first_name} {item.last_name}", item.email, item.phone_number, 
                          item.program_id.title if item.program_id else '-', item.status, item.created_at.strftime('%Y-%m-%d')],
+                'review_url': reverse('admin_volunteer_review', args=[item.email]),
                 'edit_url': reverse('admin_volunteer_edit', args=[item.email]),
                 'delete_url': reverse('admin_volunteer_delete', args=[item.email]),
             }
@@ -482,18 +655,42 @@ def admin_volunteers(request):
     })
 
 
-@group_required
+@role_required('volunteer_manager')
 def admin_volunteer_add(request):
     return admin_form_view(request, VolunteerForm, section_name='Volunteer', action_label='Add', return_url='admin_volunteers')
 
 
-@group_required
+@role_required('volunteer_manager')
 def admin_volunteer_edit(request, volunteer_email):
     instance = get_object_or_404(Volunteer, email=volunteer_email)
     return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
 
 
-@group_required
+@role_required('volunteer_manager')
+def admin_volunteer_review(request, volunteer_email):
+    instance = get_object_or_404(Volunteer.objects.select_related('program_id'), email=volunteer_email)
+    payment = VolunteerPayment.objects.select_related('transaction').filter(volunteer=instance).first()
+
+    if request.method == 'POST':
+        next_status = request.POST.get('status')
+        valid_statuses = dict(Volunteer.APPLICATION_STATUS)
+
+        if next_status in valid_statuses:
+            instance.status = next_status
+            instance.save(update_fields=['status'])
+            messages.success(request, f'Application status updated to {valid_statuses[next_status]}.')
+            return redirect('admin_volunteer_review', volunteer_email=instance.email)
+
+        messages.error(request, 'Invalid application status.')
+
+    return render(request, 'core/admin_volunteer_review.html', {
+        'volunteer': instance,
+        'payment': payment,
+        'status_choices': Volunteer.APPLICATION_STATUS,
+    })
+
+
+@role_required('volunteer_manager')
 def admin_volunteer_delete(request, volunteer_email):
     instance = get_object_or_404(Volunteer, email=volunteer_email)
     if request.method == 'POST':

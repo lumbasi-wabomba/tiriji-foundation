@@ -228,6 +228,58 @@
         });
     }
 
+    function initVolunteerApplicationProgress() {
+        const form = document.querySelector("[data-volunteer-application-form]");
+        const tracker = document.querySelector("[data-application-progress]");
+
+        if (!form || !tracker) return;
+
+        const steps = {
+            personal: tracker.querySelector('[data-step="personal"]'),
+            program: tracker.querySelector('[data-step="program"]'),
+            emergency: tracker.querySelector('[data-step="emergency"]'),
+            submit: tracker.querySelector('[data-step="submit"]'),
+        };
+
+        const field = (name) => form.querySelector(`[name="${name}"]`);
+        const hasValue = (name) => {
+            const input = field(name);
+            return input && String(input.value || "").trim().length > 0;
+        };
+
+        const groups = {
+            personal: ["first_name", "last_name", "email", "phone_number", "occupation", "residence", "id_pass_no"],
+            program: ["program_id", "starting_date", "end_date"],
+            emergency: ["emergency_contact_name", "emergency_contact_phone"],
+        };
+
+        const completeGroup = (names) => names.every(hasValue);
+
+        const setStep = (step, isComplete, isActive) => {
+            if (!step) return;
+            step.classList.toggle("complete", isComplete);
+            step.classList.toggle("active", isActive);
+        };
+
+        const updateProgress = () => {
+            const personalDone = completeGroup(groups.personal);
+            const programDone = completeGroup(groups.program);
+            const emergencyDone = completeGroup(groups.emergency);
+
+            setStep(steps.personal, personalDone, !personalDone);
+            setStep(steps.program, programDone, personalDone && !programDone);
+            setStep(steps.emergency, emergencyDone, personalDone && programDone && !emergencyDone);
+            setStep(steps.submit, personalDone && programDone && emergencyDone, personalDone && programDone && emergencyDone);
+        };
+
+        form.querySelectorAll("input, select, textarea").forEach((input) => {
+            input.addEventListener("input", updateProgress);
+            input.addEventListener("change", updateProgress);
+        });
+
+        updateProgress();
+    }
+
     function initProgramSearch() {
         const searchInput = document.getElementById("programSearch");
         const programCards = document.querySelectorAll(".program-card");
@@ -251,6 +303,7 @@
         initCounters();
         initVolunteerEstimator();
         initDonationTiers();
+        initVolunteerApplicationProgress();
         initProgramSearch();
     }
 

@@ -5,13 +5,18 @@
 {% block content %}
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <h1>Tiriji Ops</h1>
+        <h1><a href="{% url 'admin_portal' %}">Tiriji Ops</a></h1>
+        <p class="admin-role-label">{{ current_role }}</p>
         <nav aria-label="Admin navigation">
+            <a href="{% url 'admin_portal' %}">Dashboard</a>
             <a href="{% url 'admin_programs' %}">Programs</a>
             <a href="{% url 'admin_events' %}">Events</a>
             <a href="{% url 'admin_news' %}">Publishing</a>
             <a href="{% url 'admin_resources' %}">Resources</a>
+            <a href="{% url 'admin_volunteers' %}">Applications</a>
+            <a href="{% url 'admin_donations' %}">Finance</a>
             <a href="{% url 'admin_feedback' %}">Feedback</a>
+            <a href="{% url 'admin_users' %}">Users & Roles</a>
         </nav>
         <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
     </aside>
@@ -34,17 +39,27 @@
             <div class="admin-card"><span>Events</span><strong>{{ event_count }}</strong><a href="{% url 'admin_events' %}">Manage</a></div>
             <div class="admin-card"><span>News</span><strong>{{ news_count }}</strong><a href="{% url 'admin_news' %}">Manage</a></div>
             <div class="admin-card"><span>Resources</span><strong>{{ resource_count }}</strong><a href="{% url 'admin_resources' %}">Manage</a></div>
+            <div class="admin-card"><span>Donations</span><strong>{{ donation_count }}</strong><a href="{% url 'admin_donations' %}">Review</a></div>
         </section>
 
         <section class="ops-grid">
             <div class="ops-panel">
                 <div class="panel-heading">
                     <h3>Volunteer Approval Queue</h3>
-                    <span class="status-badge warning">Review</span>
+                    <span class="status-badge warning">{{ pending_volunteer_count }} to review</span>
                 </div>
-                <div class="workflow-row"><span>Submitted</span><strong>New applications</strong><em>Payment summary pending</em></div>
-                <div class="workflow-row"><span>Under Review</span><strong>Program fit check</strong><em>Coordinator action</em></div>
-                <div class="workflow-row"><span>Approved</span><strong>Arrival planning</strong><em>Orientation next</em></div>
+                {% for application in pending_volunteers %}
+                <a class="workflow-row workflow-link" href="{% url 'admin_volunteer_review' application.email %}">
+                    <span title="{{ application.get_status_display }}">
+                        {% if application.status == 'payment_pending' %}Payment{% elif application.status == 'under_review' %}Review{% elif application.status == 'submitted' %}New{% elif application.status == 'approved' %}Approved{% elif application.status == 'rejected' %}Rejected{% elif application.status == 'active' %}Active{% elif application.status == 'completed' %}Done{% else %}{{ application.status|title }}{% endif %}
+                    </span>
+                    <strong>{{ application.first_name }} {{ application.last_name }}</strong>
+                    <em>{{ application.program_id.title|default:"No program" }}</em>
+                </a>
+                {% empty %}
+                <div class="workflow-row"><span>Clear</span><strong>No applications waiting for review</strong><em>Queue empty</em></div>
+                {% endfor %}
+                <a href="{% url 'admin_volunteers' %}" class="btn btn-primary">Open Application Queue</a>
             </div>
             <div class="ops-panel">
                 <div class="panel-heading">

@@ -53,9 +53,20 @@ It is protected by login and supports operational content management for:
 - News
 - Resources
 - Volunteers
+- Donations and finance review
 - Feedback
+- Admin users and role assignment
 
-The dashboard has been restyled as an operations command center with workflow panels, metrics, quick publishing actions, and management links.
+The dashboard has been restyled as an operations command center with workflow panels, metrics, quick publishing actions, finance review, and management links. Admin pages run as a separate portal shell without public site navigation or footer links. If an authenticated admin user leaves `/admin-portal/` for a public page, the session is automatically logged out.
+
+Admin roles are powered by Django groups:
+
+- `sys_admin`: user and role management plus full portal access
+- `manager`: full operational access
+- `content_manager`: programs, news, and resources
+- `events_resources_manager`: events, programs, news, and resources
+- `volunteer_manager`: volunteer applications and review workflow
+- `finance_manager`: donation and payment review
 
 ## Tech Stack
 
@@ -186,6 +197,8 @@ Important routes to test:
 /news/
 /resources/
 /admin-portal/
+/admin-portal/users/
+/admin-portal/donations/
 ```
 
 Submission flows to verify after backend changes:
@@ -203,6 +216,7 @@ Submission flows to verify after backend changes:
 - Fixed donation submission by generating donation and merchant reference IDs.
 - Fixed volunteer payment summary model lookup and payment status rendering.
 - Fixed broken partner image path on the About page.
+- Added admin portal isolation, role-based staff users, finance review, and automatic admin logout when leaving the portal.
 
 ## Notes
 

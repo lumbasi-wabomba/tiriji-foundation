@@ -17,7 +17,8 @@
 </head>
 <body>
 
-{% if not request.path|slice:":12" == "/admin-portal" %}
+{% url 'login' as login_url %}
+{% if request.path|slice:":13" != "/admin-portal" and request.path != login_url %}
 {% url 'about' as about_url %}
 {% url 'children' as children_url %}
 {% url 'women' as women_url %}
@@ -90,6 +91,7 @@
 </main>
 
 <!-- ===== FOOTER ===== -->
+{% if request.path|slice:":13" != "/admin-portal" and request.path != login_url %}
 <footer class="site-footer">
     <div class="container footer-content">
         <div>
@@ -111,6 +113,7 @@
         {% endif %}
     </div>
 </footer>
+{% endif %}
 
 <script src="{% static 'js/script.js' %}"></script>
 
