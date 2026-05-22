@@ -24,3 +24,6 @@ staticfiles/
 .env
 
 .wrangler/
+
+.vscode/
+.idea/  
