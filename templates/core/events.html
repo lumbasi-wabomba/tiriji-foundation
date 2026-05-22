@@ -21,13 +21,11 @@
             {% if event.image_url %}
                 <img src="{{ event.image_url }}" alt="{{ event.title }}">
             {% endif %}
-            <div class="event-card-content">
-                <h3>{{ event.title }}</h3>
-                <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
-                <p><strong>Location:</strong> {{ event.event_location }}</p>
-                <p class="event-description">{{ event.events_description|truncatewords:20 }}</p>
-                <a href="{% url 'event_detail' event.event_id %}" class="text-link">Read More →</a>
-            </div>
+            <h3>{{ event.title }}</h3>
+            <p><strong>Date:</strong> {{ event.event_date }}</p>
+            <p><strong>Location:</strong> {{ event.event_location }}</p>
+            <p>{{ event.events_description|truncatewords:20 }}</p>
+            <a href="{% url 'event_detail' event.event_id %}" class="text-link">Read More →</a>
         </div>
         {% empty %}
         <div class="no-items-message">

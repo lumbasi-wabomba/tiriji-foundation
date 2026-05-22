@@ -164,13 +164,16 @@ def donate_cancel(request):
 
 
 def events(request):
-    return render(request, 'core/events.html')  
+    events_list = Event.objects.all()
+    return render(request, 'core/events.html', {'events': events_list})
 
 def news(request):
-    return render(request, 'core/news.html')
+    news_list = News.objects.all()
+    return render(request, 'core/news.html', {'news': news_list})
 
 def resources(request):
-    return render(request, 'core/resources.html')
+    resources_list = Resource.objects.all()
+    return render(request, 'core/resources.html', {'resources': resources_list})
 
 def faq(request):
     return render(request, 'core/faq.html')

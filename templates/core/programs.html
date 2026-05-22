@@ -41,6 +41,15 @@
 
     <div class="program-grid">
         {% for program in programs %}
+        <div class="program-card">
+            {% if program.image_url %}
+                <img src="{{ program.image_url }}" alt="{{ program.title }}">
+            {% endif %}
+            <h3>{{ program.title }}</h3>
+            <p>{{ program.program_description|truncatewords:25 }}</p>
+            <a href="{% url 'program_detail' program.program_id %}" class="text-link">
+                Read More →
+            </a>
         <div class="program-card reveal-on-scroll" data-program="{{ program.title|lower }}">
             
             <!-- Image Container -->
