@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+
+{% block title %}Blog | Tiriji Foundation{% endblock %}
+
+{% block content %}
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div>
+            <h1>Field Notes</h1>
+            <p>Reflections, learning notes, and updates from Tiriji Foundation's regenerative community work.</p>
+        </div>
+        <div class="hero-proof glass-panel">
+            <strong>Coming into focus</strong>
+            <span>For now, published updates live under News while the blog workflow is prepared.</span>
+        </div>
+    </div>
+</section>
+
+<section class="section section-cream">
+    <div class="container">
+        <div class="section-heading">
+            <p class="section-label">Blog</p>
+            <h2>Long-form stories will live here.</h2>
+        </div>
+        <div class="story-grid">
+            <article class="story-card">
+                <h3>Program reflections</h3>
+                <p>Use this space for deeper stories from scholars, mentors, women entrepreneurs, volunteers, and coordinators.</p>
+                <a href="{% url 'news' %}" class="text-link">Read current news</a>
+            </article>
+            <article class="story-card">
+                <h3>Partner learning</h3>
+                <p>Document what Tiriji is learning through partner networks, events, and field implementation.</p>
+                <a href="{% url 'partners' %}" class="text-link">View partners</a>
+            </article>
+            <article class="story-card">
+                <h3>Volunteer journals</h3>
+                <p>Share placement reflections and practical guides for future volunteers.</p>
+                <a href="{% url 'volunteer' %}" class="text-link">Volunteer pathway</a>
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

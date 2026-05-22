@@ -14,6 +14,7 @@ urlpatterns = [
     path('volunteer/signup/', views.volunteer_signup, name='volunteer_signup'),
     path('volunteer/payment/<str:volunteer_email>/volunteer_payment_summary/', views.volunteer_payment_summary, name='volunteer_payment_summary'),
     path('donate/', views.donate, name='donate'),
+    path('donate/payment/<str:donation_id>/', views.donation_payment, name='donation_payment'),
     path('events/', views.events, name='events'),
     path('events/<int:event_id>/', views.event_detail, name='event_detail'),
     path('news/', views.news, name='news'),
@@ -32,6 +33,7 @@ urlpatterns = [
     path('careers/', views.careers, name='careers'),
     path('careers/<int:career_id>/', views.career_detail, name='career_detail'),
     path('donate/success/', views.donate_success, name='donate_success'),
+    path('donate/cancel/', views.donate_cancel, name='donate_cancel'),
     path('feedback/', views.feedback, name='feedback'),
 
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),

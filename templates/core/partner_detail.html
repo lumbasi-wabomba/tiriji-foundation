@@ -3,30 +3,39 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div>
         <h1>{{ partner.name }}</h1>
+        {% if partner.program_id %}<p>{{ partner.program_id.title }}</p>{% endif %}
+        </div>
+        <div class="hero-proof glass-panel">
+            <strong>Partner profile</strong>
+            <span>Connected to Tiriji's operational ecosystem.</span>
+        </div>
     </div>
 </section>
 
-<!-- PARTNER DETAILS -->
-<section class="container partner-detail">
-    {% if partner.logo %}
-        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
-    {% endif %}
+<section class="section">
+    <div class="container editorial-grid">
+        <div class="editorial-media partner-detail-logo">
+            {% if partner.profile_logo_url %}
+                <img src="{{ partner.profile_logo_url }}" alt="{{ partner.name }}">
+            {% elif partner.profile_logo %}
+                <img src="{{ partner.profile_logo.url }}" alt="{{ partner.name }}">
+            {% endif %}
+        </div>
 
-    {% if partner.description %}
-    <div class="partner-description">
-        <p>{{ partner.description|linebreaks }}</p>
-    </div>
-    {% endif %}
+        <div class="editorial-copy">
+            <p class="section-label">Partner</p>
+            <h2>{{ partner.name }}</h2>
+            <div class="description">{{ partner.partners_description|linebreaks }}</div>
 
-    {% if partner.website %}
-    <div class="partner-website" style="text-align:center; margin-top:20px;">
-        <a href="{{ partner.website }}" class="btn btn-primary" target="_blank">Visit Website</a>
+            {% if partner.website_url %}
+            <a href="{{ partner.website_url }}" class="btn btn-primary" target="_blank" rel="noopener">Visit Partner Website</a>
+            {% endif %}
+        </div>
     </div>
-    {% endif %}
 </section>
 
 {% endblock %}

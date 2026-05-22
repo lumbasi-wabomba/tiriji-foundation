@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+
+{% block title %}Complete Donation | Tiriji Foundation{% endblock %}
+
+{% block content %}
+<section class="page-hero donation-hero">
+    <div class="container page-hero-grid">
+        <div>
+            <h1>Complete your {{ payment_session.config.label }} donation.</h1>
+            <p>Review the payment details and complete the demo checkout step for Tiriji Foundation.</p>
+        </div>
+        <div class="dashboard-card">
+            <span>Reference</span>
+            <strong>{{ payment_session.reference }}</strong>
+            <p>{{ payment_session.config.provider }}</p>
+        </div>
+    </div>
+</section>
+
+<section class="section section-cream">
+    <div class="container donation-layout">
+        <div class="donation-form-card">
+            <p class="section-label">Payment Summary</p>
+            <h2>{{ donation.currency }} {{ donation.amount }}</h2>
+            <div class="detail-list">
+                <div><dt>Donor</dt><dd>{{ donation.donor_name|default:"Anonymous" }}</dd></div>
+                <div><dt>Email</dt><dd>{{ donation.donor_email|default:"-" }}</dd></div>
+                <div><dt>Method</dt><dd>{{ payment_session.config.label }}</dd></div>
+                <div><dt>Type</dt><dd>{% if donation.is_monthly %}Monthly sponsorship{% else %}One-time donation{% endif %}</dd></div>
+                <div><dt>Status</dt><dd>{{ donation.get_status_display }}</dd></div>
+            </div>
+        </div>
+
+        <div class="allocation-card">
+            <p class="section-label">{{ payment_session.config.provider }}</p>
+            <h2>{{ payment_session.config.action }}</h2>
+            {% for instruction in payment_session.config.instructions %}
+            <div class="allocation-row"><span>{{ instruction }}</span></div>
+            {% endfor %}
+
+            {% if payment_session.method == 'bank' %}
+            <div class="resource-empty-note">
+                <strong>Bank transfer reference</strong>
+                <span>Use {{ payment_session.reference }} as your payment reference. Finance will reconcile it in the admin portal.</span>
+            </div>
+            {% endif %}
+
+            {% if payment_session.is_subscription %}
+            <div class="resource-empty-note">
+                <strong>Monthly sponsorship</strong>
+                <span>This demo records the subscription intent. Live recurring billing still needs gateway webhooks.</span>
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="confirm_demo_payment">
+                <button type="submit" class="btn btn-primary">Confirm Demo Payment</button>
+                <a href="{% url 'donate_cancel' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

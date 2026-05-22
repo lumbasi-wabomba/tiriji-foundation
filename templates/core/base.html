@@ -29,6 +29,8 @@
 {% url 'events' as events_url %}
 {% url 'news' as news_url %}
 {% url 'resources' as resources_url %}
+{% url 'blog' as blog_url %}
+{% url 'careers' as careers_url %}
 <!-- ===== NAVBAR ===== -->
 <header class="site-header">
     <div class="nav-wrapper">
@@ -56,7 +58,7 @@
                 
                 <!-- Collapsible Resources Dropdown -->
                 <li class="nav-dropdown">
-                    <button type="button" class="nav-dropdown-toggle{% if request.path == events_url or request.path == news_url or request.path == resources_url %} nav-current{% endif %}" aria-expanded="false" aria-haspopup="true">
+                    <button type="button" class="nav-dropdown-toggle{% if request.path == events_url or request.path == news_url or request.path == resources_url or request.path == blog_url or request.path == careers_url %} nav-current{% endif %}" aria-expanded="false" aria-haspopup="true">
                         Resources
                         <span class="dropdown-icon">▼</span>
                     </button>
@@ -64,6 +66,8 @@
                         <li><a href="{{ events_url }}" {% if request.path == events_url %}class="nav-current" aria-current="page"{% endif %}>Events</a></li>
                         <li><a href="{{ news_url }}" {% if request.path == news_url %}class="nav-current" aria-current="page"{% endif %}>News</a></li>
                         <li><a href="{{ resources_url }}" {% if request.path == resources_url %}class="nav-current" aria-current="page"{% endif %}>Materials</a></li>
+                        <li><a href="{{ blog_url }}" {% if request.path == blog_url %}class="nav-current" aria-current="page"{% endif %}>Blog</a></li>
+                        <li><a href="{{ careers_url }}" {% if request.path == careers_url %}class="nav-current" aria-current="page"{% endif %}>Careers</a></li>
                     </ul>
                 </li>
             </ul>
@@ -94,18 +98,30 @@
 {% if request.path|slice:":13" != "/admin-portal" and request.path != login_url %}
 <footer class="site-footer">
     <div class="container footer-content">
-        <div>
+        <div class="footer-brand">
             <p class="footer-kicker">Tiriji Foundation</p>
             <p class="mb-0 footer-copy">
-                &copy; {% now "Y" %} Tiriji Foundation. Regenerating communities through education, women empowerment, and volunteer action.
+                &copy; {% now "Y" %} Tiriji Foundation. Meru, Kenya.
             </p>
         </div>
-        <div class="footer-links" aria-label="Footer links">
-            <a href="{% url 'children' %}">Children</a>
-            <a href="{% url 'women' %}">Women</a>
-            <a href="{% url 'volunteer' %}">Volunteer</a>
-            <a href="{% url 'donate' %}">Donate</a>
+        <div class="footer-location" aria-label="Address and location">
+            <p>P.O. Box 599 - 60200, Meru, Kenya</p>
+            <p><a href="mailto:info@tirijifoundation.com">info@tirijifoundation.com</a></p>
         </div>
+        <nav class="footer-socials" aria-label="Social links">
+            <a href="https://www.facebook.com/tirijifoundation/" target="_blank" rel="noopener" aria-label="Facebook">
+                <span aria-hidden="true">f</span>
+            </a>
+            <a href="https://twitter.com/tirijifoundation" target="_blank" rel="noopener" aria-label="X / Twitter">
+                <span aria-hidden="true">X</span>
+            </a>
+            <a href="https://www.instagram.com/tirijifoundation/" target="_blank" rel="noopener" aria-label="Instagram">
+                <span aria-hidden="true">◎</span>
+            </a>
+            <a href="https://wa.link/vp3blq" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <span aria-hidden="true">W</span>
+            </a>
+        </nav>
         {% if request.path == '/about/' %}
         <p class="footer-login">
             <a href="{% url 'login' %}">Staff login</a>

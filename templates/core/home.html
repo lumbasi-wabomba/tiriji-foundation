@@ -195,13 +195,7 @@
             <p class="section-label">Trusted Ecosystem</p>
             <h2>Partners strengthening the operating network.</h2>
         </div>
-        <div class="partner-rail reveal-on-scroll">
-            <img src="{% static 'images/partners/partner-ipi.png' %}" alt="International Peace Initiatives">
-            <img src="{% static 'images/partners/partner-nile.png' %}" alt="Nile Journeys">
-            <img src="{% static 'images/partners/partner-id.png' %}" alt="Impact Direct">
-            <img src="{% static 'images/partners/partner-geri.png' %}" alt="Gender Equity and Reconciliation International">
-            <img src="{% static 'images/partners/partner-syk.png' %}" alt="Synergy Youth Kenya">
-        </div>
+        {% include "core/partials/partner_showcase.html" with compact=True %}
     </div>
 </section>
 

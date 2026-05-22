@@ -1,8 +1,63 @@
 from django import forms
+from django.utils.html import strip_tags
+import re
+
 from .models import program, events, news, resources, volunteer, donation, feedback, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
 from .admin_roles import ADMIN_ROLE_CHOICES
 
-class ProgramForm(forms.ModelForm):
+
+CONTROL_CHAR_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+
+
+def sanitize_text(value, preserve_newlines=False):
+    if not isinstance(value, str):
+        return value
+
+    value = strip_tags(value)
+    value = CONTROL_CHAR_RE.sub('', value)
+
+    if preserve_newlines:
+        lines = value.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+        return '\n'.join(' '.join(line.split()) for line in lines).strip()
+
+    return ' '.join(value.split()).strip()
+
+
+class SanitizedFieldsMixin:
+    sanitizer_preserve_newlines = ()
+    sanitizer_skip_fields = ()
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        for field_name, value in list(cleaned_data.items()):
+            if field_name in self.sanitizer_skip_fields or not isinstance(value, str):
+                continue
+
+            cleaned_value = sanitize_text(
+                value,
+                preserve_newlines=field_name in self.sanitizer_preserve_newlines,
+            )
+
+            if field_name.endswith('email') or field_name == 'email':
+                cleaned_value = cleaned_value.lower()
+
+            cleaned_data[field_name] = cleaned_value
+
+        return cleaned_data
+
+
+class SanitizedModelForm(SanitizedFieldsMixin, forms.ModelForm):
+    pass
+
+
+class SanitizedForm(SanitizedFieldsMixin, forms.Form):
+    pass
+
+
+class ProgramForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('program_description',)
+
     class Meta:
         model = program
         fields = [ 'title', 'program_description', 'image', 'two_week_fee', 'four_week_fee', 'eight_week_fee', 'extra_week_fee',]
@@ -12,7 +67,9 @@ class ProgramForm(forms.ModelForm):
         }
 
 
-class EventForm(forms.ModelForm):
+class EventForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('events_description',)
+
     class Meta:
         model = events
         fields = ['title', 'events_description', 'image', 'program_id', 'event_location', 'event_date']
@@ -22,7 +79,9 @@ class EventForm(forms.ModelForm):
         }
 
 
-class NewsForm(forms.ModelForm):
+class NewsForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('news_description',)
+
     class Meta:
         model = news
         fields = ['title', 'news_description', 'image', 'program_id', 'event_id']
@@ -31,7 +90,9 @@ class NewsForm(forms.ModelForm):
         }
 
 
-class ResourceForm(forms.ModelForm):
+class ResourceForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('resources_description',)
+
     class Meta:
         model = resources
         fields = ['title', 'resources_description', 'image', 'file', 'program_id']
@@ -39,7 +100,7 @@ class ResourceForm(forms.ModelForm):
             'resources_description': forms.Textarea(attrs={'rows': 4}),
         }
 
-class VolunteerForm(forms.ModelForm):
+class VolunteerForm(SanitizedModelForm):
 
     class Meta:
 
@@ -115,7 +176,8 @@ class VolunteerForm(forms.ModelForm):
 
         return cleaned_data
 
-class DonationForm(forms.ModelForm):
+class DonationForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('donation_reason',)
 
     amount = forms.DecimalField(
         max_digits=10,
@@ -173,7 +235,9 @@ class DonationForm(forms.ModelForm):
         }
 
 
-class FeedbackForm(forms.ModelForm):
+class FeedbackForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('message',)
+
     class Meta:
         model = feedback
         fields = ['name', 'email', 'message']
@@ -184,7 +248,9 @@ class FeedbackForm(forms.ModelForm):
         }
 
 
-class AdminUserForm(forms.Form):
+class AdminUserForm(SanitizedForm):
+    sanitizer_skip_fields = ('password',)
+
     first_name = forms.CharField(
         max_length=150,
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -239,7 +305,7 @@ class AdminUserForm(forms.Form):
             raise forms.ValidationError('A user with this email already exists.')
         return email
 
-class ImpactMetricForm(forms.ModelForm):
+class ImpactMetricForm(SanitizedModelForm):
     class Meta:
         model = ImpactMetric
         fields = ['page', 'label', 'value', 'description', 'display_order', 'is_active']
@@ -252,7 +318,9 @@ class ImpactMetricForm(forms.ModelForm):
         }
 
 
-class FeaturedPersonForm(forms.ModelForm):
+class FeaturedPersonForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('short_bio',)
+
     class Meta:
         model = FeaturedPerson
         fields = ['page', 'feature_type', 'name', 'age', 'headline', 'short_bio', 'achievement', 'dream_or_goal', 'quote', 'image', 'is_featured']
@@ -269,7 +337,9 @@ class FeaturedPersonForm(forms.ModelForm):
         }
 
 
-class SuccessStoryForm(forms.ModelForm):
+class SuccessStoryForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('challenge', 'intervention', 'outcome')
+
     class Meta:
         model = SuccessStory
         fields = ['page', 'title', 'person_name', 'challenge', 'intervention', 'outcome', 'quote', 'image', 'is_featured']
@@ -284,7 +354,9 @@ class SuccessStoryForm(forms.ModelForm):
         }
 
 
-class InspirationVideoForm(forms.ModelForm):
+class InspirationVideoForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('description',)
+
     class Meta:
         model = InspirationVideo
         fields = ['page', 'title', 'description', 'video_url', 'thumbnail', 'is_featured']
@@ -296,7 +368,9 @@ class InspirationVideoForm(forms.ModelForm):
         }
 
 
-class PageMediaForm(forms.ModelForm):
+class PageMediaForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('description',)
+
     class Meta:
         model = PageMedia
         fields = ['page', 'media_type', 'title', 'description', 'image', 'video_url', 'display_order']

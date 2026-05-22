@@ -1,0 +1,39 @@
+{% load static %}
+
+<div class="partner-showcase{% if compact %} partner-showcase-compact{% endif %}">
+    <a class="partner-card-link" href="https://ipeacei.org/" target="_blank" rel="noopener">
+        <img src="{% static 'images/partners/partner-ipi.png' %}" alt="International Peace Initiatives logo">
+        <strong>International Peace Initiatives</strong>
+        {% if not compact %}<span>Peacebuilding, reconciliation, and community transformation.</span>{% endif %}
+    </a>
+
+    <a class="partner-card-link" href="https://www.nilejourneys.org/" target="_blank" rel="noopener">
+        <img src="{% static 'images/partners/partner-nile.png' %}" alt="Nile Journeys logo">
+        <strong>Nile Journeys</strong>
+        {% if not compact %}<span>Leadership journeys, mentoring, and regenerative learning.</span>{% endif %}
+    </a>
+
+    <a class="partner-card-link" href="https://impactdirect.eu/" target="_blank" rel="noopener">
+        <img src="{% static 'images/partners/partner-id.png' %}" alt="Impact Direct logo">
+        <strong>Impact Direct</strong>
+        {% if not compact %}<span>Impact networks and international partnership support.</span>{% endif %}
+    </a>
+
+    <a class="partner-card-link" href="https://www.genderreconciliationinternational.org/" target="_blank" rel="noopener">
+        <img src="{% static 'images/partners/partner-geri.png' %}" alt="Gender Equity and Reconciliation International logo">
+        <strong>Gender Equity and Reconciliation International</strong>
+        {% if not compact %}<span>Gender healing, equity, and reconciliation practice.</span>{% endif %}
+    </a>
+
+    <a class="partner-card-link" href="https://www.synergykenya.org/" target="_blank" rel="noopener">
+        <img src="{% static 'images/partners/partner-syk.png' %}" alt="Synergy Youth Kenya logo">
+        <strong>Synergy Youth Kenya</strong>
+        {% if not compact %}<span>Youth trust-building, integrity, and community connection.</span>{% endif %}
+    </a>
+
+    <a class="partner-card-link" href="https://nalediinitiative.org/" target="_blank" rel="noopener">
+        <img src="{% static 'images/partners/partner-naledi.jpg' %}" alt="Naledi Initiative logo">
+        <strong>Naledi Initiative</strong>
+        {% if not compact %}<span>Community-led transformation and learning partnerships.</span>{% endif %}
+    </a>
+</div>

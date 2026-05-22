@@ -296,6 +296,23 @@
         });
     }
 
+    function initAutoPaymentMethod() {
+        const form = document.querySelector("[data-payment-method-form]");
+        const select = document.querySelector("[data-auto-payment-method]");
+        const action = document.querySelector("[data-payment-method-action]");
+
+        if (!form || !select || !action) return;
+
+        select.addEventListener("change", () => {
+            action.value = "refresh_method";
+            if (form.requestSubmit) {
+                form.requestSubmit();
+                return;
+            }
+            form.submit();
+        });
+    }
+
     function init() {
         initNavigation();
         initHeroSlider();
@@ -305,6 +322,7 @@
         initDonationTiers();
         initVolunteerApplicationProgress();
         initProgramSearch();
+        initAutoPaymentMethod();
     }
 
     if (document.readyState === "loading") {

@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div>
+            <h1>{{ gallery_item.title }}</h1>
+            <p>{{ gallery_item.image_description|truncatewords:24 }}</p>
+        </div>
+        <div class="hero-proof glass-panel">
+            <strong>Community gallery</strong>
+            {% if gallery_item.program_id %}
+            <span>{{ gallery_item.program_id.title }}</span>
+            {% elif gallery_item.event_id %}
+            <span>{{ gallery_item.event_id.title }}</span>
+            {% else %}
+            <span>Tiriji Foundation</span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container editorial-grid">
+        <div class="editorial-media">
+            {% if gallery_item.image_url %}
+                <img src="{{ gallery_item.image_url }}" alt="{{ gallery_item.title }}">
+            {% elif gallery_item.image %}
+                <img src="{{ gallery_item.image.url }}" alt="{{ gallery_item.title }}">
+            {% else %}
+                <img src="{% static 'images/program-kenger.jpg' %}" alt="{{ gallery_item.title }}">
+            {% endif %}
+        </div>
+        <div class="editorial-copy">
+            <p class="section-label">Gallery</p>
+            <h2>{{ gallery_item.title }}</h2>
+            <div class="description">{{ gallery_item.image_description|linebreaks }}</div>
+            <a href="{% url 'gallery' %}" class="btn btn-primary">Back to Gallery</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

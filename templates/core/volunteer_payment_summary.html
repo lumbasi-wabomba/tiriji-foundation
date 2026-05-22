@@ -2,54 +2,64 @@
 
 {% block content %}
 
-<section class="container py-5">
+<section class="page-hero donation-hero">
+    <div class="container page-hero-grid">
+        <div>
+            <h1>Volunteer Payment Summary</h1>
+            <p>Review your placement fee and choose a payment method to continue your application.</p>
+        </div>
+        <div class="dashboard-card">
+            <span>Reference</span>
+            <strong>{{ payment_session.reference }}</strong>
+            <p>{% if payment.paid %}Paid{% else %}Payment pending{% endif %}</p>
+        </div>
+    </div>
+</section>
 
-    <h1>Volunteer Payment Summary</h1>
+<section class="section section-cream">
+    <div class="container donation-layout">
+        <div class="donation-form-card">
+            <p class="section-label">Volunteer</p>
+            <h2>{{ volunteer.first_name }} {{ volunteer.last_name }}</h2>
+            <div class="detail-list">
+                <div><dt>Program</dt><dd>{{ volunteer.program_id.title }}</dd></div>
+                <div><dt>Duration</dt><dd>{{ volunteer.duration_weeks }} weeks</dd></div>
+                <div><dt>Application Status</dt><dd>{{ volunteer.get_status_display }}</dd></div>
+                <div><dt>Amount</dt><dd>KES {{ payment.amount }}</dd></div>
+                <div><dt>Transaction</dt><dd>{{ payment.transaction.id }}</dd></div>
+            </div>
+        </div>
 
-    <hr>
+        <div class="allocation-card">
+            <p class="section-label">Payment Method</p>
+            <h2>{{ payment_session.config.provider }}</h2>
+            {% for instruction in payment_session.config.instructions %}
+            <div class="allocation-row"><span>{{ instruction }}</span></div>
+            {% endfor %}
 
-    <h3>Volunteer Information</h3>
-
-    <p>
-        <strong>Name:</strong>
-        {{ volunteer.first_name }}
-        {{ volunteer.last_name }}
-    </p>
-
-    <p>
-        <strong>Program:</strong>
-        {{ volunteer.program_id.title }}
-    </p>
-
-    <p>
-        <strong>Duration:</strong>
-        {{ volunteer.duration_weeks }} weeks
-    </p>
-
-    <p>
-        <strong>Application Status:</strong>
-        {{ volunteer.status }}
-    </p>
-
-    <hr>
-
-    <h3>Payment Information</h3>
-
-    <p>
-        <strong>Amount:</strong>
-        KES {{ payment.amount }}
-    </p>
-
-    <p>
-        <strong>Payment Status:</strong>
-        {% if payment.paid %}Paid{% else %}Pending{% endif %}
-    </p>
-
-    <p>
-        <strong>Transaction:</strong>
-        {{ payment.transaction.id }}
-    </p>
-
+            <form method="post" class="premium-form" data-payment-method-form>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="refresh_method" data-payment-method-action>
+                <div class="form-group">
+                    <label>Choose method</label>
+                    <select name="payment_method" class="form-control" data-auto-payment-method>
+                        {% for key, config in payment_methods.items %}
+                        <option value="{{ key }}" {% if key == payment_session.method %}selected{% endif %}>{{ config.label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if not payment.paid %}
+                    <small class="field-help">Changing this updates the payment instructions automatically.</small>
+                    {% endif %}
+                </div>
+                {% if payment.paid %}
+                <span class="status-badge live">Paid</span>
+                {% else %}
+                <button type="submit" name="action" value="confirm_demo_payment" class="btn btn-primary">Confirm Demo Payment</button>
+                <noscript><button type="submit" name="action" value="refresh_method" class="btn btn-secondary">Update Method</button></noscript>
+                {% endif %}
+            </form>
+        </div>
+    </div>
 </section>
 
 {% endblock %}

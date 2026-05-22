@@ -8,6 +8,7 @@ from django.urls import reverse
 from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, employees as Employee, partners as Partner, gallery as Gallery, feedback as Feedback
 from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
+from .services.payment_service import PaymentService
 
 
 def user_in_group(user):
@@ -148,13 +149,22 @@ def volunteer_signup(request):
 def volunteer_payment_summary(request, volunteer_email):
     volunteer_instance = get_object_or_404(Volunteer, email=volunteer_email)
     payment = get_object_or_404(VolunteerPayment, volunteer=volunteer_instance)
+    method = request.POST.get('payment_method', payment.transaction.payment_method if payment.transaction else 'mpesa')
+    payment_session = PaymentService.volunteer_session(payment, method)
+
+    if request.method == 'POST' and request.POST.get('action') == 'confirm_demo_payment':
+        PaymentService.complete_volunteer_payment(payment)
+        messages.success(request, 'Demo volunteer payment marked as paid.')
+        return redirect('volunteer_payment_summary', volunteer_email=volunteer_instance.email)
 
     return render(
         request,
         'core/volunteer_payment_summary.html',
         {
             'volunteer': volunteer_instance,
-            'payment': payment
+            'payment': payment,
+            'payment_session': payment_session,
+            'payment_methods': PaymentService.METHOD_CONFIG,
         }
     )
 
@@ -174,11 +184,25 @@ def donate(request):
             donation.transaction = transaction
             donation.status = 'pending'
             donation.save()
-            return redirect('donate_success')
+            return redirect('donation_payment', donation_id=donation.donation_id)
 
     else:
         form = DonationForm()
     return render(request, 'core/donate.html', {'form': form })
+
+def donation_payment(request, donation_id):
+    donation = get_object_or_404(Donation.objects.select_related('transaction'), donation_id=donation_id)
+    payment_session = PaymentService.donation_session(donation)
+
+    if request.method == 'POST' and request.POST.get('action') == 'confirm_demo_payment':
+        PaymentService.complete_donation(donation)
+        messages.success(request, 'Demo donation payment marked as complete.')
+        return redirect('donate_success')
+
+    return render(request, 'core/donation_payment.html', {
+        'donation': donation,
+        'payment_session': payment_session,
+    })
 
 def donate_success(request):
     return render(request, 'core/donate_success.html')

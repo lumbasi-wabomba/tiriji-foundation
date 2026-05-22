@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block title %}Blog Detail | Tiriji Foundation{% endblock %}
+
+{% block content %}
+<section class="page-hero programs-hero">
+    <div class="container">
+        <h1>Blog Article</h1>
+        <p>This blog detail route is ready for a future blog model and publishing workflow.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="card">
+            <h2>Publishing workflow pending</h2>
+            <p>For demo purposes, use News for active updates. A dedicated Blog model can be added when long-form editorial publishing becomes part of the scope.</p>
+            <a href="{% url 'blog' %}" class="btn btn-primary">Back to Blog</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

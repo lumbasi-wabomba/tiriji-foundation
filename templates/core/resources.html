@@ -30,7 +30,16 @@
                 {% if resource.program_id %}
                 <p><strong>Program:</strong> {{ resource.program_id.title }}</p>
                 {% endif %}
-                <a href="{% url 'resource_detail' resource.resource_id %}" class="text-link">Open Resource</a>
+                <div class="resource-actions">
+                    <a href="{% url 'resource_detail' resource.resource_id %}" class="text-link">Open Resource</a>
+                    {% if resource.file_url %}
+                    <a href="{{ resource.file_url }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Download</a>
+                    {% elif resource.file %}
+                    <a href="{{ resource.file.url }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Download</a>
+                    {% else %}
+                    <span class="status-badge">Preview only</span>
+                    {% endif %}
+                </div>
             </article>
             {% empty %}
             <article class="story-card">

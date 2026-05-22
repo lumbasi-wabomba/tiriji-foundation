@@ -3,36 +3,89 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
-        <h1>Upcoming Events</h1>
-        <p>Join our initiatives and community activities to make a difference.</p>
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Field Events & Community Gatherings</h1>
+            <p>Track upcoming workshops, mentorship days, volunteer activations, and community-led moments across Tiriji programs.</p>
+        </div>
+        <div class="hero-proof glass-panel reveal-on-scroll">
+            <strong>Living calendar</strong>
+            <span>Events connect programs, volunteers, local coordinators, and families in real time.</span>
+        </div>
     </div>
 </section>
 
-<!-- EVENTS GRID -->
-<section class="container events-section">
-    <h2 class="section-title">All Events</h2>
-
-    <div class="event-grid">
-        {% for event in events %}
-        <div class="event-card">
-            {% if event.image_url %}
-                <img src="{{ event.image_url }}" alt="{{ event.title }}">
+{% if events %}
+<section class="section">
+    <div class="container editorial-grid">
+        {% with featured_event=events.0 %}
+        <div class="editorial-media reveal-on-scroll">
+            {% if featured_event.image_url %}
+                <img src="{{ featured_event.image_url }}" alt="{{ featured_event.title }}">
+            {% elif featured_event.image %}
+                <img src="{{ featured_event.image.url }}" alt="{{ featured_event.title }}">
+            {% else %}
+                <img src="{% static 'images/program-kenger.jpg' %}" alt="{{ featured_event.title }}">
             {% endif %}
-            <h3>{{ event.title }}</h3>
-            <p><strong>Date:</strong> {{ event.event_date }}</p>
-            <p><strong>Location:</strong> {{ event.event_location }}</p>
-            <p>{{ event.events_description|truncatewords:20 }}</p>
-            <a href="{% url 'event_detail' event.event_id %}" class="text-link">Read More →</a>
         </div>
-        {% empty %}
-        <div class="no-items-message">
-            <p>No upcoming events at the moment.</p>
-            <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Next Gathering</p>
+            <h2>{{ featured_event.title }}</h2>
+            <div class="story-meta">
+                <span>{{ featured_event.event_date|date:"M d, Y" }}</span>
+                <span>{{ featured_event.event_location }}</span>
+                {% if featured_event.program_id %}<span>{{ featured_event.program_id.title }}</span>{% endif %}
+            </div>
+            <div class="description">{{ featured_event.events_description|linebreaks }}</div>
+            <a href="{% url 'event_detail' featured_event.event_id %}" class="btn btn-primary">View Event</a>
         </div>
-        {% endfor %}
+        {% endwith %}
+    </div>
+</section>
+{% endif %}
+
+<section class="section section-cream">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Event Pipeline</p>
+            <h2>Upcoming activations and program moments.</h2>
+        </div>
+
+        <div class="story-grid">
+            {% for event in events %}
+            <article class="story-card event-story-card reveal-on-scroll">
+                {% if event.image_url %}
+                    <img src="{{ event.image_url }}" alt="{{ event.title }}">
+                {% elif event.image %}
+                    <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                {% endif %}
+                <p class="section-label">{{ event.event_date|date:"M d, Y" }}</p>
+                <h3>{{ event.title }}</h3>
+                <p>{{ event.events_description|truncatewords:24 }}</p>
+                <div class="story-meta">
+                    <span>{{ event.event_location }}</span>
+                    {% if event.program_id %}<span>{{ event.program_id.title }}</span>{% endif %}
+                </div>
+                <a href="{% url 'event_detail' event.event_id %}" class="text-link">Open event</a>
+            </article>
+            {% empty %}
+            <article class="story-card">
+                <h3>No upcoming events</h3>
+                <p>New workshops, field days, and volunteer activations will appear here once scheduled.</p>
+                <a href="{% url 'volunteer' %}" class="text-link">Explore volunteering</a>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
+    <div class="container">
+        <h2>Want to show up in the field?</h2>
+        <p>Join a volunteer pathway and we will connect you to upcoming program activity.</p>
+        <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Apply to Volunteer</a>
+        <a href="{% url 'programs' %}" class="btn btn-secondary">Explore Programs</a>
     </div>
 </section>
 

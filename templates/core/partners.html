@@ -3,38 +3,48 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
-        <h1>Our Partners</h1>
-        <p>We collaborate with these organizations to amplify our impact.</p>
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Our Partner Network</h1>
+            <p>Trusted organizations strengthen Tiriji Foundation through peacebuilding, mentorship, gender reconciliation, youth leadership, and regenerative community practice.</p>
+        </div>
+        <div class="hero-proof glass-panel reveal-on-scroll">
+            <strong>Operational ecosystem</strong>
+            <span>Partnerships connect field programs, learning journeys, and community transformation.</span>
+        </div>
     </div>
 </section>
 
-<!-- PARTNERS GRID -->
-<section class="container partners-section">
-    <h2 class="section-title">Partners</h2>
-
-    <div class="partners-grid">
-        {% for partner in partners %}
-        <div class="partner-card">
-            {% if partner.profile_logo_url %}
-                <img src="{{ partner.profile_logo_url }}" alt="{{ partner.name }}">
-            {% elif partner.profile_logo %}
-                <img src="{{ partner.profile_logo.url }}" alt="{{ partner.name }}">
-            {% endif %}
-            <h4>{{ partner.name }}</h4>
-            {% if partner.partners_description %}
-            <p>{{ partner.partners_description|truncatewords:20 }}</p>
-            {% endif %}
-            {% if partner.website_url %}
-            <a href="{{ partner.website_url }}" target="_blank" class="text-link">Visit Website →</a>
-            {% endif %}
-            <a href="{% url 'partner_detail' partner.id %}" class="text-link">Read More →</a>
+<section class="section section-cream">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Partners</p>
+            <h2>Organizations working alongside Tiriji.</h2>
         </div>
-        {% empty %}
-        <p>No partners available at the moment.</p>
-        {% endfor %}
+        {% include "core/partials/partner_showcase.html" %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="container trust-grid">
+        <div class="reveal-on-scroll">
+            <p class="section-label">Why Partnerships Matter</p>
+            <h2>A stronger network makes local transformation more durable.</h2>
+        </div>
+        <div class="trust-list reveal-on-scroll">
+            <div><strong>Shared capability</strong><span>Partners bring training, facilitation, mentoring, and regional experience.</span></div>
+            <div><strong>Local legitimacy</strong><span>Collaboration helps programs stay accountable to communities and context.</span></div>
+            <div><strong>Scalable learning</strong><span>Knowledge moves across programs without losing the human story.</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
+    <div class="container">
+        <h2>Build with Tiriji.</h2>
+        <p>We welcome aligned institutions, community organizations, and funders who want to support regenerative change.</p>
+        <a href="{% url 'contact' %}" class="btn btn-primary">Start a Partnership</a>
     </div>
 </section>
 

@@ -3,57 +3,70 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
-        <h1>Contact Us</h1>
-        <p>
-            Have questions, suggestions, or want to get involved? Reach out to us!
-        </p>
-    </div>
-</section>
-
-<!-- CONTACT INFO -->
-<section class="container contact-info">
-    <div class="grid-2">
-        <div>
-            <h2>Get in Touch</h2>
-            <p><strong>Address:</strong> P.O. Box 599 - 60200 Meru, Kenya</p>
-            <p><strong>Email:</strong> info@tirijifoundation.com</p>
-            <p><strong>Phone:</strong> +254 795 444 556</p>
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Start a Conversation With Tiriji.</h1>
+            <p>Reach the team for volunteering, partnerships, donations, resources, and community program questions.</p>
         </div>
-        <div>
-            <h2>Follow Us</h2>
-            <p>Stay connected through our social channels:</p>
-            <ul class="social-links">
-                <li><a href="https://www.facebook.com/tirijifoundation/">Facebook</a></li>
-                <li><a href="https://twitter.com/tirijifoundation">Twitter</a></li>
-                <li><a href="https://www.instagram.com/tirijifoundation/">Instagram</a></li>
-                <li><a href="https://wa.link/vp3blq">WhatsApp</a></li>
-            </ul>
+        <div class="hero-proof glass-panel reveal-on-scroll">
+            <strong>Meru, Kenya</strong>
+            <span>P.O. Box 599 - 60200</span>
         </div>
     </div>
 </section>
 
-<!-- CONTACT FORM -->
-<section class="contact-form container">
-    <h2>Send Us a Message</h2>
-    <form action="{% url 'feedback' %}" method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required placeholder="Your full name">
+<section class="section section-cream contact-section">
+    <div class="container contact-layout">
+        <div class="contact-panel reveal-on-scroll">
+            <p class="section-label">Contact</p>
+            <h2>Direct channels</h2>
+            <div class="contact-methods">
+                <a href="mailto:info@tirijifoundation.com">
+                    <span>@</span>
+                    <strong>info@tirijifoundation.com</strong>
+                </a>
+                <a href="tel:+254795444556">
+                    <span>☎</span>
+                    <strong>+254 795 444 556</strong>
+                </a>
+                <div>
+                    <span>⌖</span>
+                    <strong>Meru County, Kenya</strong>
+                </div>
+            </div>
+
+            <div class="contact-socials" aria-label="Social links">
+                <a href="https://www.facebook.com/tirijifoundation/" target="_blank" rel="noopener">Facebook</a>
+                <a href="https://twitter.com/tirijifoundation" target="_blank" rel="noopener">X</a>
+                <a href="https://www.instagram.com/tirijifoundation/" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://wa.link/vp3blq" target="_blank" rel="noopener">WhatsApp</a>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required placeholder="Your email address">
+
+        <div class="donation-form-card reveal-on-scroll">
+            <p class="section-label">Message</p>
+            <h2>Send us a note</h2>
+            <form action="{% url 'feedback' %}" method="POST" class="premium-form">
+                {% csrf_token %}
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="you@example.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required placeholder="Tell us what you would like to discuss"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="5" required placeholder="Your message"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Send Message</button>
-    </form>
+    </div>
 </section>
 
 {% endblock %}

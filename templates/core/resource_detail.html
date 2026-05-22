@@ -32,6 +32,11 @@
             <a href="{{ resource.file_url }}" class="btn btn-primary" target="_blank" rel="noopener">Download Resource</a>
             {% elif resource.file %}
             <a href="{{ resource.file.url }}" class="btn btn-primary" target="_blank" rel="noopener">Download Resource</a>
+            {% else %}
+            <div class="resource-empty-note">
+                <strong>No downloadable file attached.</strong>
+                <span>This resource is currently available as an on-page brief only.</span>
+            </div>
             {% endif %}
         </div>
     </div>
