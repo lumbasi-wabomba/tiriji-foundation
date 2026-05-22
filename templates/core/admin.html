@@ -3,49 +3,74 @@
 {% block title %}Admin Portal | Tiriji Foundation{% endblock %}
 
 {% block content %}
-<div class="container admin-dashboard">
-    <div class="admin-header card">
-        <div>
-            <h1>Admin Portal</h1>
-            <p class="subtitle">A clean, simplified dashboard for administrators, secretaries, and directors.</p>
-        </div>
-        <div class="admin-actions">
-            <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
-        </div>
-    </div>
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <h1>Tiriji Ops</h1>
+        <nav aria-label="Admin navigation">
+            <a href="{% url 'admin_programs' %}">Programs</a>
+            <a href="{% url 'admin_events' %}">Events</a>
+            <a href="{% url 'admin_news' %}">Publishing</a>
+            <a href="{% url 'admin_resources' %}">Resources</a>
+            <a href="{% url 'admin_feedback' %}">Feedback</a>
+        </nav>
+        <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+    </aside>
 
-    <div class="admin-summary grid grid-250">
-        <div class="admin-card">
-            <h3>Programs</h3>
-            <p>{{ program_count }}</p>
-            <a href="{% url 'admin_programs' %}" class="btn btn-primary">Manage</a>
+    <main class="admin-workspace">
+        <div class="admin-command">
+            <div>
+                <p class="section-label">Operations Dashboard</p>
+                <h2>Workflow command center</h2>
+                <p>Track approvals, program publishing, events, resources, and operational alerts from one surface.</p>
+            </div>
+            <div class="admin-search" role="search">
+                <span>Search</span>
+                <input type="search" placeholder="Find programs, events, donors...">
+            </div>
         </div>
-        <div class="admin-card">
-            <h3>Events</h3>
-            <p>{{ event_count }}</p>
-            <a href="{% url 'admin_events' %}" class="btn btn-primary">Manage</a>
-        </div>
-        <div class="admin-card">
-            <h3>News</h3>
-            <p>{{ news_count }}</p>
-            <a href="{% url 'admin_news' %}" class="btn btn-primary">Manage</a>
-        </div>
-        <div class="admin-card">
-            <h3>Resources</h3>
-            <p>{{ resource_count }}</p>
-            <a href="{% url 'admin_resources' %}" class="btn btn-primary">Manage</a>
-        </div>
-    </div>
 
-    <div class="admin-tips card">
-        <h2>Quick actions</h2>
-        <p>Use these tiles to quickly add new content or keep the website synchronized with the latest programs, stories, events and resources.</p>
-        <div class="admin-tile-grid grid grid-250">
-            <a href="{% url 'admin_program_add' %}" class="admin-tile">Add a Program</a>
-            <a href="{% url 'admin_event_add' %}" class="admin-tile">Add an Event</a>
-            <a href="{% url 'admin_news_add' %}" class="admin-tile">Add News</a>
-            <a href="{% url 'admin_resource_add' %}" class="admin-tile">Upload Resource</a>
-        </div>
-    </div>
+        <section class="admin-metrics">
+            <div class="admin-card"><span>Programs</span><strong>{{ program_count }}</strong><a href="{% url 'admin_programs' %}">Manage</a></div>
+            <div class="admin-card"><span>Events</span><strong>{{ event_count }}</strong><a href="{% url 'admin_events' %}">Manage</a></div>
+            <div class="admin-card"><span>News</span><strong>{{ news_count }}</strong><a href="{% url 'admin_news' %}">Manage</a></div>
+            <div class="admin-card"><span>Resources</span><strong>{{ resource_count }}</strong><a href="{% url 'admin_resources' %}">Manage</a></div>
+        </section>
+
+        <section class="ops-grid">
+            <div class="ops-panel">
+                <div class="panel-heading">
+                    <h3>Volunteer Approval Queue</h3>
+                    <span class="status-badge warning">Review</span>
+                </div>
+                <div class="workflow-row"><span>Submitted</span><strong>New applications</strong><em>Payment summary pending</em></div>
+                <div class="workflow-row"><span>Under Review</span><strong>Program fit check</strong><em>Coordinator action</em></div>
+                <div class="workflow-row"><span>Approved</span><strong>Arrival planning</strong><em>Orientation next</em></div>
+            </div>
+            <div class="ops-panel">
+                <div class="panel-heading">
+                    <h3>Payment Tracking</h3>
+                    <span class="status-badge live">Live</span>
+                </div>
+                <div class="allocation-card compact-allocation">
+                    <div class="allocation-row"><span>Volunteer fees</span><strong>Pending</strong></div>
+                    <div class="allocation-bar"><span style="width: 62%"></span></div>
+                    <div class="allocation-row"><span>Donations</span><strong>Active</strong></div>
+                    <div class="allocation-bar"><span style="width: 78%"></span></div>
+                </div>
+            </div>
+            <div class="ops-panel wide">
+                <div class="panel-heading">
+                    <h3>Quick Publishing</h3>
+                    <span class="status-badge">Content</span>
+                </div>
+                <div class="admin-tile-grid">
+                    <a href="{% url 'admin_program_add' %}" class="admin-tile">Add a Program</a>
+                    <a href="{% url 'admin_event_add' %}" class="admin-tile">Add an Event</a>
+                    <a href="{% url 'admin_news_add' %}" class="admin-tile">Add News</a>
+                    <a href="{% url 'admin_resource_add' %}" class="admin-tile">Upload Resource</a>
+                </div>
+            </div>
+        </section>
+    </main>
 </div>
 {% endblock %}

@@ -1,28 +1,106 @@
 {% extends "core/base.html" %}
+{% load static %}
 {% block title %}Women Empowerment | Tiriji{% endblock %}
 
 {% block content %}
 
-<section class="page-hero">
-    <div class="container">
-        <h1>Women Empowerment</h1>
-        <p>Creating economic independence through vocational training.</p>
+<section class="page-hero page-hero-women">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Women Empowerment</h1>
+            <p>Vocational training, entrepreneurship, leadership, and peer mentorship for women shaping local economies.</p>
+            <a href="{% url 'donate' %}" class="btn btn-primary">Fund a Workshop</a>
+        </div>
+        <div class="hero-proof glass-panel reveal-on-scroll">
+            <strong>Community enterprise pathway</strong>
+            <span>Skills, confidence, financial literacy, and practical business transformation.</span>
+        </div>
     </div>
 </section>
 
-<section class="container py-5">
-    <h2>Our Focus</h2>
-    <p>
-        We equip women with practical vocational skills, entrepreneurship
-        guidance, and financial literacy to foster long-term sustainability.
-    </p>
+<section class="impact-strip">
+    <div class="container impact-grid">
+        {% for metric in impact_metrics %}
+        <div class="impact-stat reveal-on-scroll">
+            <strong>{{ metric.value }}</strong>
+            <span>{{ metric.label }}</span>
+        </div>
+        {% empty %}
+        <div class="impact-stat reveal-on-scroll"><strong data-count="120">0</strong><span>Women empowered</span></div>
+        <div class="impact-stat reveal-on-scroll"><strong data-count="18">0</strong><span>Training cohorts</span></div>
+        <div class="impact-stat reveal-on-scroll"><strong data-count="9">0</strong><span>Community mentors</span></div>
+        {% endfor %}
+    </div>
 </section>
 
-<section class="cta-section text-center">
+<section class="section editorial-section">
+    <div class="container editorial-grid">
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Leadership Journey</p>
+            <h2>{% if featured_person %}{{ featured_person.headline }}{% else %}Empowerment is practical: a skill, a peer network, and a way forward.{% endif %}</h2>
+            <p>
+                {% if featured_person %}
+                    {{ featured_person.short_bio }}
+                {% else %}
+                    Tiriji’s women programs are built around vocational skills,
+                    entrepreneurship support, financial literacy, and leadership
+                    journeys that strengthen families and communities.
+                {% endif %}
+            </p>
+            {% if featured_person.quote %}<blockquote>{{ featured_person.quote }}</blockquote>{% endif %}
+        </div>
+        <div class="editorial-media reveal-on-scroll">
+            {% if featured_person and featured_person.image_url %}
+                <img src="{{ featured_person.image_url }}" alt="{{ featured_person.name }}">
+            {% else %}
+                <img src="{% static 'images/hero-women.jpg' %}" alt="Women empowerment workshop">
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="section section-cream">
     <div class="container">
-        <h2>Empower a Woman Today</h2>
-        <a href="#" class="btn btn-primary">Donate</a>
-        <a href="#" class="btn btn-outline">Partner With Us</a>
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Workshop System</p>
+            <h2>Training that moves from confidence to income.</h2>
+        </div>
+        <div class="timeline-system reveal-on-scroll">
+            <div><span>01</span><strong>Skill</strong><p>Hands-on vocational and entrepreneurship training.</p></div>
+            <div><span>02</span><strong>Practice</strong><p>Workshop exercises, product thinking, and peer learning.</p></div>
+            <div><span>03</span><strong>Mentor</strong><p>Guidance from facilitators and women already leading locally.</p></div>
+            <div><span>04</span><strong>Grow</strong><p>Business transformation stories and continued community support.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container story-grid">
+        {% for story in stories %}
+        <article class="story-card reveal-on-scroll">
+            {% if story.image_url %}<img src="{{ story.image_url }}" alt="{{ story.title }}">{% endif %}
+            <h3>{{ story.title }}</h3>
+            <p>{{ story.outcome|truncatewords:28 }}</p>
+        </article>
+        {% empty %}
+        <article class="story-card reveal-on-scroll">
+            <h3>Business transformation</h3>
+            <p>Women turn training into practical income pathways through mentorship and peer accountability.</p>
+        </article>
+        <article class="story-card reveal-on-scroll">
+            <h3>Leadership circles</h3>
+            <p>Workshops build confidence, voice, and community leadership alongside economic skills.</p>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
+    <div class="container reveal-on-scroll">
+        <h2>Invest in women who are already changing their communities.</h2>
+        <p>Fund training, mentorship, and enterprise pathways that create durable local impact.</p>
+        <a href="{% url 'donate' %}" class="btn btn-primary">Donate</a>
+        <a href="{% url 'partners' %}" class="btn btn-glass">Partner With Us</a>
     </div>
 </section>
 

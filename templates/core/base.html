@@ -8,38 +8,63 @@
     <!-- Meta -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
 
-    {% block extra_css %}{% endblock %}
+    <!-- Extra CSS -->
+    {% block extra_css %}
+    {% endblock %}
 </head>
 <body>
 
 {% if not request.path|slice:":12" == "/admin-portal" %}
+{% url 'about' as about_url %}
+{% url 'children' as children_url %}
+{% url 'women' as women_url %}
+{% url 'programs' as programs_url %}
+{% url 'volunteer' as volunteer_url %}
+{% url 'donate' as donate_url %}
+{% url 'contact' as contact_url %}
+{% url 'events' as events_url %}
+{% url 'news' as news_url %}
+{% url 'resources' as resources_url %}
 <!-- ===== NAVBAR ===== -->
 <header class="site-header">
-    <div class=" nav-wrapper">
+    <div class="nav-wrapper">
 
         <a href="{% url 'home' %}" class="brand">
             <img src="{% static 'images/logo-1.png' %}" alt="Logo" class="logo">
             <span class="brand-name">Tiriji Foundation</span>
         </a>
 
-        <button class="nav-toggle" aria-label="Toggle navigation">
-            ☰
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
         </button>
 
         <nav class="nav-menu">
             <ul class="nav-list">
-                <li><a href="{% url 'about' %}">About</a></li>
-                <li><a href="{% url 'children' %}">Children</a></li>
-                <li><a href="{% url 'women' %}">Women</a></li>
-                <li><a href="{% url 'programs' %}">Programs</a></li>
-                <li><a href="{% url 'events' %}">Events</a></li>
-                <li><a href="{% url 'news' %}">News</a></li>
-                <li><a href="{% url 'resources' %}">Resources</a></li>
-                <li><a href="{% url 'contact' %}">Contact</a></li>
+                <li><a href="{{ about_url }}" {% if request.path == about_url %}class="nav-current" aria-current="page"{% endif %}>About</a></li>
+                <li><a href="{{ children_url }}" {% if request.path == children_url %}class="nav-current" aria-current="page"{% endif %}>Children</a></li>
+                <li><a href="{{ women_url }}" {% if request.path == women_url %}class="nav-current" aria-current="page"{% endif %}>Women</a></li>
+                <li><a href="{{ programs_url }}" {% if request.path|slice:":10" == programs_url %}class="nav-current" aria-current="page"{% endif %}>Programs</a></li>
+                <li><a href="{{ volunteer_url }}" {% if request.path|slice:":11" == volunteer_url %}class="nav-current" aria-current="page"{% endif %}>Volunteer</a></li>
+                <li><a href="{{ donate_url }}" class="nav-cta{% if request.path|slice:":8" == donate_url %} nav-current{% endif %}" {% if request.path|slice:":8" == donate_url %}aria-current="page"{% endif %}>Donate</a></li>
+                <li><a href="{{ contact_url }}" {% if request.path == contact_url %}class="nav-current" aria-current="page"{% endif %}>Contact</a></li>
+                
+                <!-- Collapsible Resources Dropdown -->
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle{% if request.path == events_url or request.path == news_url or request.path == resources_url %} nav-current{% endif %}" aria-expanded="false" aria-haspopup="true">
+                        Resources
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="{{ events_url }}" {% if request.path == events_url %}class="nav-current" aria-current="page"{% endif %}>Events</a></li>
+                        <li><a href="{{ news_url }}" {% if request.path == news_url %}class="nav-current" aria-current="page"{% endif %}>News</a></li>
+                        <li><a href="{{ resources_url }}" {% if request.path == resources_url %}class="nav-current" aria-current="page"{% endif %}>Materials</a></li>
+                    </ul>
+                </li>
             </ul>
         </nav>
 
@@ -65,11 +90,20 @@
 </main>
 
 <!-- ===== FOOTER ===== -->
-<footer class="bg-dark text-light text-center py-3 mt-5">
+<footer class="site-footer">
     <div class="container footer-content">
-        <p class="mb-0 footer-copy">
-            &copy; {% now "Y" %} Tiriji Foundation. All rights reserved.
-        </p>
+        <div>
+            <p class="footer-kicker">Tiriji Foundation</p>
+            <p class="mb-0 footer-copy">
+                &copy; {% now "Y" %} Tiriji Foundation. Regenerating communities through education, women empowerment, and volunteer action.
+            </p>
+        </div>
+        <div class="footer-links" aria-label="Footer links">
+            <a href="{% url 'children' %}">Children</a>
+            <a href="{% url 'women' %}">Women</a>
+            <a href="{% url 'volunteer' %}">Volunteer</a>
+            <a href="{% url 'donate' %}">Donate</a>
+        </div>
         {% if request.path == '/about/' %}
         <p class="footer-login">
             <a href="{% url 'login' %}">Staff login</a>
@@ -78,7 +112,7 @@
     </div>
 </footer>
 
-<script src= "{% static 'js/script.js'%}"></script>
+<script src="{% static 'js/script.js' %}"></script>
 
 {% block extra_js %}{% endblock %}
 

@@ -1,45 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donation Successful | Tiriji Foundation</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="navbar">
-        <div class="container">
-            <h1 class="logo">Tiriji Foundation</h1>
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="donate.html">Donate</a></li>
-                    <li><a href="volunteer.html">Volunteer</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+{% extends "core/base.html" %}
 
-    <section class="hero">
-        <div class="container">
-            <h2>Thank You for Your Donation!</h2>
-            <p>Your generosity helps us continue making a difference.</p>
-        </div>
-    </section>
+{% block title %}Thank You | Donation Success{% endblock %}
 
-    <section class="section text-center">
-        <div class="container">
-            <p>We have successfully received your contribution. A confirmation email will be sent to you shortly.</p>
-            <a href="{% url 'home' %}" class="btn">Return to Home</a>
-        </div>
-    </section>
+{% block content %}
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Tiriji Foundation. All Rights Reserved.</p>
+<section class="section">
+
+    <div class="container">
+
+        <div class="card section-center">
+
+            <h1>Thank You for Your Donation ❤️</h1>
+
+            <p>
+                Your support is helping transform communities
+                and build regenerative futures.
+            </p>
+
+            <p>
+                A confirmation receipt will be sent to your email.
+            </p>
+
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                Return Home
+            </a>
+
+            <a href="{% url 'donate' %}" class="btn btn-secondary">
+                Donate Again
+            </a>
+
         </div>
-    </footer>
-</body>
-</html>
+
+    </div>
+
+</section>
+
+{% endblock %}

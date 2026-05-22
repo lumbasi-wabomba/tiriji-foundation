@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <h1>Volunteer Payment Summary</h1>
+
+    <hr>
+
+    <h3>Volunteer Information</h3>
+
+    <p>
+        <strong>Name:</strong>
+        {{ volunteer.first_name }}
+        {{ volunteer.last_name }}
+    </p>
+
+    <p>
+        <strong>Program:</strong>
+        {{ volunteer.program_id.title }}
+    </p>
+
+    <p>
+        <strong>Duration:</strong>
+        {{ volunteer.duration_weeks }} weeks
+    </p>
+
+    <p>
+        <strong>Application Status:</strong>
+        {{ volunteer.status }}
+    </p>
+
+    <hr>
+
+    <h3>Payment Information</h3>
+
+    <p>
+        <strong>Amount:</strong>
+        KES {{ payment.amount }}
+    </p>
+
+    <p>
+        <strong>Payment Status:</strong>
+        {% if payment.paid %}Paid{% else %}Pending{% endif %}
+    </p>
+
+    <p>
+        <strong>Transaction:</strong>
+        {{ payment.transaction.id }}
+    </p>
+
+</section>
+
+{% endblock %}

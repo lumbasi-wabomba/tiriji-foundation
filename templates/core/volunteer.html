@@ -1,67 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer | Tiriji Foundation</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <header class="navbar">
-        <div class="container">
-            <h1 class="logo">Tiriji Foundation</h1>
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="donate.html">Donate</a></li>
-                    <li><a href="volunteer.html" class="active">Volunteer</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Volunteer With Us | Tiriji Foundation{% endblock %}
+
+{% block content %}
+
+<section class="page-hero volunteer-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Volunteer in Kenya through a real onboarding ecosystem.</h1>
+            <p>
+                Choose a program, estimate your stay, understand the fee path,
+                prepare culturally, and move through a transparent approval pipeline.
+            </p>
+            <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Start Application</a>
+            <a href="#volunteer-estimator" class="btn btn-glass">Preview Journey</a>
         </div>
-    </header>
-
-    <section class="hero">
-        <div class="container">
-            <h2>Become a Volunteer</h2>
-            <p>Join our mission and help us create lasting impact in our communities.</p>
+        <div class="dashboard-card reveal-on-scroll">
+            <div class="dashboard-topline"><span class="signal-dot"></span>Current onboarding</div>
+            <div class="mini-metric"><strong>5</strong><span>Status stages</span></div>
+            <div class="mini-metric"><strong>24h</strong><span>Initial response target</span></div>
+            <div class="mini-metric"><strong>Local</strong><span>Coordinator support</span></div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="section">
-        <div class="container">
-            <h3>Volunteer Form</h3>
-            <form class="form" action="#" method="post">
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="skills">Skills / Interests</label>
-                    <textarea id="skills" name="skills" rows="4" required></textarea>
-                </div>
-
-                <button type="submit" class="btn">Submit Application</button>
-            </form>
+<section class="section section-cream" id="volunteer-estimator">
+    <div class="container app-shell">
+        <div class="app-main reveal-on-scroll">
+            <div class="section-heading compact">
+                <p class="section-label">Program Selection</p>
+                <h2>Build your volunteer pathway.</h2>
+            </div>
+            <div class="program-selector" data-volunteer-estimator>
+                <button class="selection-card active" type="button" data-program="Children & Youth" data-rate="550">
+                    <strong>Children & Youth</strong>
+                    <span>Mentorship, education activities, and life skills.</span>
+                </button>
+                <button class="selection-card" type="button" data-program="Women Empowerment" data-rate="650">
+                    <strong>Women Empowerment</strong>
+                    <span>Workshops, enterprise support, and peer mentoring.</span>
+                </button>
+                <button class="selection-card" type="button" data-program="Regenerative Communities" data-rate="700">
+                    <strong>Regenerative Communities</strong>
+                    <span>Sustainability, land care, and community projects.</span>
+                </button>
+            </div>
+            <label class="range-field">
+                <span>Duration: <strong data-duration-output>4 weeks</strong></span>
+                <input type="range" min="2" max="12" step="1" value="4" data-duration-input>
+            </label>
         </div>
-    </section>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Tiriji Foundation. All Rights Reserved.</p>
+        <aside class="app-side reveal-on-scroll">
+            <p class="section-label">Fee Preview</p>
+            <h3 data-selected-program>Children & Youth</h3>
+            <div class="fee-preview"><span>Estimated program fee</span><strong data-fee-output>$950</strong></div>
+            <p>Includes orientation, local coordination, accommodation support, meals, and field preparation.</p>
+            <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Apply With These Details</a>
+        </aside>
+    </div>
+</section>
+
+<section class="section operations-section">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Status Pipeline</p>
+            <h2>Know what happens after you apply.</h2>
         </div>
-    </footer>
-</body>
-</html>
+        <div class="journey-track reveal-on-scroll">
+            <div class="journey-step active"><span>01</span><strong>Submitted</strong><p>Application details received.</p></div>
+            <div class="journey-step active"><span>02</span><strong>Payment Pending</strong><p>Fee summary and payment record created.</p></div>
+            <div class="journey-step"><span>03</span><strong>Under Review</strong><p>Dates, program fit, and safety reviewed.</p></div>
+            <div class="journey-step"><span>04</span><strong>Approved</strong><p>Coordinator confirms placement and next steps.</p></div>
+            <div class="journey-step"><span>05</span><strong>Active</strong><p>You join the field team with local support.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="section editorial-section">
+    <div class="container editorial-grid">
+        <div class="editorial-media reveal-on-scroll">
+            <img src="{% static 'images/program-ngl.jpg' %}" alt="Volunteer community experience">
+        </div>
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Preparation</p>
+            <h2>Designed for cultural respect, safety, and useful contribution.</h2>
+            <p>
+                Volunteers receive orientation on community context, cultural
+                preparation, safety expectations, accommodation, meals, and how to
+                work alongside local coordinators.
+            </p>
+            <div class="story-meta">
+                <span>Culture briefing</span>
+                <span>Local housing</span>
+                <span>Coordinator support</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container story-grid">
+        <article class="story-card reveal-on-scroll">
+            <h3>What happens next</h3>
+            <p>Apply, review the payment summary, complete the fee step, then wait for coordinator review and placement confirmation.</p>
+        </article>
+        <article class="story-card reveal-on-scroll">
+            <h3>What your fee supports</h3>
+            <p>Accommodation, meals, orientation, local staffing, and sustainable program coordination.</p>
+        </article>
+        <article class="story-card reveal-on-scroll">
+            <h3>How you serve</h3>
+            <p>You work with children, women, sustainability programs, or leadership initiatives based on fit and timing.</p>
+        </article>
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
+    <div class="container reveal-on-scroll">
+        <h2>Start with clarity. Arrive prepared.</h2>
+        <p>Your volunteer journey should feel human, transparent, and operationally supported from day one.</p>
+        <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Start Your Journey</a>
+    </div>
+</section>
+
+{% endblock %}

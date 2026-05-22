@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
-from .models import program, volunteer, events as Event, news as News, resources as Resource
-from .forms import ProgramForm, EventForm, NewsForm, ResourceForm
+from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, feedback as Feedback
+from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm
 import os
 from django.conf import settings
 from .models import resources
@@ -27,15 +27,25 @@ def about(request):
 def contact(request):
     return render(request, 'core/contact.html')
 
+def impact_page_context(page):
+    return {
+        'impact_metrics': ImpactMetric.objects.filter(page=page, is_active=True),
+        'featured_person': FeaturedPerson.objects.filter(page=page, is_featured=True).first(),
+        'stories': SuccessStory.objects.filter(page=page)[:6],
+        'videos': InspirationVideo.objects.filter(page=page)[:4],
+        'media_items': PageMedia.objects.filter(page=page)[:8],
+    }
+
+
 def children(request):
-    return render(request, 'core/children.html')
+    context = impact_page_context('children')
+    return render(request, 'core/children.html', context)
+
 
 def women(request):
-    return render(request, 'core/women.html')   
+    context = impact_page_context('women')
+    return render(request, 'core/women.html', context)   
 
-
-def volunteer(request):
-    return render(request, 'core/volunteer.html')
 
 def programs(request):
     programs = program.objects.all()
@@ -45,20 +55,113 @@ def program_detail(request, program_id):
     program_detail = program.objects.get(program_id=program_id)
     return render(request, 'core/program_detail.html', {'program': program_detail})
 
+
+def volunteer(request):
+    return render(request, 'core/volunteer.html')
+
+
 def volunteer_signup(request):
+
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        message = request.POST.get('message')
 
-        # Save volunteer information to the database
-        volunteer.objects.create(name=name, email=email, message=message)
+        form = VolunteerForm(request.POST)
 
-        return render(request, 'core/volunteer_success.html', {'name': name})
-    return render(request, 'core/volunteer_signup.html')
+        if form.is_valid():
+
+            # =========================
+            # CREATE VOLUNTEER
+            # =========================
+            volunteer_instance = form.save(commit=False)
+
+            # Freeze calculated fee
+            volunteer_instance.calculated_fee = (
+                volunteer_instance.fee
+            )
+
+            # Initial workflow status
+            volunteer_instance.status = 'payment_pending'
+
+            volunteer_instance.save()
+
+            # =========================
+            # CREATE TRANSACTION
+            # =========================
+            transaction = Transaction.objects.create(
+                amount=volunteer_instance.calculated_fee,
+                payment_method='mpesa',
+                status='pending'
+            )
+
+            # =========================
+            # CREATE PAYMENT RECORD
+            # =========================
+            VolunteerPayment.objects.create(
+                volunteer=volunteer_instance,
+                transaction=transaction,
+                amount=volunteer_instance.calculated_fee
+            )
+
+            # =========================
+            # REDIRECT TO PAYMENT PAGE
+            # =========================
+            return redirect(
+                'volunteer_payment_summary',
+                volunteer_email=volunteer_instance.email
+            )
+
+    else:
+
+        form = VolunteerForm()
+
+    return render(
+        request,
+        'core/volunteer_signup.html',
+        {
+            'form': form
+        }
+    )
+
+def volunteer_payment_summary(request, volunteer_email):
+    volunteer_instance = get_object_or_404(Volunteer, email=volunteer_email)
+    payment = get_object_or_404(VolunteerPayment, volunteer=volunteer_instance)
+
+    return render(
+        request,
+        'core/volunteer_payment_summary.html',
+        {
+            'volunteer': volunteer_instance,
+            'payment': payment
+        }
+    )
+
+
 
 def donate(request):
-    return render(request, 'core/donate.html') 
+    if request.method == 'POST':
+        form = DonationForm(request.POST)
+
+        if form.is_valid():
+            donation = form.save(commit=False)
+            transaction = Transaction.objects.create(
+                amount=donation.amount,
+                payment_method=donation.payment_method or 'mpesa',
+                status='pending',
+            )
+            donation.transaction = transaction
+            donation.status = 'pending'
+            donation.save()
+            return redirect('donate_success')
+
+    else:
+        form = DonationForm()
+    return render(request, 'core/donate.html', {'form': form })
+
+def donate_success(request):
+    return render(request, 'core/donate_success.html')
+
+def donate_cancel(request):
+    return render(request, 'core/donate_cancel.html')
+
 
 def events(request):
     events_list = Event.objects.all()
@@ -116,11 +219,7 @@ def feedback(request):
 def newsletter(request):
     return render(request, 'core/newsletter.html')
 
-def donate_success(request):
-    return render(request, 'core/donate_success.html')
 
-def donate_cancel(request):
-    return render(request, 'core/donate_cancel.html')
 
 def event_detail(request, event_id):
     # Placeholder for event detail view
@@ -361,4 +460,163 @@ def admin_resource_delete(request, resource_id):
         'object_name': instance.title,
         'return_url': 'admin_resources',
     })
+
+
+@group_required
+def admin_volunteers(request):
+    items = Volunteer.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Volunteers',
+        'section_label': 'Volunteer',
+        'add_url': 'admin_volunteer_add',
+        'headers': ['ID', 'Full Name', 'Email', 'Phone', 'Program', 'Status', 'Created'],
+        'rows': [
+            {
+                'cols': [item.email, f"{item.first_name} {item.last_name}", item.email, item.phone_number, 
+                         item.program_id.title if item.program_id else '-', item.status, item.created_at.strftime('%Y-%m-%d')],
+                'edit_url': reverse('admin_volunteer_edit', args=[item.email]),
+                'delete_url': reverse('admin_volunteer_delete', args=[item.email]),
+            }
+            for item in items
+        ],
+    })
+
+
+@group_required
+def admin_volunteer_add(request):
+    return admin_form_view(request, VolunteerForm, section_name='Volunteer', action_label='Add', return_url='admin_volunteers')
+
+
+@group_required
+def admin_volunteer_edit(request, volunteer_email):
+    instance = get_object_or_404(Volunteer, email=volunteer_email)
+    return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
+
+
+@group_required
+def admin_volunteer_delete(request, volunteer_email):
+    instance = get_object_or_404(Volunteer, email=volunteer_email)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Volunteer deleted successfully.')
+        return redirect('admin_volunteers')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Volunteer',
+        'object_name': f"{instance.first_name} {instance.last_name}",
+        'return_url': 'admin_volunteers',
+    })
+
+
+@group_required
+def admin_feedback(request):
+    feedback_list = Feedback.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_feedback_list.html', {
+        'section_name': 'Feedback',
+        'section_label': 'Feedback Item',
+        'feedback_list': feedback_list,
+    })
+
+
+@group_required
+def admin_feedback_delete(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Feedback deleted successfully.')
+        return redirect('admin_feedback')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Feedback',
+        'object_name': instance.name,
+        'return_url': 'admin_feedback',
+    })
+
+
+@group_required
+def admin_feedback_respond(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    if request.method == 'POST':
+        # Handle response submission
+        response_message = request.POST.get('response_message')
+        if response_message:
+            # Here you would typically save the response to a related model or add it to the feedback
+            # For now, we'll just show a success message
+            messages.success(request, 'Response added successfully.')
+            return redirect('admin_feedback')
+    
+    return render(request, 'core/admin_feedback_respond.html', {
+        'feedback': instance,
+    })
+
+
+@group_required
+def admin_feedback_mark_addressed(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    # Here you would update a status field or add a tag
+    # For now, we'll just show a success message
+    messages.success(request, 'Feedback marked as addressed.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_unaddressed(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    # Here you would update a status field or remove a tag
+    messages.success(request, 'Feedback marked as unaddressed.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_in_progress(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as in progress.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_resolved(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as resolved.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_rejected(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as rejected.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_duplicate(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as duplicate.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_wontfix(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as won\'t fix.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_needsinfo(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as needs info.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_accepted(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as accepted.')
+    return redirect('admin_feedback')
+
+
+@group_required
+def admin_feedback_mark_reopened(request, feedback_id):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    messages.success(request, 'Feedback marked as reopened.')
+    return redirect('admin_feedback')
  

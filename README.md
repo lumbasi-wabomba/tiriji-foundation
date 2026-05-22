@@ -1,111 +1,211 @@
-# Tiriji Foundation
+# Tiriji Foundation Platform
 
-Tiriji Foundation is a web platform designed to showcase the programs, events, news, resources, and team behind the foundation. The platform serves as a central hub for community engagement, volunteer signups, donations, and access to educational and vocational resources.
+Tiriji Foundation is a Django-based digital platform for a regenerative NGO operating in Kenya. It presents the foundation as a living movement and operational ecosystem for children, women, volunteers, donors, partners, and local communities.
 
-## Table of Contents
+The current product direction combines cinematic storytelling, impact transparency, premium SaaS-style operational clarity, and accessible community engagement flows.
 
-- [About](#about)
-- [Features](#features)
-- [Current Progress](#current-progress)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+## Current Scope
 
-## About
+### Public Website
 
-Tiriji Foundation aims to provide a digital presence for initiatives, programs, and events that empower communities. The platform emphasizes accessibility, intuitive design, and informative content to connect supporters, volunteers, and beneficiaries.
+- Cinematic homepage with hero slideshow, impact counters, storytelling sections, transparent donation allocation, community gallery, partner rail, and calls to action.
+- Children page focused on education support, mentorship timelines, student stories, and child-centered impact metrics.
+- Women empowerment page focused on vocational training, entrepreneurship, leadership journeys, workshop systems, and transformation stories.
+- Programs listing and detail pages with search, active program cards, volunteer fee visibility, and calls to donate or volunteer.
+- Resources dropdown for Events, News, and Materials.
+- About page with mission, vision, values, team profiles, and compact partner logo cards.
+- Contact, gallery, team, partners, careers, blog, FAQ, and supporting content routes.
 
-## Features
+### Volunteer Experience
 
-The platform includes:
+- Volunteer landing page with program selection, duration estimator, fee preview, and status pipeline.
+- Volunteer application form.
+- Application flow creates:
+  - volunteer record
+  - calculated fee
+  - pending transaction
+  - volunteer payment record
+- Payment summary page for the submitted volunteer.
 
-- **Programs** — Showcase of foundation programs with detail pages, galleries, and suggested programs
-- **Events** — List of events with detail views and related events suggestions
-- **News** — News grid and detailed news articles to keep visitors informed
-- **Resources** — Educational and vocational resources with detail pages
-- **Team & Partners** — Profiles of team members and partner organizations
-- **Volunteer Sign-up** — Forms to register volunteers
-- **Donations** — Structured donation options to support the foundation
-- **Contact** — Contact forms and social media links
-- **Responsive UI** — Mobile-friendly design with consistent styling across sections
+### Donation Experience
 
-## Current Progress
+- Impact-based donation tiers.
+- Donation form with donation type, payment method, amount, reason, and monthly sponsorship option.
+- Donation submission creates:
+  - transaction record
+  - donation record
+  - generated donation ID
+  - generated merchant reference ID
+- Success page after submission.
 
-Based on the current GitHub repository (Tiriji Foundation):
+### Admin Portal
 
-### Frontend
-- Fully styled pages using `style.css`
-- Responsive grid layouts for programs, events, news, resources, and partners
-- Interactive call-to-action buttons (`.btn-primary`, `.btn-secondary`, `.btn-outline`)
-- Hover effects for cards and buttons for enhanced UX
-- Dedicated sections for volunteer signup, donations, and suggested programs/resources
+The custom admin portal is available at:
 
-### Backend (Django)
-- Models for Programs, Events, News, Resources, Team Members, and Partners
-- Admin interface for content management (assumed from earlier work)
-- Dynamic rendering of program/event/news details using templates
+```text
+/admin-portal/
+```
 
-### Pending / Next Steps
-- Integration of dynamic image uploads and media handling for program/event galleries
-- Full deployment setup and hosting configuration
-- SEO optimizations and accessibility enhancements
+It is protected by login and supports operational content management for:
+
+- Programs
+- Events
+- News
+- Resources
+- Volunteers
+- Feedback
+
+The dashboard has been restyled as an operations command center with workflow panels, metrics, quick publishing actions, and management links.
 
 ## Tech Stack
 
-- **Frontend**: HTML, CSS (custom grid and responsive layout), JavaScript (planned enhancements)
-- **Backend**: Django, Python
-- **Database**: SQLite (development), PostgreSQL (planned for production)
-- **Version Control**: Git, GitHub
+- Python
+- Django 6.0
+- PostgreSQL via `DATABASE_URL`
+- Cloudinary for uploaded media processing/storage integration
+- WhiteNoise for static file serving
+- Django REST Framework
+- django-crispy-forms and crispy-bootstrap5
+- Custom HTML/CSS/JavaScript frontend
 
-## Installation
+## Key Files
 
-1. Clone the repository
-   ```
-   git clone https://github.com/yourusername/tiriji-foundation.git
-   cd tiriji-foundation
+```text
+core/models.py              Data models and media upload hooks
+core/forms.py               Public and admin forms
+core/views.py               Public pages, submissions, and admin portal views
+core/urls.py                Application routes
+templates/core/             Public and admin templates
+templates/registration/     Login template
+static/css/style.css        Main design system and responsive UI styles
+static/js/script.js         Navigation, dropdowns, counters, reveals, estimators, filters
+static/images/              Local image and partner logo assets
+staticfiles/                Collected static output used by WhiteNoise/dev serving
+```
 
-2. **Create a virtual environment**
-   ```bash
-   python3 -m venv env
-   source env/bin/activate          # On Windows: env\Scripts\activate
-3. **Install Dependancies**
-    ```bash
-    pip install -r requirements.txt
-4. **Run Migrations**
-    ```bash
-    python manage.py migrate
-5. **Start the development server**
-    ```bash
-    python manage.py runserver
-6. **Open your browser at http://127.0.0.1:8000/**
+## Environment Variables
 
-## Usage
+Create a `.env` file in the project root with the values required by `tiriji/settings.py`:
 
-- Access programs, events, and resources via the navigation menu.  
-- Submit volunteer applications or donations through the provided forms.  
-- Administrators can log in via `staff login` at the footer of the resource page to manage content .  
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+DATABASE_URL=postgres://user:password@host:5432/database?sslmode=require
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
 
-## Contributing
+The project currently expects PostgreSQL from `DATABASE_URL`. If the database host is unavailable, views that query or submit data will fail.
 
-1. Fork the repository.  
-2. Create a feature branch:
-    ```bash
-    git checkout -b feature/new-feature
-3. Commit changes:
-    ```bash
-    git commit -m "This is an eaxmple feature"
-4. Push to your branch:
-    ```bash
-    git push origin feature/new-feature
-5. Submit a pull request
+## Local Setup
 
+1. Create and activate a virtual environment:
 
+```bash
+python3 -m venv env
+source env/bin/activate
+```
 
-## Contact
+2. Install dependencies:
 
-- **Website:** [Tiriji Foundation](https://www.tirijifoundation.com/)  
-- **GitHub:** [Raibn](https://github.com/Raibn)  
-- **Email:** [contact@tiriji-foundation.org](mailto:brayokara@gmail.com)
+```bash
+pip install -r requirements.txt
+```
+
+3. Configure `.env` with the variables above.
+
+4. Run migrations:
+
+```bash
+python manage.py migrate
+```
+
+5. Start the development server:
+
+```bash
+python manage.py runserver
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/
+```
+
+If port `8000` is busy, use another port:
+
+```bash
+python manage.py runserver 127.0.0.1:8001
+```
+
+## Static Assets
+
+Source assets live in:
+
+```text
+static/
+```
+
+The app also has a collected static directory:
+
+```text
+staticfiles/
+```
+
+When editing CSS or JavaScript locally, update the source files:
+
+```text
+static/css/style.css
+static/js/script.js
+```
+
+If the running server is serving stale assets from `staticfiles/`, either run `collectstatic` or sync the changed files into `staticfiles/` during local development.
+
+## Verification
+
+Useful checks:
+
+```bash
+python manage.py check
+python manage.py runserver 127.0.0.1:8001
+```
+
+Important routes to test:
+
+```text
+/
+/about/
+/children/
+/women/
+/programs/
+/volunteer/
+/volunteer/signup/
+/donate/
+/events/
+/news/
+/resources/
+/admin-portal/
+```
+
+Submission flows to verify after backend changes:
+
+- Donation submit redirects to `/donate/success/`.
+- Volunteer submit redirects to `/volunteer/payment/<email>/volunteer_payment_summary/`.
+- Existing volunteer payment summaries render without server errors.
+
+## Recent Platform Updates
+
+- Rebuilt the frontend design system for a modern regenerative NGO platform.
+- Added route-aware active navigation states.
+- Restyled Resources dropdown and compact About partner cards.
+- Rebuilt shared JavaScript for navigation, dropdowns, scroll reveals, counters, donation tiers, volunteer fee estimation, and program search.
+- Fixed donation submission by generating donation and merchant reference IDs.
+- Fixed volunteer payment summary model lookup and payment status rendering.
+- Fixed broken partner image path on the About page.
+
+## Notes
+
+- The custom admin portal is separate from Django's built-in `/admin/`.
+- Uploaded media is configured around Cloudinary support.
+- The visual system is intentionally not a generic charity template; it is designed to communicate active operations, trust, transparency, and human-centered impact.

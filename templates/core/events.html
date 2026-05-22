@@ -28,7 +28,10 @@
             <a href="{% url 'event_detail' event.event_id %}" class="text-link">Read More →</a>
         </div>
         {% empty %}
-        <p>No upcoming events at the moment.</p>
+        <div class="no-items-message">
+            <p>No upcoming events at the moment.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+        </div>
         {% endfor %}
     </div>
 </section>

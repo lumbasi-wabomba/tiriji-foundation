@@ -32,8 +32,20 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = []
+# Enable WhiteNoise caching for development
+if DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Comment out STATICFILES_DIRS in production to avoid conflicts with WhiteNoise 
+# if not DEBUG:
+#     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+#     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#     # Don't use STATICFILES_DIRS in production
+#     STATICFILES_DIRS = []
+
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1" ]
 
 
 # Application definition
@@ -91,14 +103,6 @@ WSGI_APPLICATION = 'tiriji.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 DATABASES = {
@@ -112,6 +116,7 @@ DATABASES = {
         'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
     }
 }
+
 
 # STORAGES = {
 #     "default": {
@@ -162,10 +167,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',

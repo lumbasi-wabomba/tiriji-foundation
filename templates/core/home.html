@@ -3,188 +3,214 @@
 
 {% block content %}
 
-<!-- HERO SECTION -->
-<section class="hero">
+<section class="hero cinematic-hero">
     <div class="hero-slide slide-1 active"></div>
     <div class="hero-slide slide-2"></div>
     <div class="hero-slide slide-3"></div>
     <div class="hero-slide slide-4"></div>
     <div class="hero-slide slide-5"></div>
-    <!--div class="hero-slide slide-6"></div-->
-
-    <div class="hero-overlay"> </div>
+    <div class="hero-overlay"></div>
 
     <div class="container hero-content">
-        <h1>Inspiring Action for Regeneration</h1>
-        <p>
-            Tiriji Foundation nurtures children, empowers women,
-             and restores communities through regenerative leadership.
-        </p>
-        </p>
-        <div class="btn">
-            <a href="{% url 'donate' %}" class="btn btn-primary">Donate</a>
-            <a href="{% url 'volunteer' %}" class="btn btn-secondary">Volunteer</a>
+        <div class="hero-copy reveal-on-scroll">
+            <h1>Regenerating Communities Through Education, Women Empowerment & Volunteer Action</h1>
+            <p>
+                Tiriji Foundation is a living movement in Kenya, connecting scholars,
+                women entrepreneurs, mentors, volunteers, and local partners through
+                measurable regenerative action.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'volunteer' %}" class="btn btn-primary">Become a Volunteer</a>
+                <a href="{% url 'donate' %}" class="btn btn-secondary">Support a Child</a>
+                <a href="#impact" class="btn btn-glass">Explore Our Impact</a>
+            </div>
+        </div>
+
+        <aside class="hero-signal glass-panel reveal-on-scroll">
+            <span class="signal-dot"></span>
+            <p>Active field network</p>
+            <strong>Children, women, mentors, and volunteers moving through real programs.</strong>
+        </aside>
+    </div>
+</section>
+
+<section class="impact-strip" id="impact" aria-label="Impact metrics">
+    <div class="container impact-grid">
+        <div class="impact-stat reveal-on-scroll">
+            <strong data-count="500">0</strong>
+            <span>Children supported</span>
+        </div>
+        <div class="impact-stat reveal-on-scroll">
+            <strong data-count="120">0</strong>
+            <span>Women empowered</span>
+        </div>
+        <div class="impact-stat reveal-on-scroll">
+            <strong data-count="20">0</strong>
+            <span>Community programs</span>
+        </div>
+        <div class="impact-stat reveal-on-scroll">
+            <strong data-count="10">0</strong>
+            <span>Partner pathways</span>
         </div>
     </div>
 </section>
 
-<!-- Addon -->
-<section class="section">
-    <div class="container">
-        
-        <h2 class="section-title">Our Impact</h2>
-        
-        <div class="grid grid-200">
-
-            <div class="card section-center">
-                <h3>500+</h3>
-                <p>Children Supported</p>
+<section class="section editorial-section">
+    <div class="container editorial-grid">
+        <div class="editorial-media reveal-on-scroll">
+            <img src="{% static 'images/hero-children.jpg' %}" alt="Children learning in a Tiriji community program">
+        </div>
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Scholar of the Week</p>
+            <h2>Mentorship that turns school support into a future pathway.</h2>
+            <p>
+                Education support is paired with life-skills mentorship, confidence
+                building, and community accountability so each child is known,
+                encouraged, and followed over time.
+            </p>
+            <div class="story-meta">
+                <span>School support</span>
+                <span>Mentorship</span>
+                <span>Life skills</span>
             </div>
-
-            <div class="card section-center">
-                <h3>120+</h3>
-                <p>Women Empowered</p>
-            </div>
-
-            <div class="card section-center">
-                <h3>20+</h3>
-                <p>Community Programs</p>
-            </div>
-
-            <!--div class="card section-center">
-                <h3>10+</h3>
-                <p>Partner Organizations</p>
-            </div-->
-
+            <a href="{% url 'children' %}" class="text-link">Follow the children journey</a>
         </div>
     </div>
 </section>
 
-<!-- ABOUT PREVIEW -->
-<section class="section section-center">
-<div class="container">  
-
-    <h2 class="section-title">Who We Are</h2>
-    <p>
-        Across communities, many children lack opportunity,
-        many women lack voice, and many families lack support.
-        Tiriji Foundation exists to change that.
-    </p>
-    <a href="{% url 'about' %}" class="text-link">Learn More →</a>
-</div>
-</section>
-
-<!-- FOCUS AREAS -->
-<section class="section section-light ">
-    <div class="container">
-        <h2 class="section-title">Our Focus Areas</h2>
-
-        <div class="grid grid-300">
-            
-            <div class="card">
-                <h3>Children</h3>
-                <p>
-                Supporting vulnerable children through care,
-                mentorship, education support, and life-skills development.
-                </p>
-
-                <a href="{% url 'children' %}" class="text-link">Explore →</a>
+<section class="section section-cream story-band">
+    <div class="container split-story">
+        <div class="story-panel reveal-on-scroll">
+            <p class="section-label">Women Changing Communities</p>
+            <h2>Economic empowerment designed around dignity, skill, and local leadership.</h2>
+            <p>
+                Tiriji supports women through vocational training, entrepreneurship
+                guidance, peer mentorship, and practical community workshops.
+            </p>
+            <a href="{% url 'women' %}" class="btn btn-primary">Explore Women Empowerment</a>
+        </div>
+        <div class="feature-card reveal-on-scroll">
+            <img src="{% static 'images/hero-women-2.jpg' %}" alt="Women in a Tiriji empowerment program">
+            <div>
+                <h3>Featured success story</h3>
+                <p>From training room to community enterprise, women build income and leadership together.</p>
             </div>
-
-            <div class="card">
-                <h3>Women</h3>
-                <p>
-                Empowering women through leadership training,
-                economic empowerment, and community healing initiatives.
-                </p>
-                <a href="{% url 'women' %}" class="text-link">Explore →</a>
-            </div>
-
-            <div class="card">
-                <h3>Restoring Communities. Raising Leaders.</h3>
-
-                <p>
-                Tiriji Foundation nurtures children, empowers women,
-                and restores communities through regenerative leadership.
-                </p>
-                <a href="{% url 'home' %}" class="text-link">Explore →</a>
-            </div>
-
         </div>
     </div>
 </section>
 
-
-
-<!-- PROGRAMS SECTION -->
-<section class="section-center section">
+<section class="section operations-section">
     <div class="container">
-        <h2 class="section-title">Our Programs</h2>
-        <p class="section-center description">
-          Our work translates vision into action through
-          community-centered programs that nurture leadership,
-          healing, and regenerative livelihoods.
-        </p>
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Volunteer Journeys</p>
+            <h2>An onboarding ecosystem with visible next steps.</h2>
+        </div>
+        <div class="journey-track reveal-on-scroll" aria-label="Volunteer onboarding status pipeline">
+            <div class="journey-step active"><span>01</span><strong>Submitted</strong><p>Application received.</p></div>
+            <div class="journey-step"><span>02</span><strong>Payment Pending</strong><p>Fee preview and payment instructions.</p></div>
+            <div class="journey-step"><span>03</span><strong>Under Review</strong><p>Program fit, dates, and safety checked.</p></div>
+            <div class="journey-step"><span>04</span><strong>Approved</strong><p>Orientation and arrival planning.</p></div>
+            <div class="journey-step"><span>05</span><strong>Active</strong><p>Field coordination and local support.</p></div>
+        </div>
+    </div>
+</section>
 
-        <div class="grid grid-300">
-            {% for program in programs %}
-            <div class="card">
+<section class="section program-showcase">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Current Programs</p>
+            <h2>Operational workstreams, not abstract charity messaging.</h2>
+        </div>
+        <div class="program-showcase-grid">
+            {% for program in programs|slice:":3" %}
+            <article class="program-feature reveal-on-scroll">
                 {% if program.image_url %}
                     <img src="{{ program.image_url }}" alt="{{ program.title }}">
+                {% else %}
+                    <img src="{% static 'images/program-ngl.jpg' %}" alt="{{ program.title }}">
                 {% endif %}
-                <h3>{{ program.title }}</h3>
-                <p>{{ program.program_description|truncatewords:20 }}</p>
-                <a href="{% url 'program_detail' program.program_id %}" class="text-link">
-                    Read More →
-                </a>
-            </div>
+                <div>
+                    <h3>{{ program.title }}</h3>
+                    <p>{{ program.program_description|truncatewords:24 }}</p>
+                    <a href="{% url 'program_detail' program.program_id %}" class="text-link">Open program brief</a>
+                </div>
+            </article>
             {% empty %}
-            <p>No programs available at the moment.</p>
+            <article class="program-feature reveal-on-scroll">
+                <img src="{% static 'images/program-ngl.jpg' %}" alt="Regenerative leadership program">
+                <div>
+                    <h3>Regenerative Leadership</h3>
+                    <p>Community-centered leadership, mentorship, and healing systems for long-term transformation.</p>
+                    <a href="{% url 'programs' %}" class="text-link">View programs</a>
+                </div>
+            </article>
             {% endfor %}
         </div>
+    </div>
+</section>
 
-        <div class="btn section-center" style="margin-top:20px;">
-            <a href="{% url 'programs' %}" class="btn btn-outline">View All Programs</a>
+<section class="section trust-section">
+    <div class="container trust-grid">
+        <div class="reveal-on-scroll">
+            <p class="section-label">Transparent Giving</p>
+            <h2>Donation pathways connected to visible program allocation.</h2>
+            <p>
+                Contributions support education materials, mentorship systems,
+                women-led enterprise development, community coordination, and
+                safe volunteer operations.
+            </p>
+            <a href="{% url 'donate' %}" class="btn btn-primary">Donate Today</a>
+        </div>
+        <div class="allocation-card reveal-on-scroll" aria-label="Illustrative fund allocation">
+            <div class="allocation-row"><span>Children education</span><strong>40%</strong></div>
+            <div class="allocation-bar"><span style="width: 40%"></span></div>
+            <div class="allocation-row"><span>Women empowerment</span><strong>30%</strong></div>
+            <div class="allocation-bar"><span style="width: 30%"></span></div>
+            <div class="allocation-row"><span>Field operations</span><strong>20%</strong></div>
+            <div class="allocation-bar"><span style="width: 20%"></span></div>
+            <div class="allocation-row"><span>Reporting and care</span><strong>10%</strong></div>
+            <div class="allocation-bar"><span style="width: 10%"></span></div>
         </div>
     </div>
 </section>
 
-
-<!-- IMPACT SECTION -->
-<section class="section section-light">
-    <div class="container grid grid-200">
-        <div class="card">
-            <h3>Community Impact</h3>
-            <p>
-                Every child mentored, every woman empowered,
-                and every community restored represents a step
-                toward a regenerative future.
-            </p>
-        </div>
-        <div class="card">
-
-            <h3>Get Involved</h3>
-            <p>
-                Join us as a donor, volunteer, or partner and help inspire action
-                for a thriving and regenerative future.
-            </p>
-            <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">
-                Sign Up
-            </a>
-        </div>
-    </div>
-</section>
-
-
-<!-- CALL TO ACTION -->
-<section class="cta">
+<section class="section gallery-band">
     <div class="container">
-        <h2>Support Our Mission</h2>
-        <p>Be Part of the Regeneration
-            Your support helps nurture leaders,
-            restore dignity, and transform communities.
-        </p>
-        <a href="{% url 'donate' %}" class="btn btn-primary">Donate Today</a>
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Community Gallery</p>
+            <h2>Field moments from an active network.</h2>
+        </div>
+        <div class="mosaic-gallery reveal-on-scroll">
+            <img src="{% static 'images/hero-children.jpg' %}" alt="Children program moment">
+            <img src="{% static 'images/hero-women.jpg' %}" alt="Women empowerment session">
+            <img src="{% static 'images/program-kenger.jpg' %}" alt="Regenerative community work">
+            <img src="{% static 'images/program-ngl.jpg' %}" alt="Leadership program gathering">
+        </div>
+    </div>
+</section>
+
+<section class="section partner-section">
+    <div class="container">
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Trusted Ecosystem</p>
+            <h2>Partners strengthening the operating network.</h2>
+        </div>
+        <div class="partner-rail reveal-on-scroll">
+            <img src="{% static 'images/partners/partner-ipi.png' %}" alt="International Peace Initiatives">
+            <img src="{% static 'images/partners/partner-nile.png' %}" alt="Nile Journeys">
+            <img src="{% static 'images/partners/partner-id.png' %}" alt="Impact Direct">
+            <img src="{% static 'images/partners/partner-geri.png' %}" alt="Gender Equity and Reconciliation International">
+            <img src="{% static 'images/partners/partner-syk.png' %}" alt="Synergy Youth Kenya">
+        </div>
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
+    <div class="container reveal-on-scroll">
+        <h2>Help turn local courage into regenerative change.</h2>
+        <p>Volunteer, sponsor a child, or fund a community program with Tiriji Foundation.</p>
+        <a href="{% url 'volunteer' %}" class="btn btn-primary">Become a Volunteer</a>
+        <a href="{% url 'donate' %}" class="btn btn-glass">Support the Mission</a>
     </div>
 </section>
 

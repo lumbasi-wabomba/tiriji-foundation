@@ -2,9 +2,13 @@ from django.db import models
 import cloudinary
 import cloudinary.uploader
 import os
+import math
+import uuid
 from .media_compress import compress_image, compress_video
 from django.db.models.signals import post_save
 from django.dispatch import receiver 
+from datetime import timedelta
+from django.core.exceptions import ValidationError
 
 class program(models.Model):
     program_id = models.AutoField(primary_key=True)
@@ -14,26 +18,259 @@ class program(models.Model):
     image_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Pricing Data
+    two_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    four_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    eight_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    extra_week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+
     def __str__(self):
         return self.title
 
-class volunteer(models.Model):
+# class volunteer(models.Model): # Capitalized volunteer to avoid conflict with volunteer view
+#     first_name = models.CharField(max_length=50, null=False, blank=False)
+#     last_name = models.CharField(max_length=50, null=False, blank=False)
+#     email = models.EmailField(primary_key=True)
+#     occupation = models.CharField(max_length=100)
+#     phone_number = models.CharField(max_length=20)
+#     id_pass_no = models.CharField(max_length=50, verbose_name="ID/Passport No")
+#     starting_date = models.DateField()
+#     end_date = models.DateField()
+#     residence = models.CharField(max_length=100)
+#     emergency_contact_name = models.CharField(max_length=100)
+#     emergency_contact_phone = models.CharField(max_length=20)
+#     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
+
+
+#     def __str__(self):
+#         return f"{self.first_name} {self.last_name} registered for {self.program_id.title} program that starts on {self.start_date} and ends on {self.end_date}"
+
+class volunteer(models.Model): # Revised version of this model
+
+
+
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
     email = models.EmailField(primary_key=True)
     occupation = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
     id_pass_no = models.CharField(max_length=50, verbose_name="ID/Passport No")
+
     starting_date = models.DateField()
     end_date = models.DateField()
+
     residence = models.CharField(max_length=100)
+
     emergency_contact_name = models.CharField(max_length=100)
     emergency_contact_phone = models.CharField(max_length=20)
-    program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
 
+    program_id = models.ForeignKey( program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    APPLICATION_STATUS = [
+        ('submitted', 'Submitted'),
+        ('payment_pending', 'Payment Pending'),
+        ('paid', 'Paid'),
+        ('under_review', 'Under Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+    ]
+
+    status = models.CharField(
+        max_length=30,
+        choices=APPLICATION_STATUS,
+        default='submitted'
+    )
+
+    calculated_fee = models.DecimalField( max_digits=10, decimal_places=2, null=True, blank=True)
+
+    @property
+    def duration_weeks(self):
+        total_days = (self.end_date - self.starting_date).days
+        return math.ceil(total_days / 7)
+    
+        return (
+            (self.end_date - self.starting_date).days // 7
+        )
+    
+    @property
+    def fee(self):
+        if not self.program_id:
+            return 0
+
+        if self.duration_weeks <= 2:
+            return self.program_id.two_week_fee
+
+        elif self.duration_weeks <= 4:
+            return self.program_id.four_week_fee
+        elif self.duration_weeks <= 8:
+            return self.program_id.eight_week_fee
+        else:
+            extra_weeks = self.duration_weeks - 8
+            extra_fee = extra_weeks * self.program_id.extra_week_fee
+            return self.program_id.eight_week_fee + extra_fee
+        
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} registered for {self.program_id.title} program that starts on {self.start_date} and ends on {self.end_date}"
+        program_title = self.program_id.title if self.program_id else "No Program"
+        return (
+            f"{self.first_name} {self.last_name} "
+            f"registered for {program_title} "
+            f"program from {self.starting_date} "
+            f"to {self.end_date}"
+        )
+    
+class Transaction(models.Model):
+
+    PAYMENT_METHODS = [
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Card'),
+        ('paypal', 'PayPal'),
+        ('stripe', 'Stripe'),
+        ('bank', 'Bank Transfer'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+    payment_method = models.CharField( max_length=20, choices=PAYMENT_METHODS, default='mpesa')
+    status = models.CharField( max_length=20, choices=STATUS_CHOICES, default='pending')
+    transaction_reference = models.CharField( max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField( auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    
+
+    def __str__(self):
+        return (
+            f"{self.payment_method} "
+            f"- {self.amount} "
+            f"- {self.status}"
+        )
+
+
+class donation(models.Model):
+    DONATION_TYPES = [
+        ('general', 'General Fund'),
+        ('children', 'Children Program'),
+        ('women', 'Women Empowerment'),
+        ('community', 'Regenerative Communities'),
+        ('volunteer', 'Volunteer Sponsorship'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    PAYMENT_METHODS = [
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Card'),
+        ('paypal', 'PayPal'),
+        ('stripe', 'Stripe'),
+        ('bank', 'Bank Transfer'),
+    ]
+
+    # =========================
+    # IDENTIFIERS
+    # =========================
+    donation_id = models.CharField( max_length=50, primary_key=True)
+    merchant_reference_id = models.CharField( max_length=100, unique=True )
+    pesapal_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+
+    # =========================
+    # DONOR INFORMATION
+    # =========================
+    donor_name = models.CharField( max_length=100, blank=True, null=True)
+    donor_email = models.EmailField( blank=True, null=True )
+    donor_phone_number = models.CharField( max_length=20, blank=True, null=True)
+
+
+    # =========================
+    # DONATION DETAILS
+    # =========================
+    donation_type = models.CharField( max_length=20, choices=DONATION_TYPES, default='general' )
+    donation_reason = models.CharField( max_length=255, blank=True, null=True)
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+    currency = models.CharField( max_length=10, default='KES')
+    is_monthly = models.BooleanField( default=False)
+    payment_method = models.CharField( max_length=20, choices=PAYMENT_METHODS, default='mpesa')
+    status = models.CharField( max_length=20, choices=STATUS_CHOICES, default ='pending')
+
+    # =========================
+    # PAYMENT DETAILS
+    # =========================
+    transaction = models.OneToOneField( Transaction, on_delete=models.CASCADE, related_name='donation', null=True, blank=True)
+    authorization_code = models.CharField( max_length=100, blank=True, null=True)
+    payment_reference = models.CharField( max_length=100, blank=True, null=True)
+    payment_date = models.DateTimeField( blank=True, null=True) 
+    amount_paid = models.DecimalField( max_digits=10, decimal_places=2, blank=True, null=True)
+    payer_phone_number = models.CharField( max_length=20, blank=True, null=True)
+    payer_email = models.EmailField( blank=True, null=True)
+    payer_name = models.CharField( max_length=100, blank=True, null=True)
+
+
+    # =========================
+    # TIMESTAMPS
+    # =========================
+    created_at = models.DateTimeField( auto_now_add=True)
+    updated_at = models.DateTimeField( auto_now=True)
+
+    def __str__(self):
+        donor = ( self.donor_name if self.donor_name else "Anonymous")
+
+        return (
+            f"{donor} donated "
+            f"{self.amount} "
+            f"{self.currency}"
+        )
+
+    def save(self, *args, **kwargs):
+        if not self.donation_id:
+            self.donation_id = self._generate_identifier("DON")
+
+        if not self.merchant_reference_id:
+            self.merchant_reference_id = self._generate_identifier("TIR")
+
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def _generate_identifier(cls, prefix):
+        while True:
+            value = f"{prefix}-{uuid.uuid4().hex[:12].upper()}"
+            if not cls.objects.filter(donation_id=value).exists() and not cls.objects.filter(merchant_reference_id=value).exists():
+                return value
+
+class SponsorPayment:
+    f""
+
+
+
+class VolunteerPayment(models.Model):
+   
+
+    volunteer = models.OneToOneField( volunteer, on_delete=models.CASCADE, related_name='payment')
+    transaction = models.OneToOneField( Transaction, on_delete=models.CASCADE, related_name='volunteer_payment')
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+    paid = models.BooleanField(default=False)
+    payment_reference = models.CharField( max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return (
+            f"{self.volunteer.first_name} {self.volunteer.last_name} - ${self.amount}"
+        )
+           
+
 
 
 class events(models.Model):
@@ -49,6 +286,43 @@ class events(models.Model):
     def __str__(self):
         return f"{self.title} event scheduled for {self.event_date} at {self.event_location} under {self.program_id.title} program"
 
+class event_registration(models.Model):
+    registration_id = models.AutoField(primary_key=True)
+    event_id = models.ForeignKey(events, on_delete=models.CASCADE, related_name='registrations')
+    name = models.CharField(max_length=100, null=False, blank=False)
+    email = models.EmailField(null=True, blank=True)
+    phone_number = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} registered for {self.event_id.title} event"
+
+class event_payment(models.Model):
+    PAYMENT_STATUS = [
+    ('pending', 'Pending'),
+    ('paid', 'Paid'),
+    ('failed', 'Failed'),
+    ('cancelled', 'Cancelled'),
+    ('refunded', 'Refunded'),
+    ]
+
+    status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS,
+        default='pending'
+    )
+    registration = models.OneToOneField( event_registration, on_delete=models.CASCADE)
+
+    amount = models.DecimalField( max_digits=10, decimal_places=2)
+
+    paid = models.BooleanField(default=False)
+
+    payment_reference = models.CharField( max_length=100, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.registration} - ${self.amount}"
 
 class news(models.Model):
     news_id = models.AutoField(primary_key=True)
@@ -116,6 +390,7 @@ class partners(models.Model):
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='partners')
 
     def __str__(self):
+        program_title = self.program_id.title if self.program_id else "No Program"
         if self.assigned_employee:
             return f"{self.name} partner related to {self.program_id.title} program and assigned to {self.assigned_employee.first_name} {self.assigned_employee.last_name}" 
         else:
@@ -140,25 +415,179 @@ class gallery(models.Model):
         elif self.event_id:
             return f"{self.title} image related to {self.event_id.title} event"
         else:
-            return self.title    
+            return self.title            
 
 
-class donations(models.Model):
-    donations_id  = models.CharField(max_length=50, primary_key=True)
-    merchant_reference_id = models.CharField(max_length=100, null=False, blank=False)
-    pesapal_transaction_id = models.CharField(max_length=100, null=False, blank=False)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=10)
-    status = models.CharField(max_length=20)
-    payment_method = models.CharField(max_length=50)
-    donation_reason = models.CharField(max_length=255, null=True, blank=True)
-    donor_email = models.EmailField(null=True, blank=True)
-    donor_phone_number = models.CharField(max_length=20, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+
+# =========================
+# IMPACT / PROGRAM STORYTELLING
+# =========================
+
+class ImpactPageChoices(models.TextChoices):
+    CHILDREN = 'children', 'Children Program'
+    WOMEN = 'women', 'Women Empowerment'
+
+
+class ImpactMetric(models.Model):
+    page = models.CharField(max_length=20, choices=ImpactPageChoices.choices)
+    label = models.CharField(max_length=100)
+    value = models.CharField(max_length=50)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'label']
 
     def __str__(self):
-        return f"Donation {self.donations_id} of {self.amount} {self.currency} via {self.payment_method} with status {self.status}"
+        return f"{self.value} {self.label} ({self.get_page_display()})"
+
+
+class FeaturedPerson(models.Model):
+    FEATURE_TYPES = [
+        ('scholar', 'Scholar of the Week'),
+        ('entrepreneur', 'Entrepreneur of the Month'),
+        ('mentor', 'Mentor Spotlight'),
+    ]
+
+    page = models.CharField(max_length=20, choices=ImpactPageChoices.choices)
+    feature_type = models.CharField(max_length=30, choices=FEATURE_TYPES)
+    name = models.CharField(max_length=100)
+    age = models.PositiveIntegerField(blank=True, null=True)
+    headline = models.CharField(max_length=150)
+    short_bio = models.TextField()
+    achievement = models.CharField(max_length=255, blank=True, null=True)
+    dream_or_goal = models.CharField(max_length=255, blank=True, null=True)
+    quote = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
+    image_url = models.URLField(max_length=250, null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_featured', '-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.get_feature_type_display()}"
+
+
+class SuccessStory(models.Model):
+    page = models.CharField(max_length=20, choices=ImpactPageChoices.choices)
+    title = models.CharField(max_length=150)
+    person_name = models.CharField(max_length=100, blank=True, null=True)
+    challenge = models.TextField()
+    intervention = models.TextField()
+    outcome = models.TextField()
+    quote = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
+    image_url = models.URLField(max_length=250, null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_featured', '-created_at']
+        verbose_name_plural = 'Success stories'
+
+    def __str__(self):
+        return self.title
+
+
+class InspirationVideo(models.Model):
+    page = models.CharField(max_length=20, choices=ImpactPageChoices.choices)
+    title = models.CharField(max_length=150)
+    description = models.TextField(blank=True, null=True)
+    video_url = models.URLField(max_length=500, help_text='YouTube, Vimeo, Cloudinary, or direct video URL')
+    thumbnail = models.ImageField(upload_to='temp/', blank=True, null=True)
+    thumbnail_url = models.URLField(max_length=250, null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_featured', '-created_at']
+
+    def __str__(self):
+        return self.title
+
+
+class PageMedia(models.Model):
+    MEDIA_TYPES = [
+        ('photo', 'Photo'),
+        ('video', 'Video'),
+    ]
+
+    page = models.CharField(max_length=20, choices=ImpactPageChoices.choices)
+    media_type = models.CharField(max_length=20, choices=MEDIA_TYPES, default='photo')
+    title = models.CharField(max_length=150)
+    description = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
+    image_url = models.URLField(max_length=250, null=True, blank=True)
+    video_url = models.URLField(max_length=500, blank=True, null=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['display_order', '-created_at']
+        verbose_name_plural = 'Page media'
+
+    def __str__(self):
+        return f"{self.title} ({self.get_page_display()})"
+
+
+@receiver(post_save, sender=FeaturedPerson)
+def upload_featured_person_image(sender, instance, **kwargs):
+    if instance.image and not instance.image_url:
+        if os.path.isfile(instance.image.path):
+            compressed_path = compress_image(instance.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                instance.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(instance.image.path)
+                instance.image = None
+                instance.save(update_fields=['image_url', 'image'])
+
+
+@receiver(post_save, sender=SuccessStory)
+def upload_success_story_image(sender, instance, **kwargs):
+    if instance.image and not instance.image_url:
+        if os.path.isfile(instance.image.path):
+            compressed_path = compress_image(instance.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                instance.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(instance.image.path)
+                instance.image = None
+                instance.save(update_fields=['image_url', 'image'])
+
+
+@receiver(post_save, sender=InspirationVideo)
+def upload_inspiration_video_thumbnail(sender, instance, **kwargs):
+    if instance.thumbnail and not instance.thumbnail_url:
+        if os.path.isfile(instance.thumbnail.path):
+            compressed_path = compress_image(instance.thumbnail.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                instance.thumbnail_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(instance.thumbnail.path)
+                instance.thumbnail = None
+                instance.save(update_fields=['thumbnail_url', 'thumbnail'])
+
+
+@receiver(post_save, sender=PageMedia)
+def upload_page_media_image(sender, instance, **kwargs):
+    if instance.image and not instance.image_url:
+        if os.path.isfile(instance.image.path):
+            compressed_path = compress_image(instance.image.path)
+            if compressed_path:
+                result = cloudinary.uploader.upload(compressed_path)
+                instance.image_url = result['secure_url']
+                os.remove(compressed_path)
+                os.remove(instance.image.path)
+                instance.image = None
+                instance.save(update_fields=['image_url', 'image'])
 
 
 class feedback(models.Model):
