@@ -5,112 +5,100 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
-
-        <h1>Support Regenerative Change</h1>
-
-        <p>
-            Your donation helps empower communities,
-            support children, and build sustainable futures.
-        </p>
-
+<section class="page-hero donation-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Give through a transparent impact pathway.</h1>
+            <p>
+                Support children, women, and regenerative community work with a
+                donation experience designed for clarity, trust, and visible allocation.
+            </p>
+        </div>
+        <div class="dashboard-card reveal-on-scroll">
+            <div class="dashboard-topline"><span class="signal-dot"></span>Secure donation flow</div>
+            <div class="mini-metric"><strong>40%</strong><span>Education support</span></div>
+            <div class="mini-metric"><strong>30%</strong><span>Women empowerment</span></div>
+            <div class="mini-metric"><strong>20%</strong><span>Field operations</span></div>
+        </div>
     </div>
 </section>
 
-<!-- IMPACT SECTION -->
-<section class="section">
-
-    <div class="container">
-
-        <h2 class="section-title">Your Impact</h2>
-
-        <div class="grid grid-300">
-
-            <div class="card section-center">
-                <h3>$25</h3>
-                <p>Supports school supplies for children</p>
+<section class="section section-cream">
+    <div class="container donation-layout">
+        <div class="donation-story reveal-on-scroll">
+            <p class="section-label">Impact Tiers</p>
+            <h2>Choose the kind of change you want to move.</h2>
+            <div class="donation-tiers" data-donation-tiers>
+                <button type="button" class="donation-tier" data-amount="25"><strong>$25</strong><span>School supplies and learning materials.</span></button>
+                <button type="button" class="donation-tier active" data-amount="100"><strong>$100</strong><span>Mentorship and leadership support.</span></button>
+                <button type="button" class="donation-tier" data-amount="500"><strong>$500</strong><span>Community regeneration project support.</span></button>
             </div>
-
-            <div class="card section-center">
-                <h3>$100</h3>
-                <p>Funds leadership and mentorship programs</p>
+            <div class="allocation-card">
+                <div class="allocation-row"><span>Program delivery</span><strong>70%</strong></div>
+                <div class="allocation-bar"><span style="width: 70%"></span></div>
+                <div class="allocation-row"><span>Field coordination</span><strong>20%</strong></div>
+                <div class="allocation-bar"><span style="width: 20%"></span></div>
+                <div class="allocation-row"><span>Reporting and donor care</span><strong>10%</strong></div>
+                <div class="allocation-bar"><span style="width: 10%"></span></div>
             </div>
-
-            <div class="card section-center">
-                <h3>$500</h3>
-                <p>Supports community regeneration projects</p>
-            </div>
-
         </div>
 
-    </div>
-
-</section>
-
-<!-- DONATION FORM -->
-<section class="section section-light">
-
-    <div class="container">
-
-        <div class="card">
-
-            <h2 class="section-title">Make a Donation</h2>
-
-            <form method="POST">
-
+        <div class="donation-form-card reveal-on-scroll">
+            <h2>Make a Donation</h2>
+            <form method="POST" class="premium-form">
                 {% csrf_token %}
-
                 <div class="grid grid-2">
-
                     <div class="form-group">
                         <label>Name</label>
                         {{ form.donor_name }}
                     </div>
-
                     <div class="form-group">
                         <label>Email</label>
                         {{ form.donor_email }}
                     </div>
-
+                    <div class="form-group">
+                        <label>Phone</label>
+                        {{ form.donor_phone_number }}
+                    </div>
                     <div class="form-group">
                         <label>Donation Type</label>
                         {{ form.donation_type }}
                     </div>
-
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        {{ form.payment_method }}
+                    </div>
                     <div class="form-group">
                         <label>Amount (USD)</label>
-                        <input type="number"
-                               name="amount"
-                               class="form-control"
-                               required>
+                        <input type="number" name="amount" class="form-control" value="100" min="1" required data-donation-amount>
                     </div>
-
                 </div>
-
                 <div class="form-group">
-                    <label>Message (Optional)</label>
-                    {{ form.message }}
+                    <label>Donation Reason</label>
+                    {{ form.donation_reason }}
                 </div>
-
-                <div class="form-group">
-                    <label>
-                        {{ form.is_monthly }}
-                        Make this a monthly donation
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Donate Now
-                </button>
-
+                <label class="toggle-line">
+                    {{ form.is_monthly }}
+                    <span>Make this a monthly sponsorship</span>
+                </label>
+                <button type="submit" class="btn btn-primary">Donate Securely</button>
             </form>
-
         </div>
-
     </div>
+</section>
 
+<section class="section trust-section">
+    <div class="container trust-grid">
+        <div class="reveal-on-scroll">
+            <p class="section-label">Donor Trust</p>
+            <h2>Clear allocation, active programs, and confirmation after giving.</h2>
+        </div>
+        <div class="trust-list reveal-on-scroll">
+            <div><strong>Secure payment record</strong><span>Every donation creates a transaction for tracking.</span></div>
+            <div><strong>Impact-based options</strong><span>Give toward children, women, community, or general operations.</span></div>
+            <div><strong>Monthly sponsorship</strong><span>Build sustained support for ongoing programs.</span></div>
+        </div>
+    </div>
 </section>
 
 {% endblock %}

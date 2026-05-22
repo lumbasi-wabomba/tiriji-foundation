@@ -8,8 +8,9 @@ Volunteer Application | Tiriji Foundation
 {% block content %}
 
 <!-- HERO -->
-<section class="page-hero">
-    <div class="container">
+<section class="page-hero volunteer-hero">
+    <div class="container page-hero-grid">
+        <div>
 
         <h1>Volunteer Application</h1>
 
@@ -17,6 +18,11 @@ Volunteer Application | Tiriji Foundation
             Join our regenerative movement and become part
             of community transformation in Kenya.
         </p>
+        </div>
+        <div class="hero-proof glass-panel">
+            <strong>Application pipeline</strong>
+            <span>Submitted -> Payment Pending -> Under Review -> Approved -> Active</span>
+        </div>
 
     </div>
 </section>
@@ -27,7 +33,19 @@ Volunteer Application | Tiriji Foundation
 
     <div class="container">
 
-        <div class="card">
+        <div class="application-layout">
+            <aside class="application-sidebar">
+                <p class="section-label">Progress Tracker</p>
+                <div class="vertical-steps">
+                    <span class="active">Personal Information</span>
+                    <span>Program and Dates</span>
+                    <span>Emergency Contact</span>
+                    <span>Payment Summary</span>
+                </div>
+                <p>After submission, the system creates a payment pending status and takes you to your fee summary.</p>
+            </aside>
+
+        <div class="card application-card">
 
             <h2 class="section-title">
                 Volunteer Registration
@@ -145,6 +163,7 @@ Volunteer Application | Tiriji Foundation
 
             </form>
 
+        </div>
         </div>
 
     </div>

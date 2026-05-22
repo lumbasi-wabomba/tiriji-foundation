@@ -42,7 +42,7 @@
 
     <p>
         <strong>Payment Status:</strong>
-        {{ payment.status }}
+        {% if payment.paid %}Paid{% else %}Pending{% endif %}
     </p>
 
     <p>

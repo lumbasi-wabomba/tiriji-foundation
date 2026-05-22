@@ -51,11 +51,11 @@ urlpatterns = [
     path('admin-portal/resources/add/', views.admin_resource_add, name='admin_resource_add'),
     path('admin-portal/resources/<int:resource_id>/edit/', views.admin_resource_edit, name='admin_resource_edit'),
     path('admin-portal/resources/<int:resource_id>/delete/', views.admin_resource_delete, name='admin_resource_delete'),
-    path('admin-portal/volunteers/<int:volunteer_id>/payment-summary/', views.volunteer_payment_summary, name='volunteer_payment_summary'),
+    path('admin-portal/volunteers/<str:volunteer_email>/payment-summary/', views.volunteer_payment_summary, name='admin_volunteer_payment_summary'),
 
     path('admin-portal/volunteers/', views.admin_volunteers, name='admin_volunteers'),
-    path('admin-portal/volunteers/<int:volunteer_id>/edit/', views.admin_volunteer_edit, name='admin_volunteer_edit'),
-    path('admin-portal/volunteers/<int:volunteer_id>/delete/', views.admin_volunteer_delete, name='admin_volunteer_delete'),
+    path('admin-portal/volunteers/<str:volunteer_email>/edit/', views.admin_volunteer_edit, name='admin_volunteer_edit'),
+    path('admin-portal/volunteers/<str:volunteer_email>/delete/', views.admin_volunteer_delete, name='admin_volunteer_delete'),
 
     path('admin-portal/feedback/', views.admin_feedback, name='admin_feedback'),
     path('admin-portal/feedback/<int:feedback_id>/delete/', views.admin_feedback_delete, name='admin_feedback_delete'),

@@ -5,346 +5,123 @@
 
 {% block content %}
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="container">
-        <h1>Volunteer in Kenya</h1>
-        <p>
-            Join Tiriji Foundation and become part of a regenerative movement
-            transforming lives through community empowerment, education,
-            leadership, and sustainable development.
-        </p>
-
-        <div class="btn">
-            <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">
-                Apply Now
-            </a>
-
-            <a href="#fees" class="btn btn-secondary">
-                View Program Fees
-            </a>
-        </div>
-    </div>
-</section>
-
-
-<!-- INTRO -->
-<section class="section">
-    <div class="container grid grid-2">
-
-        <div>
-            <h2 class="section-title">Why Volunteer With Tiriji?</h2>
-
-            <p class="description">
-                Our volunteer experiences are rooted in Ubuntu —
-                the belief that humanity flourishes through connection,
-                service, and shared growth.
-            </p>
-
-            <p class="description">
-                Volunteers work alongside local communities in projects
-                focused on children support, women empowerment,
-                regenerative farming, mentorship, leadership,
-                and holistic transformation.
-            </p>
-
-            <p class="description">
-                Whether you stay for two weeks or several months,
-                your contribution becomes part of a lasting impact journey.
-            </p>
-        </div>
-
-        <div class="card">
-            <img src="{% static 'images/hero-children.jpg' %}"
-                 alt="Volunteers with children">
-
-            <h3>Community-Based Experience</h3>
-
+<section class="page-hero volunteer-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
+            <h1>Volunteer in Kenya through a real onboarding ecosystem.</h1>
             <p>
-                Live, learn, and serve within authentic local communities
-                while building meaningful cross-cultural relationships.
+                Choose a program, estimate your stay, understand the fee path,
+                prepare culturally, and move through a transparent approval pipeline.
             </p>
+            <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Start Application</a>
+            <a href="#volunteer-estimator" class="btn btn-glass">Preview Journey</a>
         </div>
-
+        <div class="dashboard-card reveal-on-scroll">
+            <div class="dashboard-topline"><span class="signal-dot"></span>Current onboarding</div>
+            <div class="mini-metric"><strong>5</strong><span>Status stages</span></div>
+            <div class="mini-metric"><strong>24h</strong><span>Initial response target</span></div>
+            <div class="mini-metric"><strong>Local</strong><span>Coordinator support</span></div>
+        </div>
     </div>
 </section>
 
+<section class="section section-cream" id="volunteer-estimator">
+    <div class="container app-shell">
+        <div class="app-main reveal-on-scroll">
+            <div class="section-heading compact">
+                <p class="section-label">Program Selection</p>
+                <h2>Build your volunteer pathway.</h2>
+            </div>
+            <div class="program-selector" data-volunteer-estimator>
+                <button class="selection-card active" type="button" data-program="Children & Youth" data-rate="550">
+                    <strong>Children & Youth</strong>
+                    <span>Mentorship, education activities, and life skills.</span>
+                </button>
+                <button class="selection-card" type="button" data-program="Women Empowerment" data-rate="650">
+                    <strong>Women Empowerment</strong>
+                    <span>Workshops, enterprise support, and peer mentoring.</span>
+                </button>
+                <button class="selection-card" type="button" data-program="Regenerative Communities" data-rate="700">
+                    <strong>Regenerative Communities</strong>
+                    <span>Sustainability, land care, and community projects.</span>
+                </button>
+            </div>
+            <label class="range-field">
+                <span>Duration: <strong data-duration-output>4 weeks</strong></span>
+                <input type="range" min="2" max="12" step="1" value="4" data-duration-input>
+            </label>
+        </div>
 
-<!-- PROGRAM AREAS -->
-<section class="section section-light">
+        <aside class="app-side reveal-on-scroll">
+            <p class="section-label">Fee Preview</p>
+            <h3 data-selected-program>Children & Youth</h3>
+            <div class="fee-preview"><span>Estimated program fee</span><strong data-fee-output>$950</strong></div>
+            <p>Includes orientation, local coordination, accommodation support, meals, and field preparation.</p>
+            <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Apply With These Details</a>
+        </aside>
+    </div>
+</section>
+
+<section class="section operations-section">
     <div class="container">
-
-        <h2 class="section-title">Volunteer Opportunities</h2>
-
-        <div class="grid grid-300">
-
-            <div class="card">
-                <img src="{% static 'images/hero-children.jpg' %}"
-                     alt="Children Program">
-
-                <h3>Children & Youth</h3>
-
-                <p>
-                    Mentor young people, support educational activities,
-                    assist with creative programs, and help nurture leadership.
-                </p>
-            </div>
-
-            <div class="card">
-                <img src="{% static 'images/hero-women.jpg' %}"
-                     alt="Women empowerment">
-
-                <h3>Women Empowerment</h3>
-
-                <p>
-                    Support workshops, entrepreneurship initiatives,
-                    mentorship programs, and community wellness projects.
-                </p>
-            </div>
-
-            <div class="card">
-                <img src="{% static 'images/program-kenger.jpg' %}"
-                     alt="Regenerative agriculture">
-
-                <h3>Regenerative Communities</h3>
-
-                <p>
-                    Participate in environmental restoration,
-                    regenerative agriculture, and sustainability projects.
-                </p>
-            </div>
-
+        <div class="section-heading reveal-on-scroll">
+            <p class="section-label">Status Pipeline</p>
+            <h2>Know what happens after you apply.</h2>
+        </div>
+        <div class="journey-track reveal-on-scroll">
+            <div class="journey-step active"><span>01</span><strong>Submitted</strong><p>Application details received.</p></div>
+            <div class="journey-step active"><span>02</span><strong>Payment Pending</strong><p>Fee summary and payment record created.</p></div>
+            <div class="journey-step"><span>03</span><strong>Under Review</strong><p>Dates, program fit, and safety reviewed.</p></div>
+            <div class="journey-step"><span>04</span><strong>Approved</strong><p>Coordinator confirms placement and next steps.</p></div>
+            <div class="journey-step"><span>05</span><strong>Active</strong><p>You join the field team with local support.</p></div>
         </div>
     </div>
 </section>
 
+<section class="section editorial-section">
+    <div class="container editorial-grid">
+        <div class="editorial-media reveal-on-scroll">
+            <img src="{% static 'images/program-ngl.jpg' %}" alt="Volunteer community experience">
+        </div>
+        <div class="editorial-copy reveal-on-scroll">
+            <p class="section-label">Preparation</p>
+            <h2>Designed for cultural respect, safety, and useful contribution.</h2>
+            <p>
+                Volunteers receive orientation on community context, cultural
+                preparation, safety expectations, accommodation, meals, and how to
+                work alongside local coordinators.
+            </p>
+            <div class="story-meta">
+                <span>Culture briefing</span>
+                <span>Local housing</span>
+                <span>Coordinator support</span>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- EXPERIENCE -->
 <section class="section">
-    <div class="container">
-
-        <h2 class="section-title">What Your Experience Includes</h2>
-
-        <div class="grid grid-250">
-
-            <div class="card section-center">
-                <h3>Accommodation</h3>
-                <p>
-                    Safe and welcoming volunteer housing with shared facilities.
-                </p>
-            </div>
-
-            <div class="card section-center">
-                <h3>Meals</h3>
-                <p>
-                    Daily local meals and opportunities to experience Kenyan culture.
-                </p>
-            </div>
-
-            <div class="card section-center">
-                <h3>Orientation</h3>
-                <p>
-                    Full introduction to the community, culture,
-                    and project expectations.
-                </p>
-            </div>
-
-            <div class="card section-center">
-                <h3>Local Support</h3>
-                <p>
-                    Dedicated local coordinators to guide and support you.
-                </p>
-            </div>
-
-        </div>
+    <div class="container story-grid">
+        <article class="story-card reveal-on-scroll">
+            <h3>What happens next</h3>
+            <p>Apply, review the payment summary, complete the fee step, then wait for coordinator review and placement confirmation.</p>
+        </article>
+        <article class="story-card reveal-on-scroll">
+            <h3>What your fee supports</h3>
+            <p>Accommodation, meals, orientation, local staffing, and sustainable program coordination.</p>
+        </article>
+        <article class="story-card reveal-on-scroll">
+            <h3>How you serve</h3>
+            <p>You work with children, women, sustainability programs, or leadership initiatives based on fit and timing.</p>
+        </article>
     </div>
 </section>
 
-
-<!-- FEES -->
-<section class="section section-light" id="fees">
-    <div class="container">
-
-        <h2 class="section-title">Volunteer Program Fees</h2>
-
-        <p class="section-center description">
-            Designed to remain accessible while supporting accommodation,
-            meals, local staffing, and sustainable community programs.
-        </p>
-
-        <div class="grid grid-300">
-
-            <div class="card section-center">
-                <h3>2 Weeks</h3>
-                <h2>$550</h2>
-                <p>
-                    Perfect for short-term immersion and community engagement.
-                </p>
-
-                <a href="{% url 'volunteer_signup' %}"
-                   class="btn btn-primary">
-                    Apply
-                </a>
-            </div>
-
-            <div class="card section-center">
-                <h3>4 Weeks</h3>
-                <h2>$950</h2>
-                <p>
-                    Build deeper relationships and contribute to ongoing programs.
-                </p>
-
-                <a href="{% url 'volunteer_signup' %}"
-                   class="btn btn-primary">
-                    Apply
-                </a>
-            </div>
-
-            <div class="card section-center">
-                <h3>8 Weeks</h3>
-                <h2>$1,750</h2>
-                <p>
-                    Extended immersion with meaningful long-term project involvement.
-                </p>
-
-                <a href="{% url 'volunteer_signup' %}"
-                   class="btn btn-primary">
-                    Apply
-                </a>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-
-<!-- GALLERY -->
-<section class="section">
-    <div class="container">
-
-        <h2 class="section-title">Life at Tiriji</h2>
-
-        <div class="grid grid-300">
-
-            <div class="card">
-                <img src="{% static 'images/program-ngl.jpg' %}"
-                     alt="Community activities">
-            </div>
-
-            <div class="card">
-                <img src="{% static 'images/hero-women-2.jpg' %}"
-                     alt="Volunteer engagement">
-            </div>
-
-            <div class="card">
-                <img src="{% static 'images/hero-children.jpg' %}"
-                     alt="Youth mentorship">
-            </div>
-
-        </div>
-    </div>
-</section>
-
-
-<!-- VIDEO SECTION -->
-<section class="section section-light">
-    <div class="container">
-
-        <h2 class="section-title">Stories From the Community</h2>
-
-        <div class="grid grid-2">
-
-            <div class="card">
-                <video controls width="100%">
-                    <source src="{% static 'videos/community-story.mp4' %}" type="video/mp4">
-                </video>
-
-                <h3>Community Transformation</h3>
-
-                <p>
-                    Hear stories from local leaders and volunteers
-                    involved in our regenerative initiatives.
-                </p>
-            </div>
-
-            <div class="card">
-                <video controls width="100%">
-                    <source src="{% static 'videos/volunteer-life.mp4' %}" type="video/mp4">
-                </video>
-
-                <h3>Volunteer Experience</h3>
-
-                <p>
-                    A glimpse into daily life, cultural exchange,
-                    and impact-driven volunteer experiences.
-                </p>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-
-<!-- FAQ -->
-<section class="section">
-    <div class="container">
-
-        <h2 class="section-title">Frequently Asked Questions</h2>
-
-        <div class="grid grid-2">
-
-            <div class="card">
-                <h3>Do I need experience?</h3>
-                <p>
-                    No. Passion, adaptability, and willingness to learn
-                    are more important than formal experience.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>What is included in the fee?</h3>
-                <p>
-                    Accommodation, meals, orientation, local support,
-                    and project coordination are included.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>Can groups apply?</h3>
-                <p>
-                    Yes. We welcome schools, universities,
-                    faith groups, and organizational teams.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>When can I start?</h3>
-                <p>
-                    Volunteer placements are available throughout the year.
-                </p>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-
-<!-- CTA -->
-<section class="cta">
-    <div class="container">
-
-        <h2>Become Part of the Movement</h2>
-
-        <p>
-            Your time, skills, and presence can help inspire
-            regeneration and lasting transformation.
-        </p>
-
-        <a href="{% url 'volunteer_signup' %}"
-           class="btn btn-primary">
-            Start Your Journey
-        </a>
-
+<section class="cta cinematic-cta">
+    <div class="container reveal-on-scroll">
+        <h2>Start with clarity. Arrive prepared.</h2>
+        <p>Your volunteer journey should feel human, transparent, and operationally supported from day one.</p>
+        <a href="{% url 'volunteer_signup' %}" class="btn btn-primary">Start Your Journey</a>
     </div>
 </section>
 

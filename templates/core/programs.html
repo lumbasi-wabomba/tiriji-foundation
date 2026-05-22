@@ -4,17 +4,24 @@
 {% block content %}
 
 <!-- HERO -->
-<section class="page-hero">
-    <div class="container">
+<section class="page-hero programs-hero">
+    <div class="container page-hero-grid">
+        <div class="reveal-on-scroll">
         <h1>Our Programs</h1>
         <p>
-            Explore our diverse initiatives empowering communities, youth, and the environment.
+            Explore active workstreams that connect volunteers, local coordinators,
+            children, women, and regenerative community systems.
         </p>
+        </div>
+        <div class="hero-proof glass-panel reveal-on-scroll">
+            <strong>Operational program briefs</strong>
+            <span>Impact stats, volunteer fees, details, and application pathways.</span>
+        </div>
     </div>
 </section>
 
 <!-- FILTER/SEARCH (Optional) -->
-<section class="container programs-filter-section">
+<section class="container programs-filter-section reveal-on-scroll">
     <div class="programs-controls">
         <input 
             type="text" 
@@ -27,11 +34,14 @@
 
 <!-- PROGRAMS GRID -->
 <section class="container programs-section">
-    <h2 class="section-title">All Programs</h2>
+    <div class="section-heading reveal-on-scroll">
+        <p class="section-label">Program Network</p>
+        <h2>Choose where your support becomes field action.</h2>
+    </div>
 
     <div class="program-grid">
         {% for program in programs %}
-        <div class="program-card" data-program="{{ program.title|lower }}">
+        <div class="program-card reveal-on-scroll" data-program="{{ program.title|lower }}">
             
             <!-- Image Container -->
             <div class="program-card-image">
@@ -93,9 +103,7 @@
             </div>
 
             <!-- Overlay badge -->
-            <div class="program-card-badge">
-                Active Program
-            </div>
+            <div class="program-card-badge">Active Program</div>
         </div>
         {% empty %}
         <div class="no-programs-message">
@@ -107,7 +115,7 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section">
+<section class="cta cinematic-cta">
     <div class="container">
         <h2>Want to Get Involved?</h2>
         <p>Support our programs or volunteer to make a lasting impact.</p>
@@ -115,43 +123,5 @@
         <a href="{% url 'volunteer' %}" class="btn btn-secondary">Volunteer</a>
     </div>
 </section>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    const searchInput = document.getElementById('programSearch');
-    const programCards = document.querySelectorAll('.program-card');
-
-    if (searchInput) {
-        searchInput.addEventListener('keyup', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-
-            programCards.forEach(card => {
-                const programName = card.getAttribute('data-program');
-                if (programName.includes(searchTerm)) {
-                    card.style.display = '';
-                    card.style.animation = 'fadeIn 0.3s ease';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    }
-</script>
-
-<style>
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
 
 {% endblock %}

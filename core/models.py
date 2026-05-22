@@ -3,6 +3,7 @@ import cloudinary
 import cloudinary.uploader
 import os
 import math
+import uuid
 from .media_compress import compress_image, compress_video
 from django.db.models.signals import post_save
 from django.dispatch import receiver 
@@ -101,23 +102,23 @@ class volunteer(models.Model): # Revised version of this model
             return 0
 
         if self.duration_weeks <= 2:
-            return self.program.two_week_fee
+            return self.program_id.two_week_fee
 
         elif self.duration_weeks <= 4:
-            return self.program.four_week_fee
+            return self.program_id.four_week_fee
         elif self.duration_weeks <= 8:
-            return self.program.eight_week_fee
+            return self.program_id.eight_week_fee
         else:
             extra_weeks = self.duration_weeks - 8
-            extra_fee = extra_weeks * (self.program.eight_week_fee / 8)
-            return self.program.eight_week_fee + extra_fee
+            extra_fee = extra_weeks * self.program_id.extra_week_fee
+            return self.program_id.eight_week_fee + extra_fee
         
 
     def __str__(self):
         program_title = self.program_id.title if self.program_id else "No Program"
         return (
             f"{self.first_name} {self.last_name} "
-            f"registered for {self.program_id.title} "
+            f"registered for {program_title} "
             f"program from {self.starting_date} "
             f"to {self.end_date}"
         )
@@ -232,6 +233,22 @@ class donation(models.Model):
             f"{self.amount} "
             f"{self.currency}"
         )
+
+    def save(self, *args, **kwargs):
+        if not self.donation_id:
+            self.donation_id = self._generate_identifier("DON")
+
+        if not self.merchant_reference_id:
+            self.merchant_reference_id = self._generate_identifier("TIR")
+
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def _generate_identifier(cls, prefix):
+        while True:
+            value = f"{prefix}-{uuid.uuid4().hex[:12].upper()}"
+            if not cls.objects.filter(donation_id=value).exists() and not cls.objects.filter(merchant_reference_id=value).exists():
+                return value
 
 class SponsorPayment:
     f""

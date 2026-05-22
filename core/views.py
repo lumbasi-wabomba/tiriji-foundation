@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
-from .models import program, volunteer, events as Event, news as News, resources as Resource, Transaction, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
+from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, feedback as Feedback
 from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm
 import os
 from django.conf import settings
@@ -98,8 +98,7 @@ def volunteer_signup(request):
             VolunteerPayment.objects.create(
                 volunteer=volunteer_instance,
                 transaction=transaction,
-                amount=volunteer_instance.calculated_fee,
-                status='pending'
+                amount=volunteer_instance.calculated_fee
             )
 
             # =========================
@@ -123,7 +122,7 @@ def volunteer_signup(request):
     )
 
 def volunteer_payment_summary(request, volunteer_email):
-    volunteer_instance = get_object_or_404(volunteer, email=volunteer_email)
+    volunteer_instance = get_object_or_404(Volunteer, email=volunteer_email)
     payment = get_object_or_404(VolunteerPayment, volunteer=volunteer_instance)
 
     return render(
@@ -140,40 +139,18 @@ def volunteer_payment_summary(request, volunteer_email):
 def donate(request):
     if request.method == 'POST':
         form = DonationForm(request.POST)
+
         if form.is_valid():
-            amount = request.POST.get('amount')
+            donation = form.save(commit=False)
             transaction = Transaction.objects.create(
-                amount=amount,
+                amount=donation.amount,
+                payment_method=donation.payment_method or 'mpesa',
                 status='pending',
-                payment_method=request.POST.get('payment_method', 'mpesa')
             )
-            donation = form.save(commit=False)
             donation.transaction = transaction
+            donation.status = 'pending'
             donation.save()
-
-            # Simulated redirect to payment gateway step
             return redirect('donate_success')
-    else:
-        form = DonationForm()
-        
-    return render(
-        request,
-        'core/donate.html',
-        {'form': form}
-    )
-
-
-def donate(request):
-    if request.method == 'POST':
-        form = DonationForm(request.POST)
-
-        if form.is_valid():
-            amount = request.POST.get('amount')
-            transaction = Transaction.objects.create( amount=amount, payment_method=request.POST.get('payment_method'))
-            donation = form.save(commit=False)
-            donation.transaction = transaction
-            donation.save()
-            return redirect('donation_success')
 
     else:
         form = DonationForm()
@@ -484,7 +461,7 @@ def admin_resource_delete(request, resource_id):
 
 @group_required
 def admin_volunteers(request):
-    items = volunteer.objects.all().order_by('-created_at')
+    items = Volunteer.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
         'section_name': 'Volunteers',
         'section_label': 'Volunteer',
@@ -509,13 +486,13 @@ def admin_volunteer_add(request):
 
 @group_required
 def admin_volunteer_edit(request, volunteer_email):
-    instance = get_object_or_404(volunteer, email=volunteer_email)
+    instance = get_object_or_404(Volunteer, email=volunteer_email)
     return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
 
 
 @group_required
 def admin_volunteer_delete(request, volunteer_email):
-    instance = get_object_or_404(volunteer, email=volunteer_email)
+    instance = get_object_or_404(Volunteer, email=volunteer_email)
     if request.method == 'POST':
         instance.delete()
         messages.success(request, 'Volunteer deleted successfully.')
@@ -529,7 +506,7 @@ def admin_volunteer_delete(request, volunteer_email):
 
 @group_required
 def admin_feedback(request):
-    feedback_list = feedback.objects.all().order_by('-created_at')
+    feedback_list = Feedback.objects.all().order_by('-created_at')
     return render(request, 'core/admin_feedback_list.html', {
         'section_name': 'Feedback',
         'section_label': 'Feedback Item',
@@ -539,7 +516,7 @@ def admin_feedback(request):
 
 @group_required
 def admin_feedback_delete(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     if request.method == 'POST':
         instance.delete()
         messages.success(request, 'Feedback deleted successfully.')
@@ -553,7 +530,7 @@ def admin_feedback_delete(request, feedback_id):
 
 @group_required
 def admin_feedback_respond(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     if request.method == 'POST':
         # Handle response submission
         response_message = request.POST.get('response_message')
@@ -570,7 +547,7 @@ def admin_feedback_respond(request, feedback_id):
 
 @group_required
 def admin_feedback_mark_addressed(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     # Here you would update a status field or add a tag
     # For now, we'll just show a success message
     messages.success(request, 'Feedback marked as addressed.')
@@ -579,7 +556,7 @@ def admin_feedback_mark_addressed(request, feedback_id):
 
 @group_required
 def admin_feedback_mark_unaddressed(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     # Here you would update a status field or remove a tag
     messages.success(request, 'Feedback marked as unaddressed.')
     return redirect('admin_feedback')
@@ -587,56 +564,56 @@ def admin_feedback_mark_unaddressed(request, feedback_id):
 
 @group_required
 def admin_feedback_mark_in_progress(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as in progress.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_resolved(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as resolved.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_rejected(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as rejected.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_duplicate(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as duplicate.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_wontfix(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as won\'t fix.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_needsinfo(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as needs info.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_accepted(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as accepted.')
     return redirect('admin_feedback')
 
 
 @group_required
 def admin_feedback_mark_reopened(request, feedback_id):
-    instance = get_object_or_404(feedback, feedback_id=feedback_id)
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as reopened.')
     return redirect('admin_feedback')
  
