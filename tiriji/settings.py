@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'storages', 
     'rest_framework',
     'cloudinary',
+    'cloudinary_storage',
+    'fernet_fields',
     
 ]
 

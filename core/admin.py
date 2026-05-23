@@ -65,10 +65,6 @@ admin.site.register(resources, ResourcesAdmin)
 admin.site.register(employees, EmployeesAdmin)
 admin.site.register(partners, PartnersAdmin)
 admin.site.register(gallery, GalleryAdmin)
-
-
-
-
 admin.site.register(ImpactMetric, ImpactMetricAdmin)
 admin.site.register(FeaturedPerson, FeaturedPersonAdmin)
 admin.site.register(SuccessStory, SuccessStoryAdmin)

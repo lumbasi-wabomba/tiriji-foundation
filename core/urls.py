@@ -36,8 +36,10 @@ urlpatterns = [
     path('donate/cancel/', views.donate_cancel, name='donate_cancel'),
     path('feedback/', views.feedback, name='feedback'),
 
+    #  admin
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
+    path('admin-portal/logout/', views.admin_logout, name='admin_logout'),
 
     path('admin-portal/', views.admin_portal, name='admin_portal'),
     path('admin-portal/users/', views.admin_users, name='admin_users'),
@@ -86,6 +88,6 @@ urlpatterns = [
     path('admin-portal/feedback/<int:feedback_id>/mark-needsinfo/', views.admin_feedback_mark_needsinfo, name='admin_feedback_mark_needsinfo'),
     path('admin-portal/feedback/<int:feedback_id>/mark-accepted/', views.admin_feedback_mark_accepted, name='admin_feedback_mark_accepted'),
     path('admin-portal/feedback/<int:feedback_id>/mark-reopened/', views.admin_feedback_mark_reopened, name='admin_feedback_mark_reopened'),
-    path('admin-portal/logout/', views.admin_logout, name='admin_logout'),
+    
     #path('feedback/success/', views.feedback_success, name='feedback_success'), 
 ]

@@ -1,8 +1,9 @@
 import os
 import subprocess
 from PIL import Image
+import cloudinary
+import cloudinary.uploader
  
-
 ffmpeg_path = 'ffmpeg'
 
 # compress image 
@@ -65,3 +66,39 @@ def compress_video(input_path, crf=30):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+
+# cloudinary engine
+def cloudinary_upload(sender, instance, **kwargs):
+    if instance.image and not instance.image_url:
+        if os.path.isfile(instance.image.path):
+            compressed_image_path = compress_image(instance.image.path)
+            if compressed_image_path:
+                try:
+                    result = cloudinary.uploader.upload(compressed_image_path, resource_type="image")
+                    instance.image_url = result.get('secure_url')
+                    instance.save()
+                    os.remove(compressed_image_path)
+                except Exception as e:
+                    print(f"Error uploading to Cloudinary: {e}")
+
+    elif instance.video and not instance.video_url:
+        if os.path.isfile(instance.video.path):
+            compressed_video_path = compress_video(instance.video.path)
+            if compressed_video_path:
+                try:
+                    result = cloudinary.uploader.upload(compressed_video_path, resource_type="video")
+                    instance.video_url = result.get('secure_url')
+                    instance.save()
+                    os.remove(compressed_video_path)
+                except Exception as e:
+                    print(f"Error uploading to Cloudinary: {e}")
+
+    elif instance.file and not instance.file_url:
+        if os.path.isfile(instance.file.path):
+            try:
+                result = cloudinary.uploader.upload(instance.file.path, resource_type="raw")
+                instance.file_url = result.get('secure_url')
+                instance.save()
+            except Exception as e:
+                print(f"Error uploading to Cloudinary: {e}")
+       
