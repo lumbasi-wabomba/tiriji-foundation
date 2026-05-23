@@ -154,7 +154,7 @@ class donation(models.Model):
     donation_type = models.CharField( max_length=20, choices=DONATION_TYPES, default='general' )
     donation_reason = models.CharField( max_length=255, blank=True, null=True)
     amount = models.DecimalField( max_digits=10, decimal_places=2)
-    currency = models.CharField( max_length=10, default='KES')
+    currency = models.CharField( max_length=10, default='USD')
     is_monthly = models.BooleanField( default=False)
     payment_method = models.CharField( max_length=20, choices=PAYMENT_METHODS, default='mpesa')
     status = models.CharField( max_length=20, choices=STATUS_CHOICES, default ='pending')
@@ -196,7 +196,6 @@ class donation(models.Model):
             value = f"{prefix}-{uuid.uuid4().hex[:12].upper()}"
             if not cls.objects.filter(donation_id=value).exists() and not cls.objects.filter(merchant_reference_id=value).exists():
                 return value
-
 
 class VolunteerPayment(models.Model):
     payment_ref = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -277,8 +276,23 @@ class news(models.Model):
             return f"{self.title} news related to {self.event_id.title} event"
         else:
             return self.title
+class BlogPost(models.Model):
+    blog_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=150)
+    excerpt = models.TextField()
+    body = models.TextField()
+    image = models.ImageField(upload_to='temp/', blank=True, null=True)
+    image_url = models.URLField(max_length=250, null=True, blank=True)
+    source_url = models.URLField(max_length=500, blank=True, null=True)
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']
 
+    def __str__(self):
+        return self.title
 class resources(models.Model):
     resource_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50, null=False, blank=False)
@@ -654,4 +668,3 @@ class feedback(models.Model):
 #                 os.remove(instance.image.path)
 #                 instance.image = None
 #                 instance.save(update_fields=['image_url', 'image'])
-

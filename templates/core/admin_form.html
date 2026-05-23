@@ -3,6 +3,7 @@
 {% block title %}{{ action_label }} {{ section_name }} | Admin{% endblock %}
 
 {% block content %}
+{% include "core/partials/admin_shell_open.html" %}
 <div class="container admin-panel">
     <div class="admin-header card">
         <div>
@@ -32,4 +33,5 @@
         </form>
     </div>
 </div>
+{% include "core/partials/admin_shell_close.html" %}
 {% endblock %}

@@ -21,7 +21,7 @@
     <div class="container donation-layout">
         <div class="donation-form-card">
             <p class="section-label">Payment Summary</p>
-            <h2>{{ donation.currency }} {{ donation.amount }}</h2>
+            <h2>${{ donation.amount }}</h2>
             <div class="detail-list">
                 <div><dt>Donor</dt><dd>{{ donation.donor_name|default:"Anonymous" }}</dd></div>
                 <div><dt>Email</dt><dd>{{ donation.donor_email|default:"-" }}</dd></div>

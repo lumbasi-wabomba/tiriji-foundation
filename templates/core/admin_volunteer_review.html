@@ -3,6 +3,7 @@
 {% block title %}Review Volunteer Application | Admin{% endblock %}
 
 {% block content %}
+{% include "core/partials/admin_shell_open.html" %}
 <div class="container admin-panel">
     <div class="admin-header card">
         <div>
@@ -40,7 +41,7 @@
                 <p><strong>Program</strong><span>{{ volunteer.program_id.title|default:"No program selected" }}</span></p>
                 <p><strong>Start Date</strong><span>{{ volunteer.starting_date }}</span></p>
                 <p><strong>End Date</strong><span>{{ volunteer.end_date }}</span></p>
-                <p><strong>Calculated Fee</strong><span>KES {{ volunteer.calculated_fee }}</span></p>
+                <p><strong>Calculated Fee</strong><span>${{ volunteer.calculated_fee }}</span></p>
                 <p><strong>Payment</strong><span>{% if payment.paid %}Paid{% else %}Pending{% endif %}</span></p>
                 <p><strong>Transaction</strong><span>{% if payment %}{{ payment.transaction.id }}{% else %}No payment record{% endif %}</span></p>
             </div>
@@ -71,4 +72,5 @@
         </section>
     </div>
 </div>
+{% include "core/partials/admin_shell_close.html" %}
 {% endblock %}

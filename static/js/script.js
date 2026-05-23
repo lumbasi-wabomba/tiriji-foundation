@@ -313,6 +313,48 @@
         });
     }
 
+    function initAdminSidebar() {
+        const shell = document.querySelector("[data-admin-shell]");
+        const toggle = document.querySelector("[data-admin-sidebar-toggle]");
+        const backdrop = document.querySelector("[data-admin-sidebar-backdrop]");
+        const state = document.querySelector("[data-admin-sidebar-state]");
+
+        if (!shell || !toggle) return;
+
+        const setOpen = (isOpen) => {
+            shell.classList.toggle("sidebar-open", isOpen);
+            if (state) state.checked = isOpen;
+            toggle.setAttribute("aria-expanded", String(isOpen));
+        };
+
+        if (state) {
+            state.addEventListener("change", () => {
+                setOpen(state.checked);
+            });
+        }
+
+        toggle.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setOpen(!shell.classList.contains("sidebar-open"));
+            }
+        });
+
+        if (backdrop) {
+            backdrop.addEventListener("click", () => setOpen(false));
+        }
+
+        shell.querySelectorAll(".admin-sidebar a").forEach((link) => {
+            link.addEventListener("click", () => setOpen(false));
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                setOpen(false);
+            }
+        });
+    }
+
     function init() {
         initNavigation();
         initHeroSlider();
@@ -323,6 +365,7 @@
         initVolunteerApplicationProgress();
         initProgramSearch();
         initAutoPaymentMethod();
+        initAdminSidebar();
     }
 
     if (document.readyState === "loading") {

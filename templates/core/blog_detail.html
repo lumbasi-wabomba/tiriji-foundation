@@ -1,21 +1,54 @@
 {% extends "core/base.html" %}
+{% load static %}
 
-{% block title %}Blog Detail | Tiriji Foundation{% endblock %}
+{% block title %}{{ blog_post.title }} | Tiriji Foundation{% endblock %}
 
 {% block content %}
 <section class="page-hero programs-hero">
-    <div class="container">
-        <h1>Blog Article</h1>
-        <p>This blog detail route is ready for a future blog model and publishing workflow.</p>
+    <div class="container page-hero-grid">
+        <div>
+            <p class="section-label">Field Note</p>
+            <h1>{{ blog_post.title }}</h1>
+            <p>{{ blog_post.excerpt }}</p>
+            <a href="{% url 'blog' %}" class="btn btn-glass">Back to Blog</a>
+        </div>
+        <div class="hero-proof glass-panel">
+            <strong>{{ blog_post.created_at|date:"M d, Y" }}</strong>
+            <span>Published by Tiriji Foundation</span>
+        </div>
     </div>
 </section>
 
-<section class="section">
+<section class="section editorial-section">
+    <div class="container editorial-grid">
+        <div class="editorial-media reveal-on-scroll">
+            {% if blog_post.image_url %}
+                <img src="{{ blog_post.image_url }}" alt="{{ blog_post.title }}">
+            {% elif blog_post.image %}
+                <img src="{{ blog_post.image.url }}" alt="{{ blog_post.title }}">
+            {% else %}
+                <img src="{% static 'images/IMG-20260522-WA0018.jpg' %}" alt="{{ blog_post.title }}">
+            {% endif %}
+        </div>
+        <article class="editorial-copy article-body reveal-on-scroll">
+            <p class="section-label">Story Context</p>
+            <div class="description">{{ blog_post.body|linebreaks }}</div>
+            {% if blog_post.source_url %}
+            <p class="source-note">
+                <a href="{{ blog_post.source_url }}" target="_blank" rel="noopener">Source context</a>
+            </p>
+            {% endif %}
+        </article>
+    </div>
+</section>
+
+<section class="cta cinematic-cta">
     <div class="container">
-        <div class="card">
-            <h2>Publishing workflow pending</h2>
-            <p>For demo purposes, use News for active updates. A dedicated Blog model can be added when long-form editorial publishing becomes part of the scope.</p>
-            <a href="{% url 'blog' %}" class="btn btn-primary">Back to Blog</a>
+        <h2>Move from reading to action.</h2>
+        <p>Explore programs, support a child, or apply to serve with the community team.</p>
+        <div class="cta-actions">
+            <a href="{% url 'programs' %}" class="btn btn-primary">Explore Programs</a>
+            <a href="{% url 'volunteer_signup' %}" class="btn btn-glass">Apply to Volunteer</a>
         </div>
     </div>
 </section>

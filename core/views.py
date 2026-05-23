@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -6,22 +6,38 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
-
-from core.celery_task import process_media_task
-from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, employees as Employee, partners as Partner, gallery as Gallery, feedback as Feedback
-from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm
+from .models import BlogPost, program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, employees as Employee, partners as Partner, gallery as Gallery, feedback as Feedback
+from .forms import BlogPostForm, ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm, SuccessStoryForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 from .services.payment_service import PaymentService
 from django.contrib.auth import logout as auth_logout
 from django_ratelimit.decorators import ratelimit
-
-import os
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from celery.result import AsyncResult
 from core.celery_task import process_media_task
+
+CAREER_OPENINGS = [
+    {
+        'id': 1,
+        'title': 'Volunteer Program Coordinator',
+        'location': 'Meru, Kenya',
+        'description': (
+            'Coordinate volunteer onboarding, placement readiness, field schedules, '
+            'and communication between applicants, program leads, and community hosts.'
+        ),
+    },
+    {
+        'id': 2,
+        'title': 'Events and Resources Associate',
+        'location': 'Hybrid / Meru',
+        'description': (
+            'Support resource publishing, event logistics, field updates, partner '
+            'materials, and documentation for Tiriji Foundation programs.'
+        ),
+    },
+]
 
 
 def user_in_group(user):
@@ -253,6 +269,10 @@ def partners(request):
     return render(request, 'core/partners.html', {'partners': partner_items})
 
 @require_http_methods(["GET"])
+def careers(request):
+    return render(request, 'core/careers.html', {'careers': CAREER_OPENINGS})
+
+@require_http_methods(["GET"])
 def privacy_policy(request):
     return render(request, 'core/privacy_policy.html')
 
@@ -313,13 +333,20 @@ def partner_detail(request, partner_id):
     return render(request, 'core/partner_detail.html', {'partner': partner})
 
 @require_http_methods(["GET"])
+def career_detail(request, career_id):
+    career = next((item for item in CAREER_OPENINGS if item['id'] == career_id), None)
+    if career is None:
+        raise Http404('Career opening not found')
+    return render(request, 'core/career_detail.html', {'career': career})
+
 def blog(request):
-    return render(request, 'core/blog.html')
+    blog_posts = BlogPost.objects.filter(is_published=True).order_by('-created_at')
+    return render(request, 'core/blog.html', {'blog_posts': blog_posts})
 
 @require_http_methods(["GET"])
 def blog_detail(request, blog_id):
-    # Placeholder for blog detail view
-    return render(request, 'core/blog_detail.html', {'blog_id': blog_id})
+    blog_post = get_object_or_404(BlogPost, blog_id=blog_id, is_published=True)
+    return render(request, 'core/blog_detail.html', {'blog_post': blog_post})
 
 
 @group_required
@@ -336,6 +363,8 @@ def admin_portal(request):
         'event_count': Event.objects.count(),
         'news_count': News.objects.count(),
         'resource_count': Resource.objects.count(),
+        'blog_count': BlogPost.objects.count(),
+        'story_count': SuccessStory.objects.count(),
         'donation_count': Donation.objects.count(),
         'pending_volunteers': pending_volunteers,
         'pending_volunteer_count': Volunteer.objects.filter(status__in=pending_statuses).count(),
@@ -469,7 +498,7 @@ def admin_donations(request):
                 'cols': [
                     item.donation_id or 'Missing ID',
                     item.donor_name or 'Anonymous',
-                    f'{item.currency} {item.amount}',
+                    f'${item.amount}',
                     item.get_donation_type_display(),
                     item.get_payment_method_display(),
                     item.get_status_display(),
@@ -689,12 +718,105 @@ def admin_news_delete(request, news_id):
     })
 # -------------------------------------------------------------------------------------------------------------------------------
 
-# resources management
-# -------------------------------------------------------------------------------------------------------------------------------
+@role_required('content_manager', 'events_resources_manager')
+def admin_blogs(request):
+    items = BlogPost.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Blog',
+        'section_label': 'Blog post',
+        'add_url': 'admin_blog_add',
+        'headers': ['ID', 'Title', 'Published', 'Updated'],
+        'rows': [
+            {
+                'cols': [
+                    item.blog_id,
+                    item.title,
+                    'Yes' if item.is_published else 'Draft',
+                    item.updated_at.strftime('%Y-%m-%d'),
+                ],
+                'edit_url': reverse('admin_blog_edit', args=[item.blog_id]),
+                'delete_url': reverse('admin_blog_delete', args=[item.blog_id]),
+            }
+            for item in items
+        ],
+    })
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_blog_add(request):
+    return admin_form_view(request, BlogPostForm, section_name='Blog post', action_label='Add', return_url='admin_blogs')
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_blog_edit(request, blog_id):
+    instance = get_object_or_404(BlogPost, blog_id=blog_id)
+    return admin_form_view(request, BlogPostForm, instance=instance, section_name='Blog post', action_label='Update', return_url='admin_blogs')
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_blog_delete(request, blog_id):
+    instance = get_object_or_404(BlogPost, blog_id=blog_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Blog post deleted successfully.')
+        return redirect('admin_blogs')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Blog post',
+        'object_name': instance.title,
+        'return_url': 'admin_blogs',
+    })
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_stories(request):
+    items = SuccessStory.objects.all().order_by('-created_at')
+    return render(request, 'core/admin_list.html', {
+        'section_name': 'Stories',
+        'section_label': 'Story',
+        'add_url': 'admin_story_add',
+        'headers': ['ID', 'Title', 'Page', 'Featured'],
+        'rows': [
+            {
+                'cols': [
+                    item.id,
+                    item.title,
+                    item.get_page_display(),
+                    'Yes' if item.is_featured else '-',
+                ],
+                'edit_url': reverse('admin_story_edit', args=[item.id]),
+                'delete_url': reverse('admin_story_delete', args=[item.id]),
+            }
+            for item in items
+        ],
+    })
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_story_add(request):
+    return admin_form_view(request, SuccessStoryForm, section_name='Story', action_label='Add', return_url='admin_stories')
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_story_edit(request, story_id):
+    instance = get_object_or_404(SuccessStory, pk=story_id)
+    return admin_form_view(request, SuccessStoryForm, instance=instance, section_name='Story', action_label='Update', return_url='admin_stories')
+
+
+@role_required('content_manager', 'events_resources_manager')
+def admin_story_delete(request, story_id):
+    instance = get_object_or_404(SuccessStory, pk=story_id)
+    if request.method == 'POST':
+        instance.delete()
+        messages.success(request, 'Story deleted successfully.')
+        return redirect('admin_stories')
+    return render(request, 'core/admin_delete_confirm.html', {
+        'section_name': 'Story',
+        'object_name': instance.title,
+        'return_url': 'admin_stories',
+    })
+
+
 @role_required('secretary','director')
-# @require_http_methods(["GET"])
-@login_required
-@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_resources(request):
     items = Resource.objects.select_related('program_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -867,99 +989,82 @@ def admin_feedback_delete(request, feedback_id):
 def admin_feedback_respond(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     if request.method == 'POST':
-        # Handle response submission
         response_message = request.POST.get('response_message')
         if response_message:
-            # Here you would typically save the response to a related model or add it to the feedback
-            # For now, we'll just show a success message
-            messages.success(request, 'Response added successfully.')
+            instance.response_message = response_message
+            instance.responded_at = timezone.now()
+            instance.status = 'addressed'
+            instance.save(update_fields=['response_message', 'responded_at', 'status'])
+            messages.success(request, 'Response saved.')
             return redirect('admin_feedback')
-    
-    return render(request, 'core/admin_feedback_respond.html', {
-        'feedback': instance,
-    })
+    return render(request, 'core/admin_feedback_respond.html', {'feedback': instance})
+
+
+def _mark_feedback_status(request, feedback_id, status, message):
+    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
+    instance.status = status
+    instance.save(update_fields=['status'])
+    messages.success(request, message)
+    return redirect('admin_feedback')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_addressed(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    # Here you would update a status field or add a tag
-    # For now, we'll just show a success message
-    messages.success(request, 'Feedback marked as addressed.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'addressed', 'Feedback marked as addressed.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_unaddressed(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    # Here you would update a status field or remove a tag
-    messages.success(request, 'Feedback marked as unaddressed.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'new', 'Feedback marked as new.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_in_progress(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as in progress.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'in_progress', 'Feedback marked as in progress.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_resolved(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as resolved.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'resolved', 'Feedback marked as resolved.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_rejected(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as rejected.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'rejected', 'Feedback marked as rejected.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_duplicate(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as duplicate.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'duplicate', 'Feedback marked as duplicate.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_wontfix(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as won\'t fix.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'wontfix', 'Feedback marked as won\'t fix.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_needsinfo(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as needs info.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'needsinfo', 'Feedback marked as needs info.')
 
 @group_required
 @login_required
 def admin_feedback_mark_accepted(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as accepted.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'accepted', 'Feedback marked as accepted.')
 
 
 @group_required
 @login_required
 def admin_feedback_mark_reopened(request, feedback_id):
-    instance = get_object_or_404(Feedback, feedback_id=feedback_id)
-    messages.success(request, 'Feedback marked as reopened.')
-    return redirect('admin_feedback')
+    return _mark_feedback_status(request, feedback_id, 'reopened', 'Feedback marked as reopened.')
 
 @group_required
 @login_required
@@ -1011,4 +1116,3 @@ def upload_media_status(request, task_id):
 
     else:
         return JsonResponse({"status": task.state.lower()})
-
