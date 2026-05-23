@@ -86,6 +86,6 @@ urlpatterns = [
     path('admin-portal/feedback/<int:feedback_id>/mark-needsinfo/', views.admin_feedback_mark_needsinfo, name='admin_feedback_mark_needsinfo'),
     path('admin-portal/feedback/<int:feedback_id>/mark-accepted/', views.admin_feedback_mark_accepted, name='admin_feedback_mark_accepted'),
     path('admin-portal/feedback/<int:feedback_id>/mark-reopened/', views.admin_feedback_mark_reopened, name='admin_feedback_mark_reopened'),
-
+    path('admin-portal/logout/', views.admin_logout, name='admin_logout'),
     #path('feedback/success/', views.feedback_success, name='feedback_success'), 
 ]
