@@ -9,6 +9,7 @@ from .models import program, volunteer as Volunteer, events as Event, news as Ne
 from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 from .services.payment_service import PaymentService
+from django.contrib.auth import logout as auth_logout
 
 
 def user_in_group(user):
@@ -840,4 +841,9 @@ def admin_feedback_mark_reopened(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as reopened.')
     return redirect('admin_feedback')
+
+@group_required
+def admin_logout(request):
+    auth_logout(request)
+    return redirect('home')
  
