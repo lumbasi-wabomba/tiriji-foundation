@@ -55,7 +55,7 @@ class ProgramForm(SanitizedModelForm):
 
     class Meta:
         model = program
-        fields = [ 'title', 'program_description', 'image', 'two_week_fee', 'four_week_fee', 'eight_week_fee', 'extra_week_fee',]
+        fields = [ 'title', 'program_description', 'image_url', 'program_location', 'week_fee' ]
         widgets = {
             'program_description': forms.Textarea(attrs={'rows': 10}),
         }
@@ -65,7 +65,7 @@ class EventForm(SanitizedModelForm):
 
     class Meta:
         model = events
-        fields = ['title', 'events_description', 'image', 'program_id', 'event_location', 'event_date']
+        fields = ['title', 'events_description', 'image_url', 'program_id', 'event_location', 'event_date']
         widgets = {
             'events_description': forms.Textarea(attrs={'rows': 10}),
             'event_date': forms.DateInput(attrs={'type': 'date'}),
@@ -77,7 +77,7 @@ class NewsForm(SanitizedModelForm):
 
     class Meta:
         model = news
-        fields = ['title', 'news_description', 'image', 'program_id', 'event_id']
+        fields = ['title', 'news_description', 'image_url', 'program_id', 'event_id']
         widgets = {
             'news_description': forms.Textarea(attrs={'rows': 10}),
         }
@@ -88,7 +88,7 @@ class ResourceForm(SanitizedModelForm):
 
     class Meta:
         model = resources
-        fields = ['title', 'resources_description', 'image', 'file', 'program_id']
+        fields = ['title', 'resources_description', 'image_url', 'file_url', 'program_id']
         widgets = {
             'resources_description': forms.Textarea(attrs={'rows': 10}),
         }
@@ -284,7 +284,7 @@ class FeaturedPersonForm(SanitizedModelForm):
 
     class Meta:
         model = FeaturedPerson
-        fields = ['page', 'feature_type', 'name', 'age', 'headline', 'short_bio', 'achievement', 'dream_or_goal', 'quote', 'image', 'is_featured']
+        fields = ['page', 'feature_type', 'name', 'age', 'headline', 'short_bio', 'achievement', 'dream_or_goal', 'quote', 'image_url', 'is_featured']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'feature_type': forms.Select(attrs={'class': 'form-control'}),
@@ -303,7 +303,7 @@ class SuccessStoryForm(SanitizedModelForm):
 
     class Meta:
         model = SuccessStory
-        fields = ['page', 'title', 'person_name', 'challenge', 'intervention', 'outcome', 'quote', 'image', 'is_featured']
+        fields = ['page', 'title', 'person_name', 'challenge', 'intervention', 'outcome', 'quote', 'image_url', 'is_featured']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -320,7 +320,7 @@ class InspirationVideoForm(SanitizedModelForm):
 
     class Meta:
         model = InspirationVideo
-        fields = ['page', 'title', 'description', 'video_url', 'thumbnail', 'is_featured']
+        fields = ['page', 'title', 'description', 'video_url', 'thumbnail_url', 'is_featured']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -334,7 +334,7 @@ class PageMediaForm(SanitizedModelForm):
 
     class Meta:
         model = PageMedia
-        fields = ['page', 'media_type', 'title', 'description', 'image', 'video_url', 'display_order']
+        fields = ['page', 'media_type', 'title', 'description', 'image_url', 'video_url', 'display_order']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'media_type': forms.Select(attrs={'class': 'form-control'}),

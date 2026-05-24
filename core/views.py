@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -5,11 +6,21 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
+
+from core.celery_task import process_media_task
 from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, employees as Employee, partners as Partner, gallery as Gallery, feedback as Feedback
 from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 from .services.payment_service import PaymentService
 from django.contrib.auth import logout as auth_logout
+
+import os
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from celery.result import AsyncResult
+from core.celery_task import process_media_task
 
 
 def user_in_group(user):
@@ -276,12 +287,12 @@ def partner_detail(request, partner_id):
     partner = get_object_or_404(Partner.objects.select_related('program_id', 'assigned_employee'), pk=partner_id)
     return render(request, 'core/partner_detail.html', {'partner': partner})
 
-# def blog(request):
-#     return render(request, 'core/blog.html')
+def blog(request):
+    return render(request, 'core/blog.html')
 
-# def blog_detail(request, blog_id):
-#     # Placeholder for blog detail view
-#     return render(request, 'core/blog_detail.html', {'blog_id': blog_id})
+def blog_detail(request, blog_id):
+    # Placeholder for blog detail view
+    return render(request, 'core/blog_detail.html', {'blog_id': blog_id})
 
 
 @group_required
@@ -833,3 +844,45 @@ def admin_logout(request):
     auth_logout(request)
     return redirect('home')
  
+#  upload media 
+# -------------------------------------------------------------------------------------------------------------------
+@group_required
+@require_POST
+def upload_media(request):
+    media_file = request.FILES.get("file")
+    if not media_file:
+        return JsonResponse({"error": "No file provided."}, status=400)
+
+    # Save original to temp/ — the Celery worker reads it from here
+    temp_path = default_storage.save(
+        f"temp/{media_file.name}",
+        ContentFile(media_file.read())
+    )
+
+    task = process_media_task.delay(temp_path)   
+    return JsonResponse({
+        "task_id": task.id,
+        "status":  "processing",
+    })
+
+@group_required
+def upload_media_status(request, task_id):
+    task = AsyncResult(task_id)
+    if task.state == "PENDING":
+        return JsonResponse({"status": "pending"})
+
+    elif task.state == "SUCCESS":
+        return JsonResponse({
+            "status": "done",
+            "url":    task.result["url"],
+            "type":   task.result["type"],
+        })
+
+    elif task.state == "FAILURE":
+        return JsonResponse({
+            "status": "failed",
+            "error":  str(task.result),
+        }, status=500)
+
+    else:
+        return JsonResponse({"status": task.state.lower()})

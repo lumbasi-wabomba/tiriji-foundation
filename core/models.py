@@ -4,12 +4,16 @@ import uuid
 from django.db.models.signals import post_save
 from datetime import timedelta
 from django.core.exceptions import ValidationError
-from fernet_fields import EncryptedEmailField, EncryptedCharField
+from encrypted_model_fields.fields import (
+    EncryptedEmailField,
+    EncryptedCharField,
+)
 
 class program(models.Model):
     program_id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     title = models.CharField(max_length=50, null=False, blank=False)
     program_description = models.TextField()
+    program_location = models.CharField(max_length=100)
     image_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     week_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
@@ -21,15 +25,15 @@ class program(models.Model):
 class volunteer(models.Model): # Revised version of this model
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
-    email = models.EncryptedEmailField(primary_key=True)
+    email = EncryptedEmailField(primary_key=True)
     occupation = models.CharField(max_length=100)
-    phone_number = models.EncryptedCharField(max_length=20)
-    id_pass_no = models.EncryptedCharField(max_length=50, verbose_name="ID/Passport No")
+    phone_number = EncryptedCharField(max_length=20)
+    id_pass_no = EncryptedCharField(max_length=50, verbose_name="ID/Passport No")
     starting_date = models.DateField()
     end_date = models.DateField()
     residence = models.CharField(max_length=100)
     emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_phone = models.EncryptedCharField(max_length=20)
+    emergency_contact_phone = EncryptedCharField(max_length=20)
     program_id = models.ForeignKey( program, on_delete=models.CASCADE, null=True, blank=True, related_name='volunteers')
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -142,8 +146,8 @@ class donation(models.Model):
     
     # DONOR INFORMATION
     donor_name = models.CharField( max_length=100, blank=True, null=True)
-    donor_email = models.EncryptedEmailField( blank=True, null=True )
-    donor_phone_number = models.EncryptedCharField( max_length=20, blank=True, null=True)
+    donor_email = EncryptedEmailField( blank=True, null=True )
+    donor_phone_number = EncryptedCharField( max_length=20, blank=True, null=True)
     
     # DONATION DETAILS
     donation_type = models.CharField( max_length=20, choices=DONATION_TYPES, default='general' )
@@ -160,9 +164,9 @@ class donation(models.Model):
     payment_reference = models.CharField( max_length=100, blank=True, null=True)
     payment_date = models.DateTimeField( blank=True, null=True) 
     amount_paid = models.DecimalField( max_digits=10, decimal_places=2, blank=True, null=True)
-    payer_phone_number = models.EncryptedCharField( max_length=20, blank=True, null=True)
-    payer_email = models.EncryptedEmailField( blank=True, null=True)
-    payer_name = models.CharField( max_length=100, blank=True, null=True)
+    payer_phone_number = EncryptedCharField( max_length=20, blank=True, null=True)
+    payer_email = EncryptedEmailField( blank=True, null=True)
+    payer_name = EncryptedCharField( max_length=100, blank=True, null=True)
 
     # TIMESTAMPS
     created_at = models.DateTimeField( auto_now_add=True)
@@ -226,8 +230,8 @@ class event_registration(models.Model):
     registration_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event_id = models.ForeignKey(events, on_delete=models.CASCADE, related_name='registrations')
     name = models.CharField(max_length=100, null=False, blank=False)
-    email = models.EncyptedEmailField(null=True, blank=True)
-    phone_number = models.EncyptedCharField(max_length=20)
+    email = EncryptedEmailField(null=True, blank=True)
+    phone_number = EncryptedCharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -292,14 +296,14 @@ class resources(models.Model):
 class employees(models.Model):
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
-    email = models.EncryptedEmailField(unique=True, primary_key=True)
+    email = EncryptedEmailField(unique=True, primary_key=True)
     role = models.CharField(max_length=100)
-    phone_number = models.EncryptedCharField(max_length=20)
-    id_pass_no = models.EncryptedCharField(max_length=50, verbose_name="ID/Passport No")
+    phone_number = EncryptedCharField(max_length=20)
+    id_pass_no = EncryptedCharField(max_length=50, verbose_name="ID/Passport No")
     starting_date = models.DateField()
     residence = models.CharField(max_length=100)
     emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_phone = models.EncryptedCharField(max_length=20)
+    emergency_contact_phone = EncryptedCharField(max_length=20)
     bio = models.TextField()
     profile_image_url = models.URLField(max_length=250, null=True, blank=True)
 
@@ -467,7 +471,7 @@ class feedback(models.Model):
 
     feedback_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, null=False, blank=False)
-    email = models.EmailField(null=True, blank=True)
+    email = EncryptedEmailField(null=True, blank=True)
     message = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     response_message = models.TextField(blank=True, null=True)

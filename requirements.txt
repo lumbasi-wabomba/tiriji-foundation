@@ -5,6 +5,7 @@ brotli==1.2.0
 celery==5.6.3
 certifi==2026.1.4
 cffi==2.0.0
+charset-normalizer==3.4.7
 click==8.3.1
 click-didyoumean==0.3.1
 click-plugins==1.1.1.2
@@ -16,14 +17,16 @@ dj-database-url==3.1.1
 Django==6.0.2
 django-admin-interface==0.32.0
 django-cleanup==9.0.0
+django-cloudinary-storage==0.3.0
 django-colorfield==0.14.0
 django-crispy-forms==2.5
-django-fernet-fields==0.6
+django-encrypted-model-fields==0.6.5
 django-storages==1.14.6
 django_celery_results==2.6.0
 djangorestframework==3.16.1
 gunicorn==25.1.0
 h11==0.16.0
+idna==3.16
 kombu==5.6.2
 packaging==26.0
 pillow==12.1.1
@@ -34,6 +37,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
 python-slugify==8.0.4
 redis==7.4.0
+requests==2.34.2
 six==1.17.0
 sqlparse==0.5.5
 text-unidecode==1.3
