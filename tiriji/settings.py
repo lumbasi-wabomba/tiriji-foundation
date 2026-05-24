@@ -32,7 +32,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-DEBUG = os.getenv('DEBUG') == 'True'
+# DEBUG = os.getenv('DEBUG') == 'False'
 
 # Enable WhiteNoise caching for development
 if DEBUG:
@@ -66,6 +66,10 @@ INSTALLED_APPS = [
     'storages', 
     'rest_framework',
     'cloudinary',
+    'cloudinary_storage',
+    'encrypted_model_fields',
+    'django_celery_results',
+
     
 ]
 
@@ -118,12 +122,8 @@ DATABASES = {
     }
 }
 
-
-# STORAGES = {
-#     "default": {
-#         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-#     },
-# }
+# encryption 
+FIELD_ENCRYPTION_KEY = os.environ.get("FIELD_ENCRYPTION_KEY")
 
 # cloudinary settings & config 
 cloudinary.config( 
@@ -133,6 +133,15 @@ cloudinary.config(
     secure=True
 )
 
+# celery & redis settings
+CELERY_BROKER_URL        = os.getenv("REDIS_URL", "redis://localhost:6379/0")  # tasks queue
+CELERY_RESULT_BACKEND    = "django-db"  
+CELERY_CACHE_BACKEND     = "default"
+CELERY_TASK_SERIALIZER   = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT    = ["json"]
+CELERY_RESULT_EXPIRES    = 3600          
+CELERY_TASK_TRACK_STARTED = True         
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -192,3 +201,32 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+# tiriji/settings.py — add this anywhere
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',       # prints full traceback to terminal always
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}

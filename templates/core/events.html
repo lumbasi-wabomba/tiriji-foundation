@@ -23,8 +23,8 @@
         <div class="editorial-media reveal-on-scroll">
             {% if featured_event.image_url %}
                 <img src="{{ featured_event.image_url }}" alt="{{ featured_event.title }}">
-            {% elif featured_event.image %}
-                <img src="{{ featured_event.image.url }}" alt="{{ featured_event.title }}">
+            <!-- {% elif featured_event.image %}
+                <img src="{{ featured_event.image.url }}" alt="{{ featured_event.title }}"> -->
             {% else %}
                 <img src="{% static 'images/program-kenger.jpg' %}" alt="{{ featured_event.title }}">
             {% endif %}

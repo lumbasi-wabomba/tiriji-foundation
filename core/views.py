@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -5,11 +6,21 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
+
+from core.celery_task import process_media_task
 from .models import program, volunteer as Volunteer, events as Event, news as News, resources as Resource, donation as Donation, Transaction, VolunteerPayment, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia, employees as Employee, partners as Partner, gallery as Gallery, feedback as Feedback
 from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm, DonationForm, FeedbackForm, AdminUserForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 from .services.payment_service import PaymentService
 from django.contrib.auth import logout as auth_logout
+
+import os
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from celery.result import AsyncResult
+from core.celery_task import process_media_task
 
 
 def user_in_group(user):
@@ -84,14 +95,9 @@ def volunteer(request):
 def volunteer_signup(request):
 
     if request.method == 'POST':
-
         form = VolunteerForm(request.POST)
-
         if form.is_valid():
-
-            # =========================
             # CREATE VOLUNTEER
-            # =========================
             volunteer_instance = form.save(commit=False)
 
             # Freeze calculated fee
@@ -101,35 +107,27 @@ def volunteer_signup(request):
 
             # Initial workflow status
             volunteer_instance.status = 'payment_pending'
-
             volunteer_instance.save()
-
-            # =========================
+            
             # CREATE TRANSACTION
-            # =========================
             transaction = Transaction.objects.create(
                 amount=volunteer_instance.calculated_fee,
                 payment_method='mpesa',
                 status='pending'
             )
 
-            # =========================
             # CREATE PAYMENT RECORD
-            # =========================
             VolunteerPayment.objects.create(
                 volunteer=volunteer_instance,
                 transaction=transaction,
                 amount=volunteer_instance.calculated_fee
             )
 
-            # =========================
             # REDIRECT TO PAYMENT PAGE
-            # =========================
             return redirect(
                 'volunteer_payment_summary',
                 volunteer_email=volunteer_instance.email
             )
-
     else:
 
         initial = {}
@@ -142,9 +140,7 @@ def volunteer_signup(request):
     return render(
         request,
         'core/volunteer_signup.html',
-        {
-            'form': form
-        }
+        {'form': form}
     )
 
 def volunteer_payment_summary(request, volunteer_email):
@@ -153,10 +149,13 @@ def volunteer_payment_summary(request, volunteer_email):
     method = request.POST.get('payment_method', payment.transaction.payment_method if payment.transaction else 'mpesa')
     payment_session = PaymentService.volunteer_session(payment, method)
 
+    # --------------------------------------------------------------------------------------------------
+    # for demo purposes
     if request.method == 'POST' and request.POST.get('action') == 'confirm_demo_payment':
         PaymentService.complete_volunteer_payment(payment)
         messages.success(request, 'Demo volunteer payment marked as paid.')
         return redirect('volunteer_payment_summary', volunteer_email=volunteer_instance.email)
+    # ---------------------------------------------------------------------------------------------------
 
     return render(
         request,
@@ -168,8 +167,6 @@ def volunteer_payment_summary(request, volunteer_email):
             'payment_methods': PaymentService.METHOD_CONFIG,
         }
     )
-
-
 
 def donate(request):
     if request.method == 'POST':
@@ -195,10 +192,13 @@ def donation_payment(request, donation_id):
     donation = get_object_or_404(Donation.objects.select_related('transaction'), donation_id=donation_id)
     payment_session = PaymentService.donation_session(donation)
 
+    # demo purposes
+    # --------------------------------------------------------------------------------------------------
     if request.method == 'POST' and request.POST.get('action') == 'confirm_demo_payment':
         PaymentService.complete_donation(donation)
         messages.success(request, 'Demo donation payment marked as complete.')
         return redirect('donate_success')
+    # --------------------------------------------------------------------------------------------------
 
     return render(request, 'core/donation_payment.html', {
         'donation': donation,
@@ -239,17 +239,11 @@ def partners(request):
     partner_items = Partner.objects.select_related('program_id', 'assigned_employee').all().order_by('-created_at')
     return render(request, 'core/partners.html', {'partners': partner_items})
 
-def careers(request):
-    return render(request, 'core/careers.html', {'careers': []})
-
 def privacy_policy(request):
     return render(request, 'core/privacy_policy.html')
 
 def terms_of_service(request):
     return render(request, 'core/terms_of_service.html')
-
-def support(request):
-    return render(request, 'core/support.html')
 
 def sitemap(request):
     return render(request, 'core/sitemap.html')
@@ -266,11 +260,8 @@ def feedback(request):
 
     return render(request, "core/feedback.html", {'form': form})
 
-
 def newsletter(request):
     return render(request, 'core/newsletter.html')
-
-
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event.objects.select_related('program_id'), event_id=event_id)
@@ -295,10 +286,6 @@ def team_member_detail(request, member_id):
 def partner_detail(request, partner_id):
     partner = get_object_or_404(Partner.objects.select_related('program_id', 'assigned_employee'), pk=partner_id)
     return render(request, 'core/partner_detail.html', {'partner': partner})
-
-def career_detail(request, career_id):
-    # Placeholder for career detail view
-    return render(request, 'core/career_detail.html', {'career_id': career_id})
 
 def blog(request):
     return render(request, 'core/blog.html')
@@ -327,7 +314,6 @@ def admin_portal(request):
     }
     return render(request, 'core/admin.html', context)
 
-
 def admin_form_view(request, form_class, instance=None, section_name='', action_label='Create', return_url='admin_portal'):
     if request.method == 'POST':
         form = form_class(request.POST, request.FILES, instance=instance)
@@ -345,12 +331,11 @@ def admin_form_view(request, form_class, instance=None, section_name='', action_
         'return_url': return_url,
     })
 
-
+# user management
+# --------------------------------------------------------------------------------------------------------------------------------
 @role_required('sys_admin')
 def admin_users(request):
-    users = User.objects.filter(
-        Q(is_staff=True) | Q(groups__name__in=ADMIN_GROUP_NAMES)
-    ).distinct().order_by('first_name', 'username')
+    users = User.objects.filter(Q(is_staff=True) | Q(groups__name__in=ADMIN_GROUP_NAMES)).distinct().order_by('first_name', 'username')
 
     return render(request, 'core/admin_users.html', {
         'user_rows': [
@@ -361,7 +346,6 @@ def admin_users(request):
             for user in users
         ],
     })
-
 
 @role_required('sys_admin')
 def admin_user_add(request):
@@ -389,7 +373,6 @@ def admin_user_add(request):
         'action_label': 'Add',
         'return_url': 'admin_users',
     })
-
 
 @role_required('sys_admin')
 def admin_user_edit(request, user_id):
@@ -426,9 +409,11 @@ def admin_user_edit(request, user_id):
         'action_label': 'Update',
         'return_url': 'admin_users',
     })
+# ---------------------------------------------------------------------------------------------------------------
 
-
-@role_required('finance_manager')
+# donations management 
+# ---------------------------------------------------------------------------------------------------------------
+@role_required('director','secretary')
 def admin_donations(request):
     items = Donation.objects.select_related('transaction').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -454,7 +439,7 @@ def admin_donations(request):
     })
 
 
-@role_required('finance_manager')
+@role_required('director','secretary')
 def admin_donation_review(request, donation_id):
     instance = get_object_or_404(Donation.objects.select_related('transaction'), donation_id=donation_id)
 
@@ -481,9 +466,12 @@ def admin_donation_review(request, donation_id):
         'donation': instance,
         'status_choices': Donation.STATUS_CHOICES,
     })
+# --------------------------------------------------------------------------------------------------------------
 
+# program management
+# --------------------------------------------------------------------------------------------------------------
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('director','secretary')
 def admin_programs(request):
     items = program.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -502,18 +490,18 @@ def admin_programs(request):
     })
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_program_add(request):
     return admin_form_view(request, ProgramForm, section_name='Program', action_label='Add', return_url='admin_programs')
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_program_edit(request, program_id):
     instance = get_object_or_404(program, program_id=program_id)
     return admin_form_view(request, ProgramForm, instance=instance, section_name='Program', action_label='Update', return_url='admin_programs')
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_program_delete(request, program_id):
     instance = get_object_or_404(program, program_id=program_id)
     if request.method == 'POST':
@@ -525,9 +513,12 @@ def admin_program_delete(request, program_id):
         'object_name': instance.title,
         'return_url': 'admin_programs',
     })
+# ---------------------------------------------------------------------------------------------------------------
 
+# event management
+# ---------------------------------------------------------------------------------------------------------------
 
-@role_required('events_resources_manager', 'content_manager')
+@role_required('secretary','director')
 def admin_events(request):
     items = Event.objects.select_related('program_id').all().order_by('-event_date')
     return render(request, 'core/admin_list.html', {
@@ -546,18 +537,18 @@ def admin_events(request):
     })
 
 
-@role_required('events_resources_manager', 'content_manager')
+@role_required('secretary','director')
 def admin_event_add(request):
     return admin_form_view(request, EventForm, section_name='Event', action_label='Add', return_url='admin_events')
 
 
-@role_required('events_resources_manager', 'content_manager')
+@role_required('secretary','director')
 def admin_event_edit(request, event_id):
     instance = get_object_or_404(Event, event_id=event_id)
     return admin_form_view(request, EventForm, instance=instance, section_name='Event', action_label='Update', return_url='admin_events')
 
 
-@role_required('events_resources_manager', 'content_manager')
+@role_required('secretary','director')
 def admin_event_delete(request, event_id):
     instance = get_object_or_404(Event, event_id=event_id)
     if request.method == 'POST':
@@ -569,9 +560,12 @@ def admin_event_delete(request, event_id):
         'object_name': instance.title,
         'return_url': 'admin_events',
     })
+# ----------------------------------------------------------------------------------------------------------------
 
+# news management
+# ----------------------------------------------------------------------------------------------------------------
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_news(request):
     items = News.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -590,18 +584,18 @@ def admin_news(request):
     })
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_news_add(request):
     return admin_form_view(request, NewsForm, section_name='News item', action_label='Add', return_url='admin_news')
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_news_edit(request, news_id):
     instance = get_object_or_404(News, news_id=news_id)
     return admin_form_view(request, NewsForm, instance=instance, section_name='News item', action_label='Update', return_url='admin_news')
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_news_delete(request, news_id):
     instance = get_object_or_404(News, news_id=news_id)
     if request.method == 'POST':
@@ -613,9 +607,11 @@ def admin_news_delete(request, news_id):
         'object_name': instance.title,
         'return_url': 'admin_news',
     })
+# -------------------------------------------------------------------------------------------------------------------------------
 
-
-@role_required('content_manager', 'events_resources_manager')
+# resources management
+# -------------------------------------------------------------------------------------------------------------------------------
+@role_required('secretary','director')
 def admin_resources(request):
     items = Resource.objects.select_related('program_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -633,19 +629,18 @@ def admin_resources(request):
         ],
     })
 
-
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_resource_add(request):
     return admin_form_view(request, ResourceForm, section_name='Resource', action_label='Add', return_url='admin_resources')
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_resource_edit(request, resource_id):
     instance = get_object_or_404(Resource, resource_id=resource_id)
     return admin_form_view(request, ResourceForm, instance=instance, section_name='Resource', action_label='Update', return_url='admin_resources')
 
 
-@role_required('content_manager', 'events_resources_manager')
+@role_required('secretary','director')
 def admin_resource_delete(request, resource_id):
     instance = get_object_or_404(Resource, resource_id=resource_id)
     if request.method == 'POST':
@@ -658,8 +653,9 @@ def admin_resource_delete(request, resource_id):
         'return_url': 'admin_resources',
     })
 
-
-@role_required('volunteer_manager')
+# volunteer management 
+# ------------------------------------------------------------------------------------------------------------------------------------
+@role_required('secretary','director')
 def admin_volunteers(request):
     items = Volunteer.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -680,18 +676,18 @@ def admin_volunteers(request):
     })
 
 
-@role_required('volunteer_manager')
+@role_required('secretary','director')
 def admin_volunteer_add(request):
     return admin_form_view(request, VolunteerForm, section_name='Volunteer', action_label='Add', return_url='admin_volunteers')
 
 
-@role_required('volunteer_manager')
+@role_required('secretary','director')
 def admin_volunteer_edit(request, volunteer_email):
     instance = get_object_or_404(Volunteer, email=volunteer_email)
     return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
 
 
-@role_required('volunteer_manager')
+@role_required('secretary','director')
 def admin_volunteer_review(request, volunteer_email):
     instance = get_object_or_404(Volunteer.objects.select_related('program_id'), email=volunteer_email)
     payment = VolunteerPayment.objects.select_related('transaction').filter(volunteer=instance).first()
@@ -715,7 +711,7 @@ def admin_volunteer_review(request, volunteer_email):
     })
 
 
-@role_required('volunteer_manager')
+@role_required('secretary','director')
 def admin_volunteer_delete(request, volunteer_email):
     instance = get_object_or_404(Volunteer, email=volunteer_email)
     if request.method == 'POST':
@@ -728,7 +724,8 @@ def admin_volunteer_delete(request, volunteer_email):
         'return_url': 'admin_volunteers',
     })
 
-
+#  feedback management
+# -------------------------------------------------------------------------------------------------------------------
 @group_required
 def admin_feedback(request):
     feedback_list = Feedback.objects.all().order_by('-created_at')
@@ -847,3 +844,45 @@ def admin_logout(request):
     auth_logout(request)
     return redirect('home')
  
+#  upload media 
+# -------------------------------------------------------------------------------------------------------------------
+@group_required
+@require_POST
+def upload_media(request):
+    media_file = request.FILES.get("file")
+    if not media_file:
+        return JsonResponse({"error": "No file provided."}, status=400)
+
+    # Save original to temp/ — the Celery worker reads it from here
+    temp_path = default_storage.save(
+        f"temp/{media_file.name}",
+        ContentFile(media_file.read())
+    )
+
+    task = process_media_task.delay(temp_path)   
+    return JsonResponse({
+        "task_id": task.id,
+        "status":  "processing",
+    })
+
+@group_required
+def upload_media_status(request, task_id):
+    task = AsyncResult(task_id)
+    if task.state == "PENDING":
+        return JsonResponse({"status": "pending"})
+
+    elif task.state == "SUCCESS":
+        return JsonResponse({
+            "status": "done",
+            "url":    task.result["url"],
+            "type":   task.result["type"],
+        })
+
+    elif task.state == "FAILURE":
+        return JsonResponse({
+            "status": "failed",
+            "error":  str(task.result),
+        }, status=500)
+
+    else:
+        return JsonResponse({"status": task.state.lower()})

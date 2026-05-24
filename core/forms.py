@@ -4,6 +4,7 @@ import re
 
 from .models import program, events, news, resources, volunteer, donation, feedback, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
 from .admin_roles import ADMIN_ROLE_CHOICES
+from django.contrib.auth.models import User
 
 
 CONTROL_CHAR_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
@@ -33,48 +34,40 @@ class SanitizedFieldsMixin:
         for field_name, value in list(cleaned_data.items()):
             if field_name in self.sanitizer_skip_fields or not isinstance(value, str):
                 continue
-
             cleaned_value = sanitize_text(
-                value,
-                preserve_newlines=field_name in self.sanitizer_preserve_newlines,
+                value, preserve_newlines=field_name in self.sanitizer_preserve_newlines,
             )
 
             if field_name.endswith('email') or field_name == 'email':
                 cleaned_value = cleaned_value.lower()
-
             cleaned_data[field_name] = cleaned_value
 
         return cleaned_data
 
-
 class SanitizedModelForm(SanitizedFieldsMixin, forms.ModelForm):
     pass
 
-
 class SanitizedForm(SanitizedFieldsMixin, forms.Form):
     pass
-
 
 class ProgramForm(SanitizedModelForm):
     sanitizer_preserve_newlines = ('program_description',)
 
     class Meta:
         model = program
-        fields = [ 'title', 'program_description', 'image', 'two_week_fee', 'four_week_fee', 'eight_week_fee', 'extra_week_fee',]
-        
+        fields = [ 'title', 'program_description', 'image_url', 'program_location', 'week_fee' ]
         widgets = {
-            'program_description': forms.Textarea(attrs={'rows': 4}),
+            'program_description': forms.Textarea(attrs={'rows': 10}),
         }
-
 
 class EventForm(SanitizedModelForm):
     sanitizer_preserve_newlines = ('events_description',)
 
     class Meta:
         model = events
-        fields = ['title', 'events_description', 'image', 'program_id', 'event_location', 'event_date']
+        fields = ['title', 'events_description', 'image_url', 'program_id', 'event_location', 'event_date']
         widgets = {
-            'events_description': forms.Textarea(attrs={'rows': 4}),
+            'events_description': forms.Textarea(attrs={'rows': 10}),
             'event_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
@@ -84,9 +77,9 @@ class NewsForm(SanitizedModelForm):
 
     class Meta:
         model = news
-        fields = ['title', 'news_description', 'image', 'program_id', 'event_id']
+        fields = ['title', 'news_description', 'image_url', 'program_id', 'event_id']
         widgets = {
-            'news_description': forms.Textarea(attrs={'rows': 4}),
+            'news_description': forms.Textarea(attrs={'rows': 10}),
         }
 
 
@@ -95,66 +88,51 @@ class ResourceForm(SanitizedModelForm):
 
     class Meta:
         model = resources
-        fields = ['title', 'resources_description', 'image', 'file', 'program_id']
+        fields = ['title', 'resources_description', 'image_url', 'file_url', 'program_id']
         widgets = {
-            'resources_description': forms.Textarea(attrs={'rows': 4}),
+            'resources_description': forms.Textarea(attrs={'rows': 10}),
         }
 
 class VolunteerForm(SanitizedModelForm):
-
     class Meta:
-
         model = volunteer
-
         fields = ['first_name', 'last_name', 'email', 'occupation', 'phone_number', 'id_pass_no', 'residence', 'starting_date', 'end_date', 'emergency_contact_name', 'emergency_contact_phone', 'program_id', ]
-
         widgets = {
             'first_name': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'last_name': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'email': forms.EmailInput(attrs={
                 'class': 'form-control'
             }),
-
             'occupation': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'id_pass_no': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'residence': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'starting_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
-
             'end_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
-
             'emergency_contact_name': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'emergency_contact_phone': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'program_id': forms.Select(attrs={
                 'class': 'form-control'
             }),
@@ -167,30 +145,20 @@ class VolunteerForm(SanitizedModelForm):
         end_date = cleaned_data.get('end_date')
 
         if start_date and end_date:
-
             if end_date <= start_date:
-
-                raise forms.ValidationError(
-                    "End date must be after start date."
-                )
-
+                raise forms.ValidationError("End date must be after start date.")
         return cleaned_data
 
 class DonationForm(SanitizedModelForm):
     sanitizer_preserve_newlines = ('donation_reason',)
 
     amount = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control'
-        })
+        max_digits=10,decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
 
     class Meta:
-
         model = donation
-
         fields = [
             'donor_name',
             'donor_email',
@@ -207,19 +175,15 @@ class DonationForm(SanitizedModelForm):
             'donor_name': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-
             'donor_email': forms.EmailInput(attrs={
                 'class': 'form-control'
             }),
-
             'donation_type': forms.Select(attrs={
                 'class': 'form-control'
             }),
-
             'message': forms.Textarea(attrs={
                 'class': 'form-control'
             }),
-
             'payment_method': forms.Select(attrs={
                 'class': 'form-control'
             }),
@@ -284,8 +248,6 @@ class AdminUserForm(SanitizedForm):
             self.fields['password'].required = True
 
     def clean_username(self):
-        from django.contrib.auth.models import User
-
         username = self.cleaned_data['username']
         query = User.objects.filter(username=username)
         if self.user_instance:
@@ -317,13 +279,12 @@ class ImpactMetricForm(SanitizedModelForm):
             'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-
 class FeaturedPersonForm(SanitizedModelForm):
     sanitizer_preserve_newlines = ('short_bio',)
 
     class Meta:
         model = FeaturedPerson
-        fields = ['page', 'feature_type', 'name', 'age', 'headline', 'short_bio', 'achievement', 'dream_or_goal', 'quote', 'image', 'is_featured']
+        fields = ['page', 'feature_type', 'name', 'age', 'headline', 'short_bio', 'achievement', 'dream_or_goal', 'quote', 'image_url', 'is_featured']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'feature_type': forms.Select(attrs={'class': 'form-control'}),
@@ -342,7 +303,7 @@ class SuccessStoryForm(SanitizedModelForm):
 
     class Meta:
         model = SuccessStory
-        fields = ['page', 'title', 'person_name', 'challenge', 'intervention', 'outcome', 'quote', 'image', 'is_featured']
+        fields = ['page', 'title', 'person_name', 'challenge', 'intervention', 'outcome', 'quote', 'image_url', 'is_featured']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -359,7 +320,7 @@ class InspirationVideoForm(SanitizedModelForm):
 
     class Meta:
         model = InspirationVideo
-        fields = ['page', 'title', 'description', 'video_url', 'thumbnail', 'is_featured']
+        fields = ['page', 'title', 'description', 'video_url', 'thumbnail_url', 'is_featured']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -373,7 +334,7 @@ class PageMediaForm(SanitizedModelForm):
 
     class Meta:
         model = PageMedia
-        fields = ['page', 'media_type', 'title', 'description', 'image', 'video_url', 'display_order']
+        fields = ['page', 'media_type', 'title', 'description', 'image_url', 'video_url', 'display_order']
         widgets = {
             'page': forms.Select(attrs={'class': 'form-control'}),
             'media_type': forms.Select(attrs={'class': 'form-control'}),
