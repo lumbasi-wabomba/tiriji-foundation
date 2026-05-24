@@ -134,7 +134,7 @@ cloudinary.config(
 )
 
 # celery & redis settings
-CELERY_BROKER_URL        = os.getenv("REDIS_URL", "redis://localhost:6379/0")  # tasks queue
+CELERY_BROKER_URL        = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND    = "django-db"  
 CELERY_CACHE_BACKEND     = "default"
 CELERY_TASK_SERIALIZER   = "json"
@@ -202,31 +202,3 @@ if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-# tiriji/settings.py — add this anywhere
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'ERROR',       # prints full traceback to terminal always
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-    },
-}
