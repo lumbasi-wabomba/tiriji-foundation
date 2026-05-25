@@ -2,7 +2,7 @@ from django import forms
 from django.utils.html import strip_tags
 import re
 
-from .models import program, events, news, resources, volunteer, donation, feedback, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
+from .models import BlogPost, program, events, news, resources, volunteer, donation, feedback, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
 from .admin_roles import ADMIN_ROLE_CHOICES
 from django.contrib.auth.models import User
 
@@ -80,6 +80,21 @@ class NewsForm(SanitizedModelForm):
         fields = ['title', 'news_description', 'image_url', 'program_id', 'event_id']
         widgets = {
             'news_description': forms.Textarea(attrs={'rows': 10}),
+        }
+
+
+class BlogPostForm(SanitizedModelForm):
+    sanitizer_preserve_newlines = ('excerpt', 'body')
+
+    class Meta:
+        model = BlogPost
+        fields = ['title', 'excerpt', 'body', 'image', 'source_url', 'is_published']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'excerpt': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 8}),
+            'source_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 

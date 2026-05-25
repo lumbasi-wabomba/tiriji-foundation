@@ -110,7 +110,7 @@ class PaymentService:
             'config': config,
             'reference': reference,
             'amount': volunteer_payment.amount,
-            'currency': 'KES',
+            'currency': 'USD',
             'is_subscription': False,
         }
 

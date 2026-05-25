@@ -1,0 +1,18 @@
+<aside class="admin-sidebar" id="adminSidebar">
+    <h1><a href="{% url 'admin_portal' %}">Tiriji Ops</a></h1>
+    <p class="admin-role-label">{{ current_role|default:"Admin Portal" }}</p>
+    <nav aria-label="Admin navigation">
+        <a href="{% url 'admin_portal' %}" {% if request.resolver_match.url_name == 'admin_portal' %}class="active"{% endif %}>Dashboard</a>
+        <a href="{% url 'admin_programs' %}" {% if 'program' in request.resolver_match.url_name %}class="active"{% endif %}>Programs</a>
+        <a href="{% url 'admin_events' %}" {% if 'event' in request.resolver_match.url_name %}class="active"{% endif %}>Events</a>
+        <a href="{% url 'admin_news' %}" {% if 'news' in request.resolver_match.url_name %}class="active"{% endif %}>Publishing</a>
+        <a href="{% url 'admin_blogs' %}" {% if 'blog' in request.resolver_match.url_name %}class="active"{% endif %}>Blog</a>
+        <a href="{% url 'admin_stories' %}" {% if 'stor' in request.resolver_match.url_name %}class="active"{% endif %}>Stories</a>
+        <a href="{% url 'admin_resources' %}" {% if 'resource' in request.resolver_match.url_name %}class="active"{% endif %}>Resources</a>
+        <a href="{% url 'admin_volunteers' %}" {% if 'volunteer' in request.resolver_match.url_name %}class="active"{% endif %}>Applications</a>
+        <a href="{% url 'admin_donations' %}" {% if 'donation' in request.resolver_match.url_name %}class="active"{% endif %}>Finance</a>
+        <a href="{% url 'admin_feedback' %}" {% if 'feedback' in request.resolver_match.url_name %}class="active"{% endif %}>Feedback</a>
+        <a href="{% url 'admin_users' %}" {% if 'user' in request.resolver_match.url_name %}class="active"{% endif %}>Users & Roles</a>
+    </nav>
+    <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+</aside>

@@ -1,6 +1,9 @@
 {% extends "core/base.html" %}
 
 {% block content %}
+{% if "/admin-portal/" in request.path %}
+{% include "core/partials/admin_shell_open.html" %}
+{% endif %}
 
 <section class="page-hero donation-hero">
     <div class="container page-hero-grid">
@@ -25,7 +28,7 @@
                 <div><dt>Program</dt><dd>{{ volunteer.program_id.title }}</dd></div>
                 <div><dt>Duration</dt><dd>{{ volunteer.duration_weeks }} weeks</dd></div>
                 <div><dt>Application Status</dt><dd>{{ volunteer.get_status_display }}</dd></div>
-                <div><dt>Amount</dt><dd>KES {{ payment.amount }}</dd></div>
+                <div><dt>Amount</dt><dd>${{ payment.amount }}</dd></div>
                 <div><dt>Transaction</dt><dd>{{ payment.transaction.id }}</dd></div>
             </div>
         </div>
@@ -61,5 +64,9 @@
         </div>
     </div>
 </section>
+
+{% if "/admin-portal/" in request.path %}
+{% include "core/partials/admin_shell_close.html" %}
+{% endif %}
 
 {% endblock %}

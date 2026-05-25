@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import program, volunteer, events, news, resources, employees, partners, gallery, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
+from .models import program, volunteer, events, news, resources, employees, partners, gallery, BlogPost, ImpactMetric, FeaturedPerson, SuccessStory, InspirationVideo, PageMedia
 
 
 
@@ -45,6 +45,12 @@ class EventsAdmin(admin.ModelAdmin):
 class NewsAdmin(admin.ModelAdmin):
     exclude = ('image',)
 
+class BlogPostAdmin(admin.ModelAdmin):
+    exclude = ('image',)
+    list_display = ('title', 'is_published', 'created_at', 'updated_at')
+    list_filter = ('is_published',)
+    search_fields = ('title', 'excerpt', 'body')
+
 class ResourcesAdmin(admin.ModelAdmin):
     exclude = ('image', 'file')
 
@@ -61,6 +67,7 @@ admin.site.register(program, ProgramAdmin)
 admin.site.register(volunteer)
 admin.site.register(events, EventsAdmin)
 admin.site.register(news, NewsAdmin)
+admin.site.register(BlogPost, BlogPostAdmin)
 admin.site.register(resources, ResourcesAdmin)
 admin.site.register(employees, EmployeesAdmin)
 admin.site.register(partners, PartnersAdmin)
