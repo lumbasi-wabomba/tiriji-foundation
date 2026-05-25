@@ -88,11 +88,12 @@ class BlogPostForm(SanitizedModelForm):
 
     class Meta:
         model = BlogPost
-        fields = ['title', 'excerpt', 'body', 'image', 'source_url', 'is_published']
+        fields = ['title', 'excerpt', 'body', 'image_url', 'source_url', 'is_published']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'excerpt': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 8}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control'}),
             'source_url': forms.URLInput(attrs={'class': 'form-control'}),
             'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

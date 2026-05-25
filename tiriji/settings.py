@@ -49,31 +49,35 @@ def normalize_host(value):
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env_bool('DEBUG', False)
-ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,.koyeb.app')
+# DEBUG = env_bool('DEBUG', False)
+# ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,.koyeb.app')
 
-for host_env in ('PUBLIC_HOSTNAME', 'KOYEB_PUBLIC_DOMAIN', 'RENDER_EXTERNAL_HOSTNAME'):
-    host = os.getenv(host_env)
-    if host:
-        normalized_host = normalize_host(host)
-        if normalized_host and normalized_host not in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.append(normalized_host)
+# for host_env in ('PUBLIC_HOSTNAME', 'KOYEB_PUBLIC_DOMAIN', 'RENDER_EXTERNAL_HOSTNAME'):
+#     host = os.getenv(host_env)
+#     if host:
+#         normalized_host = normalize_host(host)
+#         if normalized_host and normalized_host not in ALLOWED_HOSTS:
+#             ALLOWED_HOSTS.append(normalized_host)
 
-CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
-if not DEBUG:
-    for host in ALLOWED_HOSTS:
-        if host in {'localhost', '127.0.0.1', '0.0.0.0'}:
-            continue
-        origin_host = f'*{host}' if host.startswith('.') else host
-        origin = f'https://{origin_host}'
-        if origin not in CSRF_TRUSTED_ORIGINS:
-            CSRF_TRUSTED_ORIGINS.append(origin)
+# CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
+# if not DEBUG:
+#     for host in ALLOWED_HOSTS:
+#         if host in {'localhost', '127.0.0.1', '0.0.0.0'}:
+#             continue
+#         origin_host = f'*{host}' if host.startswith('.') else host
+#         origin = f'https://{origin_host}'
+#         if origin not in CSRF_TRUSTED_ORIGINS:
+#             CSRF_TRUSTED_ORIGINS.append(origin)
 
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+# if not DEBUG:
+#     SECURE_SSL_REDIRECT = True
+#     SECURE_HSTS_SECONDS = 31536000
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+
+DEBUG = True
+
+ALLOWED_HOSTS = []
 
 # Application definition
 
