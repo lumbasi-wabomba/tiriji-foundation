@@ -182,19 +182,15 @@ class donation(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        if not self.donation_id:
-            self.donation_id = self._generate_identifier("DON")
-
         if not self.merchant_reference_id:
-            self.merchant_reference_id = self._generate_identifier("TIR")
-
+            self.merchant_reference_id = self._generate_merchant_ref()
         super().save(*args, **kwargs)
 
     @classmethod
-    def _generate_identifier(cls, prefix):
+    def _generate_merchant_ref(cls):
         while True:
-            value = f"{prefix}-{uuid.uuid4().hex[:12].upper()}"
-            if not cls.objects.filter(donation_id=value).exists() and not cls.objects.filter(merchant_reference_id=value).exists():
+            value = f"TIR-{uuid.uuid4().hex[:12].upper()}"
+            if not cls.objects.filter(merchant_reference_id=value).exists():
                 return value
 
 
@@ -284,7 +280,7 @@ class resources(models.Model):
     title = models.CharField(max_length=50, null=False, blank=False)
     resources_description = models.TextField()
     image_url = models.URLField(max_length=250, null=True, blank=True)
-    file_url = models.URLField(max_length=250, null=True, blank=True)
+    file = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     program_id = models.ForeignKey(program, on_delete=models.CASCADE, null=True, blank=True, related_name='resources')
@@ -295,9 +291,10 @@ class resources(models.Model):
 
 
 class employees(models.Model):
+    employee_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
-    email = EncryptedEmailField(unique=True, primary_key=True)
+    email = EncryptedEmailField(unique=True)
     role = models.CharField(max_length=100)
     phone_number = EncryptedCharField(max_length=20)
     id_pass_no = EncryptedCharField(max_length=50, verbose_name="ID/Passport No")
@@ -315,7 +312,7 @@ class employees(models.Model):
 class partners(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
     partners_description = models.TextField()
-    profile_logo_url = models.URLField(max_length=250, null=True, blank=True)
+    profile_logo = models.URLField(max_length=250, null=True, blank=True)
     website_url = models.URLField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     assigned_employee = models.ForeignKey(employees, on_delete=models.SET_NULL, null=True, blank=True, related_name='partners')  

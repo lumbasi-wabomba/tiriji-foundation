@@ -100,36 +100,25 @@ def volunteer_signup(request):
     if request.method == 'POST':
         form = VolunteerForm(request.POST)
         if form.is_valid():
-            # CREATE VOLUNTEER
             volunteer_instance = form.save(commit=False)
-
-            # Freeze calculated fee
-            volunteer_instance.calculated_fee = (
-                volunteer_instance.fee
-            )
-
-            # Initial workflow status
+            volunteer_instance.calculated_fee = volunteer_instance.fee
             volunteer_instance.status = 'payment_pending'
             volunteer_instance.save()
-            
-            # CREATE TRANSACTION
+
             transaction = Transaction.objects.create(
                 amount=volunteer_instance.calculated_fee,
                 payment_method='mpesa',
                 status='pending'
             )
-
-            # CREATE PAYMENT RECORD
             VolunteerPayment.objects.create(
                 volunteer=volunteer_instance,
                 transaction=transaction,
                 amount=volunteer_instance.calculated_fee
             )
 
-            # REDIRECT TO PAYMENT PAGE
-            return redirect(
+            return redirect(                                   
                 'volunteer_payment_summary',
-                volunteer_email=volunteer_instance.email
+                volunteer_id=volunteer_instance.volunteer_id  
             )
     else:
         initial = {}
@@ -146,8 +135,8 @@ def volunteer_signup(request):
     )
 
 @require_http_methods(["GET","POST"])
-def volunteer_payment_summary(request, volunteer_email):
-    volunteer_instance = get_object_or_404(Volunteer, email=volunteer_email)
+def volunteer_payment_summary(request, volunteer_id):
+    volunteer_instance = get_object_or_404(Volunteer, volunteer_id=volunteer_id)
     payment = get_object_or_404(VolunteerPayment, volunteer=volunteer_instance)
     method = request.POST.get('payment_method', payment.transaction.payment_method if payment.transaction else 'mpesa')
     payment_session = PaymentService.volunteer_session(payment, method)
@@ -157,7 +146,7 @@ def volunteer_payment_summary(request, volunteer_email):
     if request.method == 'POST' and request.POST.get('action') == 'confirm_demo_payment':
         PaymentService.complete_volunteer_payment(payment)
         messages.success(request, 'Demo volunteer payment marked as paid.')
-        return redirect('volunteer_payment_summary', volunteer_email=volunteer_instance.email)
+        return redirect('volunteer_payment_summary', volunteer_id=volunteer_instance.volunteer_id)
     # ---------------------------------------------------------------------------------------------------
 
     return render(
@@ -304,7 +293,7 @@ def gallery_detail(request, gallery_id):
 
 @require_http_methods(["GET"])
 def team_member_detail(request, member_id):
-    member = get_object_or_404(Employee, email=member_id)
+    member = get_object_or_404(Employee, employee_id=member_id)
     return render(request, 'core/team_member_detail.html', {'member': member})
 
 @require_http_methods(["GET"])
@@ -760,7 +749,7 @@ def admin_volunteers(request):
         'headers': ['ID', 'Full Name', 'Email', 'Phone', 'Program', 'Status', 'Created'],
         'rows': [
             {
-                'cols': [item.email, f"{item.first_name} {item.last_name}", item.email, item.phone_number, 
+                'cols': [item.volunteer_id, f"{item.first_name} {item.last_name}", item.email, item.phone_number, 
                          item.program_id.title if item.program_id else '-', item.status, item.created_at.strftime('%Y-%m-%d')],
                 'review_url': reverse('admin_volunteer_review', args=[item.email]),
                 'edit_url': reverse('admin_volunteer_edit', args=[item.email]),
@@ -783,16 +772,16 @@ def admin_volunteer_add(request):
 # @require_http_methods(["PATCH","PUT"])
 @login_required
 @ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
-def admin_volunteer_edit(request, volunteer_email):
-    instance = get_object_or_404(Volunteer, email=volunteer_email)
+def admin_volunteer_edit(request, volunteer_id):
+    instance = get_object_or_404(Volunteer, volunteer_id=volunteer_id)
     return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
 
 
 @role_required('secretary','director')
 @login_required
 @ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
-def admin_volunteer_review(request, volunteer_email):
-    instance = get_object_or_404(Volunteer.objects.select_related('program_id'), email=volunteer_email)
+def admin_volunteer_review(request, volunteer_id):
+    instance = get_object_or_404(Volunteer.objects.select_related('program_id'), volunteer_id=volunteer_id)
     payment = VolunteerPayment.objects.select_related('transaction').filter(volunteer=instance).first()
 
     if request.method == 'POST':
@@ -803,7 +792,7 @@ def admin_volunteer_review(request, volunteer_email):
             instance.status = next_status
             instance.save(update_fields=['status'])
             messages.success(request, f'Application status updated to {valid_statuses[next_status]}.')
-            return redirect('admin_volunteer_review', volunteer_email=instance.email)
+            return redirect('admin_volunteer_review', volunteer_id=instance.volunteer_id)
 
         messages.error(request, 'Invalid application status.')
 
@@ -818,8 +807,8 @@ def admin_volunteer_review(request, volunteer_email):
 # @require_http_methods(["DELETE"])
 @login_required
 @ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
-def admin_volunteer_delete(request, volunteer_email):
-    instance = get_object_or_404(Volunteer, email=volunteer_email)
+def admin_volunteer_delete(request, volunteer_id):
+    instance = get_object_or_404(Volunteer, volunteer_id=volunteer_id)
     if request.method == 'POST':
         instance.delete()
         messages.success(request, 'Volunteer deleted successfully.')
@@ -970,29 +959,44 @@ def admin_logout(request):
 #  upload media 
 # -------------------------------------------------------------------------------------------------------------------
 @group_required
-# @require_http_methods(["POST"])
-@login_required
+@require_POST                                    
 @ratelimit(key='user', method=ratelimit.ALL, rate='15/h', block=True)
 def upload_media(request):
     media_file = request.FILES.get("file")
     if not media_file:
         return JsonResponse({"error": "No file provided."}, status=400)
 
-    # Save original to temp/ — the Celery worker reads it from here
-    temp_path = default_storage.save(
-        f"temp/{media_file.name}",
-        ContentFile(media_file.read())
-    )
+    try:
+        temp_path = default_storage.save(
+            f"temp/{media_file.name}",
+            ContentFile(media_file.read())
+        )
+    except Exception as e:
+        return JsonResponse({"error": f"Could not save file: {e}"}, status=500)
 
-    task = process_media_task.delay(temp_path)   
+    try:
+        task = process_media_task.delay(temp_path)
+    except Exception as e:
+        # Celery/Redis not reachable — clean up and return JSON error
+        default_storage.delete(temp_path)
+        return JsonResponse({
+            "error": f"Processing queue unavailable: {e}. Is Celery running?"
+        }, status=503)
+
     return JsonResponse({
         "task_id": task.id,
         "status":  "processing",
     })
 
+
 @group_required
+@require_http_methods(["GET"])
 def upload_media_status(request, task_id):
-    task = AsyncResult(task_id)
+    try:
+        task = AsyncResult(task_id)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
     if task.state == "PENDING":
         return JsonResponse({"status": "pending"})
 
@@ -1011,4 +1015,3 @@ def upload_media_status(request, task_id):
 
     else:
         return JsonResponse({"status": task.state.lower()})
-
