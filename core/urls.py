@@ -44,29 +44,29 @@ urlpatterns = [
     path('admin-portal/', views.admin_portal, name='admin_portal'),
     path('admin-portal/users/', views.admin_users, name='admin_users'),
     path('admin-portal/users/add/', views.admin_user_add, name='admin_user_add'),
-    path('admin-portal/users/<int:user_id>/edit/', views.admin_user_edit, name='admin_user_edit'),          # ← int (Django User)
+    path('admin-portal/users/<int:user_id>/edit/', views.admin_user_edit, name='admin_user_edit'),         
     path('admin-portal/donations/', views.admin_donations, name='admin_donations'),
     path('admin-portal/donations/<str:donation_id>/review/', views.admin_donation_review, name='admin_donation_review'),
 
     path('admin-portal/programs/', views.admin_programs, name='admin_programs'),
     path('admin-portal/programs/add/', views.admin_program_add, name='admin_program_add'),
-    path('admin-portal/programs/<uuid:program_id>/edit/', views.admin_program_edit, name='admin_program_edit'),      # ← uuid
-    path('admin-portal/programs/<uuid:program_id>/delete/', views.admin_program_delete, name='admin_program_delete'),# ← uuid
+    path('admin-portal/programs/<uuid:program_id>/edit/', views.admin_program_edit, name='admin_program_edit'),      
+    path('admin-portal/programs/<uuid:program_id>/delete/', views.admin_program_delete, name='admin_program_delete'),
 
     path('admin-portal/events/', views.admin_events, name='admin_events'),
     path('admin-portal/events/add/', views.admin_event_add, name='admin_event_add'),
-    path('admin-portal/events/<uuid:event_id>/edit/', views.admin_event_edit, name='admin_event_edit'),      # ← uuid
-    path('admin-portal/events/<uuid:event_id>/delete/', views.admin_event_delete, name='admin_event_delete'),# ← uuid
+    path('admin-portal/events/<uuid:event_id>/edit/', views.admin_event_edit, name='admin_event_edit'),      
+    path('admin-portal/events/<uuid:event_id>/delete/', views.admin_event_delete, name='admin_event_delete'),
 
     path('admin-portal/news/', views.admin_news, name='admin_news'),
     path('admin-portal/news/add/', views.admin_news_add, name='admin_news_add'),
-    path('admin-portal/news/<uuid:news_id>/edit/', views.admin_news_edit, name='admin_news_edit'),           # ← uuid
-    path('admin-portal/news/<uuid:news_id>/delete/', views.admin_news_delete, name='admin_news_delete'),     # ← uuid
+    path('admin-portal/news/<uuid:news_id>/edit/', views.admin_news_edit, name='admin_news_edit'),          
+    path('admin-portal/news/<uuid:news_id>/delete/', views.admin_news_delete, name='admin_news_delete'),    
 
     path('admin-portal/resources/', views.admin_resources, name='admin_resources'),
     path('admin-portal/resources/add/', views.admin_resource_add, name='admin_resource_add'),
-    path('admin-portal/resources/<uuid:resource_id>/edit/', views.admin_resource_edit, name='admin_resource_edit'),      # ← uuid
-    path('admin-portal/resources/<uuid:resource_id>/delete/', views.admin_resource_delete, name='admin_resource_delete'),# ← uuid
+    path('admin-portal/resources/<uuid:resource_id>/edit/', views.admin_resource_edit, name='admin_resource_edit'),      
+    path('admin-portal/resources/<uuid:resource_id>/delete/', views.admin_resource_delete, name='admin_resource_delete'),
 
     path('admin-portal/volunteers/<str:volunteer_email>/payment-summary/', views.volunteer_payment_summary, name='admin_volunteer_payment_summary'),
     path('admin-portal/volunteers/', views.admin_volunteers, name='admin_volunteers'),

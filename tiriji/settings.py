@@ -134,7 +134,7 @@ cloudinary.config(
 )
 
 # celery & redis settings
-CELERY_BROKER_URL        = os.getenv("REDIS_URL", "redis://localhost:6379/0")  # tasks queue
+CELERY_BROKER_URL        = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND    = "django-db"  
 CELERY_CACHE_BACKEND     = "default"
 CELERY_TASK_SERIALIZER   = "json"
@@ -178,9 +178,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    # BASE_DIR / 'static',
+    os.path.join(BASE_DIR, 'static')
 ]
 
 MEDIA_URL = '/media/'
@@ -199,34 +200,5 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 #for production
 if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-# tiriji/settings.py — add this anywhere
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'ERROR',       # prints full traceback to terminal always
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-    },
-}
