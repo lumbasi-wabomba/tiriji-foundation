@@ -1,8 +1,12 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}{{ action_label }} {{ section_name }} | Admin{% endblock %}
 
 {% block content %}
+{# CSRF token for the media upload JS #}
+<meta name="csrf-token" content="{{ csrf_token }}">
+
 {% include "core/partials/admin_shell_open.html" %}
 <div class="container admin-panel">
     <div class="admin-header card">
@@ -34,4 +38,8 @@
     </div>
 </div>
 {% include "core/partials/admin_shell_close.html" %}
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/media_upload.js' %}"></script>
 {% endblock %}
