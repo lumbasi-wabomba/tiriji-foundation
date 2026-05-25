@@ -277,7 +277,6 @@ class BlogPost(models.Model):
     title = models.CharField(max_length=150)
     excerpt = models.TextField()
     body = models.TextField()
-    image = models.ImageField(upload_to='temp/', blank=True, null=True)
     image_url = models.URLField(max_length=250, null=True, blank=True)
     source_url = models.URLField(max_length=500, blank=True, null=True)
     is_published = models.BooleanField(default=True)

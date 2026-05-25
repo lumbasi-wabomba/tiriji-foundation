@@ -1064,7 +1064,8 @@ def admin_logout(request):
 #  upload media 
 # -------------------------------------------------------------------------------------------------------------------
 @group_required
-@require_POST                                    
+@require_http_methods(["POST"])
+@login_required                                   
 @ratelimit(key='user', method=ratelimit.ALL, rate='15/h', block=True)
 def upload_media(request):
     media_file = request.FILES.get("file")
