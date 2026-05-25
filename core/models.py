@@ -22,10 +22,11 @@ class program(models.Model):
         return self.title
 
 
-class volunteer(models.Model): # Revised version of this model
+class volunteer(models.Model):
+    volunteer_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
-    email = EncryptedEmailField(primary_key=True)
+    email = EncryptedEmailField(unique=True)
     occupation = models.CharField(max_length=100)
     phone_number = EncryptedCharField(max_length=20)
     id_pass_no = EncryptedCharField(max_length=50, verbose_name="ID/Passport No")

@@ -13,10 +13,11 @@ from .forms import ProgramForm, EventForm, NewsForm, ResourceForm, VolunteerForm
 from .admin_roles import ADMIN_GROUP_NAMES, assign_admin_role, get_admin_role_label, user_has_admin_access, user_has_any_admin_role
 from .services.payment_service import PaymentService
 from django.contrib.auth import logout as auth_logout
+from django_ratelimit.decorators import ratelimit
 
 import os
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from celery.result import AsyncResult
@@ -50,6 +51,7 @@ def home(request):
 def about(request):
     return render(request, 'core/about.html')
 
+@ratelimit(key='ip', method='POST', rate='5/h', block=True)
 def contact(request):
     return render(request, 'core/contact.html')
 
@@ -72,11 +74,12 @@ def women(request):
     context = impact_page_context('women')
     return render(request, 'core/women.html', context)   
 
-
+@require_http_methods(["GET"])
 def programs(request):
     programs = program.objects.all()
     return render(request, 'core/programs.html', {'programs': programs})
 
+@require_http_methods(["GET"])
 def program_detail(request, program_id):
     program_detail = get_object_or_404(program, program_id=program_id)
     return render(request, 'core/program_detail.html', {
@@ -87,13 +90,13 @@ def program_detail(request, program_id):
         'program_events': program_detail.events.all()[:3],
     })
 
-
+@require_http_methods(["GET","POST"])
 def volunteer(request):
     return render(request, 'core/volunteer.html')
 
-
+@require_http_methods(["GET","POST"])
+@ratelimit(key='ip', method='POST', rate='3/h', block=True)
 def volunteer_signup(request):
-
     if request.method == 'POST':
         form = VolunteerForm(request.POST)
         if form.is_valid():
@@ -129,7 +132,6 @@ def volunteer_signup(request):
                 volunteer_email=volunteer_instance.email
             )
     else:
-
         initial = {}
         program_id = request.GET.get('program')
         if program_id and program.objects.filter(program_id=program_id).exists():
@@ -143,6 +145,7 @@ def volunteer_signup(request):
         {'form': form}
     )
 
+@require_http_methods(["GET","POST"])
 def volunteer_payment_summary(request, volunteer_email):
     volunteer_instance = get_object_or_404(Volunteer, email=volunteer_email)
     payment = get_object_or_404(VolunteerPayment, volunteer=volunteer_instance)
@@ -168,6 +171,8 @@ def volunteer_payment_summary(request, volunteer_email):
         }
     )
 
+@ratelimit(key='ip', method='POST', rate='5/h', block=True)
+@require_http_methods(["GET","POST"])
 def donate(request):
     if request.method == 'POST':
         form = DonationForm(request.POST)
@@ -188,6 +193,8 @@ def donate(request):
         form = DonationForm()
     return render(request, 'core/donate.html', {'form': form })
 
+@require_http_methods(["GET","POST"])
+@ratelimit(key='ip', method='POST', rate='10/h', block=True)
 def donation_payment(request, donation_id):
     donation = get_object_or_404(Donation.objects.select_related('transaction'), donation_id=donation_id)
     payment_session = PaymentService.donation_session(donation)
@@ -205,28 +212,34 @@ def donation_payment(request, donation_id):
         'payment_session': payment_session,
     })
 
+@require_http_methods(["GET"])
 def donate_success(request):
     return render(request, 'core/donate_success.html')
 
+@require_http_methods(["GET"])
 def donate_cancel(request):
     return render(request, 'core/donate_cancel.html')
 
-
+@require_http_methods(["GET"])
 def events(request):
     event_items = Event.objects.select_related('program_id').all().order_by('event_date')
     return render(request, 'core/events.html', {'events': event_items})
 
+@require_http_methods(["GET"])
 def news(request):
     news_items = News.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
     return render(request, 'core/news.html', {'news_items': news_items})
 
+@require_http_methods(["GET"])
 def resources(request):
     resource_items = Resource.objects.select_related('program_id').all().order_by('-created_at')
     return render(request, 'core/resources.html', {'resource_items': resource_items})
 
+@require_http_methods(["GET"])
 def faq(request):
     return render(request, 'core/faq.html')
 
+@require_http_methods(["GET"])
 def gallery(request):
     gallery_items = Gallery.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
     return render(request, 'core/gallery.html', {'gallery_items': gallery_items})
@@ -239,15 +252,20 @@ def partners(request):
     partner_items = Partner.objects.select_related('program_id', 'assigned_employee').all().order_by('-created_at')
     return render(request, 'core/partners.html', {'partners': partner_items})
 
+@require_http_methods(["GET"])
 def privacy_policy(request):
     return render(request, 'core/privacy_policy.html')
 
+@require_http_methods(["GET"])
 def terms_of_service(request):
     return render(request, 'core/terms_of_service.html')
 
+@require_http_methods(["GET"])
 def sitemap(request):
     return render(request, 'core/sitemap.html')
 
+@ratelimit(key='ip', method='POST', rate='5/h', block=True)
+@require_http_methods(["GET","POST"])
 def feedback(request):
     if request.method == "POST":
         form = FeedbackForm(request.POST)
@@ -260,42 +278,53 @@ def feedback(request):
 
     return render(request, "core/feedback.html", {'form': form})
 
+@require_http_methods(["GET"])
 def newsletter(request):
     return render(request, 'core/newsletter.html')
 
+@require_http_methods(["GET"])
 def event_detail(request, event_id):
     event = get_object_or_404(Event.objects.select_related('program_id'), event_id=event_id)
     return render(request, 'core/event_detail.html', {'event': event})
 
+@require_http_methods(["GET"])
 def news_detail(request, news_id):
     news_item = get_object_or_404(News, news_id=news_id)
     return render(request, 'core/news_detail.html', {'news_item': news_item})   
 
+@require_http_methods(["GET"])
 def resource_detail(request, resource_id):
     resource = get_object_or_404(Resource, resource_id=resource_id)
     return render(request, 'core/resource_detail.html', {'resource': resource})
 
+@require_http_methods(["GET"])
 def gallery_detail(request, gallery_id):
     gallery_item = get_object_or_404(Gallery.objects.select_related('program_id', 'event_id'), image_id=gallery_id)
     return render(request, 'core/gallery_detail.html', {'gallery_item': gallery_item})  
 
+@require_http_methods(["GET"])
 def team_member_detail(request, member_id):
     member = get_object_or_404(Employee, email=member_id)
     return render(request, 'core/team_member_detail.html', {'member': member})
 
+@require_http_methods(["GET"])
 def partner_detail(request, partner_id):
     partner = get_object_or_404(Partner.objects.select_related('program_id', 'assigned_employee'), pk=partner_id)
     return render(request, 'core/partner_detail.html', {'partner': partner})
 
+@require_http_methods(["GET"])
 def blog(request):
     return render(request, 'core/blog.html')
 
+@require_http_methods(["GET"])
 def blog_detail(request, blog_id):
     # Placeholder for blog detail view
     return render(request, 'core/blog_detail.html', {'blog_id': blog_id})
 
 
 @group_required
+@login_required
+@ratelimit(key='user', method=['POST','PATCH','DELETE'], rate='20/h', block=True)
 def admin_portal(request):
     pending_statuses = ['submitted', 'payment_pending', 'paid', 'under_review']
     pending_volunteers = Volunteer.objects.select_related('program_id').filter(
@@ -314,6 +343,9 @@ def admin_portal(request):
     }
     return render(request, 'core/admin.html', context)
 
+@group_required
+@login_required
+@ratelimit(key='user', method=['POST','PATCH','DELETE'], rate='20/h', block=True)
 def admin_form_view(request, form_class, instance=None, section_name='', action_label='Create', return_url='admin_portal'):
     if request.method == 'POST':
         form = form_class(request.POST, request.FILES, instance=instance)
@@ -334,6 +366,8 @@ def admin_form_view(request, form_class, instance=None, section_name='', action_
 # user management
 # --------------------------------------------------------------------------------------------------------------------------------
 @role_required('sys_admin')
+@ratelimit(key='user', method=['POST','PATCH','DELETE'], rate='10/h', block=True)
+@login_required
 def admin_users(request):
     users = User.objects.filter(Q(is_staff=True) | Q(groups__name__in=ADMIN_GROUP_NAMES)).distinct().order_by('first_name', 'username')
 
@@ -348,6 +382,9 @@ def admin_users(request):
     })
 
 @role_required('sys_admin')
+@require_http_methods(["POST"])
+@ratelimit(key='user', method=['POST'], rate='10/h', block=True)
+@login_required
 def admin_user_add(request):
     if request.method == 'POST':
         form = AdminUserForm(request.POST)
@@ -375,6 +412,9 @@ def admin_user_add(request):
     })
 
 @role_required('sys_admin')
+@require_http_methods(["PATCH","PUT"])
+@ratelimit(key='user', method=ratelimit.ALL, rate='10/h', block=True)
+@login_required
 def admin_user_edit(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     current_role = user.groups.filter(name__in=ADMIN_GROUP_NAMES).first()
@@ -414,6 +454,9 @@ def admin_user_edit(request, user_id):
 # donations management 
 # ---------------------------------------------------------------------------------------------------------------
 @role_required('director','secretary')
+@require_http_methods(["GET"])
+@ratelimit(key='user', method=ratelimit.ALL, rate='30/h', block=True)
+@login_required
 def admin_donations(request):
     items = Donation.objects.select_related('transaction').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -438,8 +481,9 @@ def admin_donations(request):
         ],
     })
 
-
+@login_required
 @role_required('director','secretary')
+@ratelimit(key='user', method=ratelimit.ALL, rate='30/h', block=True)
 def admin_donation_review(request, donation_id):
     instance = get_object_or_404(Donation.objects.select_related('transaction'), donation_id=donation_id)
 
@@ -471,7 +515,10 @@ def admin_donation_review(request, donation_id):
 # program management
 # --------------------------------------------------------------------------------------------------------------
 
+@login_required
 @role_required('director','secretary')
+# @require_http_methods(["GET","POST","PATCH","PUT"])
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_programs(request):
     items = program.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -491,17 +538,26 @@ def admin_programs(request):
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["POST","PATCH","PUT"])
+@login_required
 def admin_program_add(request):
     return admin_form_view(request, ProgramForm, section_name='Program', action_label='Add', return_url='admin_programs')
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["PATCH","PUT"])
+@login_required
 def admin_program_edit(request, program_id):
     instance = get_object_or_404(program, program_id=program_id)
     return admin_form_view(request, ProgramForm, instance=instance, section_name='Program', action_label='Update', return_url='admin_programs')
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["DELETE"])
+@login_required
 def admin_program_delete(request, program_id):
     instance = get_object_or_404(program, program_id=program_id)
     if request.method == 'POST':
@@ -519,6 +575,9 @@ def admin_program_delete(request, program_id):
 # ---------------------------------------------------------------------------------------------------------------
 
 @role_required('secretary','director')
+# @require_http_methods(["GET"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_events(request):
     items = Event.objects.select_related('program_id').all().order_by('-event_date')
     return render(request, 'core/admin_list.html', {
@@ -538,17 +597,26 @@ def admin_events(request):
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["POST"])
+@login_required
 def admin_event_add(request):
     return admin_form_view(request, EventForm, section_name='Event', action_label='Add', return_url='admin_events')
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["PATCH","PUT"])
+@login_required
 def admin_event_edit(request, event_id):
     instance = get_object_or_404(Event, event_id=event_id)
     return admin_form_view(request, EventForm, instance=instance, section_name='Event', action_label='Update', return_url='admin_events')
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["DELETE"])
+@login_required
 def admin_event_delete(request, event_id):
     instance = get_object_or_404(Event, event_id=event_id)
     if request.method == 'POST':
@@ -566,6 +634,9 @@ def admin_event_delete(request, event_id):
 # ----------------------------------------------------------------------------------------------------------------
 
 @role_required('secretary','director')
+# @require_http_methods(["GET"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_news(request):
     items = News.objects.select_related('program_id', 'event_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -585,17 +656,26 @@ def admin_news(request):
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["POST"])
+@login_required
 def admin_news_add(request):
     return admin_form_view(request, NewsForm, section_name='News item', action_label='Add', return_url='admin_news')
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["PATCH","PUT"])
+@login_required
 def admin_news_edit(request, news_id):
     instance = get_object_or_404(News, news_id=news_id)
     return admin_form_view(request, NewsForm, instance=instance, section_name='News item', action_label='Update', return_url='admin_news')
 
 
 @role_required('secretary','director')
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
+# @require_http_methods(["DELETE"])
+@login_required
 def admin_news_delete(request, news_id):
     instance = get_object_or_404(News, news_id=news_id)
     if request.method == 'POST':
@@ -612,6 +692,9 @@ def admin_news_delete(request, news_id):
 # resources management
 # -------------------------------------------------------------------------------------------------------------------------------
 @role_required('secretary','director')
+# @require_http_methods(["GET"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_resources(request):
     items = Resource.objects.select_related('program_id').all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -630,17 +713,26 @@ def admin_resources(request):
     })
 
 @role_required('secretary','director')
+# @require_http_methods(["POST"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_resource_add(request):
     return admin_form_view(request, ResourceForm, section_name='Resource', action_label='Add', return_url='admin_resources')
 
 
 @role_required('secretary','director')
+# @require_http_methods(["PATCH","PUT"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_resource_edit(request, resource_id):
     instance = get_object_or_404(Resource, resource_id=resource_id)
     return admin_form_view(request, ResourceForm, instance=instance, section_name='Resource', action_label='Update', return_url='admin_resources')
 
 
 @role_required('secretary','director')
+# @require_http_methods(["DELETE"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_resource_delete(request, resource_id):
     instance = get_object_or_404(Resource, resource_id=resource_id)
     if request.method == 'POST':
@@ -656,6 +748,9 @@ def admin_resource_delete(request, resource_id):
 # volunteer management 
 # ------------------------------------------------------------------------------------------------------------------------------------
 @role_required('secretary','director')
+# @require_http_methods(["GET"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_volunteers(request):
     items = Volunteer.objects.all().order_by('-created_at')
     return render(request, 'core/admin_list.html', {
@@ -677,17 +772,25 @@ def admin_volunteers(request):
 
 
 @role_required('secretary','director')
+# @require_http_methods(["POST"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_volunteer_add(request):
     return admin_form_view(request, VolunteerForm, section_name='Volunteer', action_label='Add', return_url='admin_volunteers')
 
 
 @role_required('secretary','director')
+# @require_http_methods(["PATCH","PUT"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_volunteer_edit(request, volunteer_email):
     instance = get_object_or_404(Volunteer, email=volunteer_email)
     return admin_form_view(request, VolunteerForm, instance=instance, section_name='Volunteer', action_label='Update', return_url='admin_volunteers')
 
 
 @role_required('secretary','director')
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_volunteer_review(request, volunteer_email):
     instance = get_object_or_404(Volunteer.objects.select_related('program_id'), email=volunteer_email)
     payment = VolunteerPayment.objects.select_related('transaction').filter(volunteer=instance).first()
@@ -712,6 +815,9 @@ def admin_volunteer_review(request, volunteer_email):
 
 
 @role_required('secretary','director')
+# @require_http_methods(["DELETE"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_volunteer_delete(request, volunteer_email):
     instance = get_object_or_404(Volunteer, email=volunteer_email)
     if request.method == 'POST':
@@ -727,6 +833,9 @@ def admin_volunteer_delete(request, volunteer_email):
 #  feedback management
 # -------------------------------------------------------------------------------------------------------------------
 @group_required
+# @require_http_methods(["GET"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_feedback(request):
     feedback_list = Feedback.objects.all().order_by('-created_at')
     return render(request, 'core/admin_feedback_list.html', {
@@ -737,6 +846,9 @@ def admin_feedback(request):
 
 
 @group_required
+# @require_http_methods(["DELETE"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='25/h', block=True)
 def admin_feedback_delete(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     if request.method == 'POST':
@@ -751,6 +863,7 @@ def admin_feedback_delete(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_respond(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     if request.method == 'POST':
@@ -768,6 +881,7 @@ def admin_feedback_respond(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_addressed(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     # Here you would update a status field or add a tag
@@ -777,6 +891,7 @@ def admin_feedback_mark_addressed(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_unaddressed(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     # Here you would update a status field or remove a tag
@@ -785,6 +900,7 @@ def admin_feedback_mark_unaddressed(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_in_progress(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as in progress.')
@@ -792,6 +908,7 @@ def admin_feedback_mark_in_progress(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_resolved(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as resolved.')
@@ -799,6 +916,7 @@ def admin_feedback_mark_resolved(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_rejected(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as rejected.')
@@ -806,6 +924,7 @@ def admin_feedback_mark_rejected(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_duplicate(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as duplicate.')
@@ -813,6 +932,7 @@ def admin_feedback_mark_duplicate(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_wontfix(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as won\'t fix.')
@@ -820,13 +940,14 @@ def admin_feedback_mark_wontfix(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_needsinfo(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as needs info.')
     return redirect('admin_feedback')
 
-
 @group_required
+@login_required
 def admin_feedback_mark_accepted(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as accepted.')
@@ -834,12 +955,14 @@ def admin_feedback_mark_accepted(request, feedback_id):
 
 
 @group_required
+@login_required
 def admin_feedback_mark_reopened(request, feedback_id):
     instance = get_object_or_404(Feedback, feedback_id=feedback_id)
     messages.success(request, 'Feedback marked as reopened.')
     return redirect('admin_feedback')
 
 @group_required
+@login_required
 def admin_logout(request):
     auth_logout(request)
     return redirect('home')
@@ -847,7 +970,9 @@ def admin_logout(request):
 #  upload media 
 # -------------------------------------------------------------------------------------------------------------------
 @group_required
-@require_POST
+# @require_http_methods(["POST"])
+@login_required
+@ratelimit(key='user', method=ratelimit.ALL, rate='15/h', block=True)
 def upload_media(request):
     media_file = request.FILES.get("file")
     if not media_file:
@@ -886,3 +1011,4 @@ def upload_media_status(request, task_id):
 
     else:
         return JsonResponse({"status": task.state.lower()})
+
