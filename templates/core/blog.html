@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block title %}Blog | Tiriji Foundation{% endblock %}
 
@@ -7,11 +8,11 @@
     <div class="container page-hero-grid">
         <div>
             <h1>Field Notes</h1>
-            <p>Reflections, learning notes, and updates from Tiriji Foundation's regenerative community work.</p>
+            <p>Stories, learning notes, and reflections from Tiriji Foundation's regenerative community work.</p>
         </div>
         <div class="hero-proof glass-panel">
-            <strong>Coming into focus</strong>
-            <span>For now, published updates live under News while the blog workflow is prepared.</span>
+            <strong>Editorial desk</strong>
+            <span>Program stories, field learning, and operational context from the Tiriji ecosystem.</span>
         </div>
     </div>
 </section>
@@ -20,24 +21,30 @@
     <div class="container">
         <div class="section-heading">
             <p class="section-label">Blog</p>
-            <h2>Long-form stories will live here.</h2>
+            <h2>Long-form context behind the work.</h2>
         </div>
         <div class="story-grid">
+            {% for post in blog_posts %}
+            <article class="story-card reveal-on-scroll">
+                {% if post.image_url %}
+                    <img src="{{ post.image_url }}" alt="{{ post.title }}">
+                {% elif post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                {% else %}
+                    <img src="{% static 'images/IMG-20260522-WA0018.jpg' %}" alt="{{ post.title }}">
+                {% endif %}
+                <p class="story-meta"><span>{{ post.created_at|date:"M d, Y" }}</span></p>
+                <h3>{{ post.title }}</h3>
+                <p>{{ post.excerpt|truncatewords:32 }}</p>
+                <a href="{% url 'blog_detail' post.blog_id %}" class="text-link">Read Field Note</a>
+            </article>
+            {% empty %}
             <article class="story-card">
-                <h3>Program reflections</h3>
-                <p>Use this space for deeper stories from scholars, mentors, women entrepreneurs, volunteers, and coordinators.</p>
+                <h3>No blog posts available</h3>
+                <p>Published field notes will appear here after the content team adds them in the admin portal.</p>
                 <a href="{% url 'news' %}" class="text-link">Read current news</a>
             </article>
-            <article class="story-card">
-                <h3>Partner learning</h3>
-                <p>Document what Tiriji is learning through partner networks, events, and field implementation.</p>
-                <a href="{% url 'partners' %}" class="text-link">View partners</a>
-            </article>
-            <article class="story-card">
-                <h3>Volunteer journals</h3>
-                <p>Share placement reflections and practical guides for future volunteers.</p>
-                <a href="{% url 'volunteer' %}" class="text-link">Volunteer pathway</a>
-            </article>
+            {% endfor %}
         </div>
     </div>
 </section>

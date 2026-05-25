@@ -3,11 +3,12 @@
 {% block title %}Review Donation | Admin{% endblock %}
 
 {% block content %}
+{% include "core/partials/admin_shell_open.html" %}
 <div class="container admin-panel">
     <div class="admin-header card">
         <div>
             <h1>Review Donation</h1>
-            <p class="subtitle">{{ donation.donor_name|default:"Anonymous donor" }} · {{ donation.currency }} {{ donation.amount }}</p>
+            <p class="subtitle">{{ donation.donor_name|default:"Anonymous donor" }} · ${{ donation.amount }}</p>
         </div>
         <div class="admin-actions">
             <a href="{% url 'admin_donations' %}" class="btn btn-outline">Back</a>
@@ -51,4 +52,5 @@
         </section>
     </div>
 </div>
+{% include "core/partials/admin_shell_close.html" %}
 {% endblock %}

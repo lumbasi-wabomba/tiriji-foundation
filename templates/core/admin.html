@@ -3,42 +3,27 @@
 {% block title %}Admin Portal | Tiriji Foundation{% endblock %}
 
 {% block content %}
-<div class="admin-shell">
-    <aside class="admin-sidebar">
-        <h1><a href="{% url 'admin_portal' %}">Tiriji Ops</a></h1>
-        <p class="admin-role-label">{{ current_role }}</p>
-        <nav aria-label="Admin navigation">
-            <a href="{% url 'admin_portal' %}">Dashboard</a>
-            <a href="{% url 'admin_programs' %}">Programs</a>
-            <a href="{% url 'admin_events' %}">Events</a>
-            <a href="{% url 'admin_news' %}">Publishing</a>
-            <a href="{% url 'admin_resources' %}">Resources</a>
-            <a href="{% url 'admin_volunteers' %}">Applications</a>
-            <a href="{% url 'admin_donations' %}">Finance</a>
-            <a href="{% url 'admin_feedback' %}">Feedback</a>
-            <a href="{% url 'admin_users' %}">Users & Roles</a>
-        </nav>
-        <a href="{% url 'admin_logout' %}" class="btn btn-outline">Logout</a>
-    </aside>
-
-    <main class="admin-workspace">
-        <div class="admin-command">
-            <div>
-                <p class="section-label">Operations Dashboard</p>
-                <h2>Workflow command center</h2>
-                <p>Track approvals, program publishing, events, resources, and operational alerts from one surface.</p>
-            </div>
-            <div class="admin-search" role="search">
-                <span>Search</span>
-                <input type="search" placeholder="Find programs, events, donors...">
-            </div>
+{% include "core/partials/admin_shell_open.html" %}
+<div class="container admin-panel">
+    <div class="admin-command">
+        <div>
+            <p class="section-label">Operations Dashboard</p>
+            <h2>Workflow command center</h2>
+            <p>Track approvals, program publishing, events, resources, and operational alerts from one surface.</p>
         </div>
+        <div class="admin-search" role="search">
+            <span>Search</span>
+            <input type="search" placeholder="Find programs, events, donors...">
+        </div>
+    </div>
 
         <section class="admin-metrics">
             <div class="admin-card"><span>Programs</span><strong>{{ program_count }}</strong><a href="{% url 'admin_programs' %}">Manage</a></div>
             <div class="admin-card"><span>Events</span><strong>{{ event_count }}</strong><a href="{% url 'admin_events' %}">Manage</a></div>
             <div class="admin-card"><span>News</span><strong>{{ news_count }}</strong><a href="{% url 'admin_news' %}">Manage</a></div>
             <div class="admin-card"><span>Resources</span><strong>{{ resource_count }}</strong><a href="{% url 'admin_resources' %}">Manage</a></div>
+            <div class="admin-card"><span>Blog</span><strong>{{ blog_count }}</strong><a href="{% url 'admin_blogs' %}">Manage</a></div>
+            <div class="admin-card"><span>Stories</span><strong>{{ story_count }}</strong><a href="{% url 'admin_stories' %}">Manage</a></div>
             <div class="admin-card"><span>Donations</span><strong>{{ donation_count }}</strong><a href="{% url 'admin_donations' %}">Review</a></div>
         </section>
 
@@ -82,10 +67,12 @@
                     <a href="{% url 'admin_program_add' %}" class="admin-tile">Add a Program</a>
                     <a href="{% url 'admin_event_add' %}" class="admin-tile">Add an Event</a>
                     <a href="{% url 'admin_news_add' %}" class="admin-tile">Add News</a>
+                    <a href="{% url 'admin_blog_add' %}" class="admin-tile">Add Blog</a>
+                    <a href="{% url 'admin_story_add' %}" class="admin-tile">Add Story</a>
                     <a href="{% url 'admin_resource_add' %}" class="admin-tile">Upload Resource</a>
                 </div>
             </div>
         </section>
-    </main>
 </div>
+{% include "core/partials/admin_shell_close.html" %}
 {% endblock %}

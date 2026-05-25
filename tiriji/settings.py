@@ -15,7 +15,7 @@ import cloudinary
 import dj_database_url
 import os
 from dotenv import load_dotenv
-from urllib.parse import urlparse, parse_qsl
+from urllib.parse import parse_qsl, urlparse
 # Load environment variables from .env file
 load_dotenv()
 
@@ -29,24 +29,51 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY env var must be set")
+
+def env_list(name, default=''):
+    return [item.strip() for item in os.getenv(name, default).split(',') if item.strip()]
+
+
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in {'1', 'true', 'yes', 'on'}
+
+
+def normalize_host(value):
+    parsed = urlparse(value if '://' in value else f'//{value}')
+    return parsed.netloc or parsed.path
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = os.getenv('DEBUG') == 'False'
+DEBUG = env_bool('DEBUG', False)
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,.koyeb.app')
 
-# Enable WhiteNoise caching for development
-if DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+for host_env in ('PUBLIC_HOSTNAME', 'KOYEB_PUBLIC_DOMAIN', 'RENDER_EXTERNAL_HOSTNAME'):
+    host = os.getenv(host_env)
+    if host:
+        normalized_host = normalize_host(host)
+        if normalized_host and normalized_host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(normalized_host)
 
-# Comment out STATICFILES_DIRS in production to avoid conflicts with WhiteNoise 
-# if not DEBUG:
-#     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-#     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-#     # Don't use STATICFILES_DIRS in production
-#     STATICFILES_DIRS = []
+CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
+if not DEBUG:
+    for host in ALLOWED_HOSTS:
+        if host in {'localhost', '127.0.0.1', '0.0.0.0'}:
+            continue
+        origin_host = f'*{host}' if host.startswith('.') else host
+        origin = f'https://{origin_host}'
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
 
-ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1" ]
-
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -201,4 +228,3 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 #for production
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-

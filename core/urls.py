@@ -63,6 +63,16 @@ urlpatterns = [
     path('admin-portal/news/<uuid:news_id>/edit/', views.admin_news_edit, name='admin_news_edit'),          
     path('admin-portal/news/<uuid:news_id>/delete/', views.admin_news_delete, name='admin_news_delete'),    
 
+    path('admin-portal/blog/', views.admin_blogs, name='admin_blogs'),
+    path('admin-portal/blog/add/', views.admin_blog_add, name='admin_blog_add'),
+    path('admin-portal/blog/<int:blog_id>/edit/', views.admin_blog_edit, name='admin_blog_edit'),
+    path('admin-portal/blog/<int:blog_id>/delete/', views.admin_blog_delete, name='admin_blog_delete'),
+
+    path('admin-portal/stories/', views.admin_stories, name='admin_stories'),
+    path('admin-portal/stories/add/', views.admin_story_add, name='admin_story_add'),
+    path('admin-portal/stories/<int:story_id>/edit/', views.admin_story_edit, name='admin_story_edit'),
+    path('admin-portal/stories/<int:story_id>/delete/', views.admin_story_delete, name='admin_story_delete'),
+
     path('admin-portal/resources/', views.admin_resources, name='admin_resources'),
     path('admin-portal/resources/add/', views.admin_resource_add, name='admin_resource_add'),
     path('admin-portal/resources/<uuid:resource_id>/edit/', views.admin_resource_edit, name='admin_resource_edit'),      

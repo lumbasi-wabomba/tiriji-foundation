@@ -12,6 +12,7 @@ The current product direction combines cinematic storytelling, impact transparen
 - Children page focused on education support, mentorship timelines, student stories, and child-centered impact metrics.
 - Women empowerment page focused on vocational training, entrepreneurship, leadership journeys, workshop systems, and transformation stories.
 - Programs listing and detail pages with search, active program cards, volunteer fee visibility, and calls to donate or volunteer.
+- Blog and field-note pages for long-form editorial updates and published stories.
 - Resources dropdown for Events, News, and Materials.
 - About page with mission, vision, values, team profiles, and compact partner logo cards.
 - Contact, gallery, team, partners, careers, blog, FAQ, and supporting content routes.
@@ -51,6 +52,8 @@ It is protected by login and supports operational content management for:
 - Programs
 - Events
 - News
+- Blog posts
+- Success stories
 - Resources
 - Volunteers
 - Donations and finance review
@@ -107,7 +110,7 @@ CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-The project currently expects PostgreSQL from `DATABASE_URL`. If the database host is unavailable, views that query or submit data will fail.
+The project expects PostgreSQL from `DATABASE_URL`. Make sure it points to a reachable local or hosted database before starting Django. If the host is unavailable, the server will not boot and data-backed views will fail.
 
 ## Local Setup
 
@@ -126,13 +129,19 @@ pip install -r requirements.txt
 
 3. Configure `.env` with the variables above.
 
-4. Run migrations:
+4. Seed demo content if you want the site populated with sample programs, stories, and editorial content:
+
+```bash
+python manage.py seed_demo
+```
+
+5. Run migrations:
 
 ```bash
 python manage.py migrate
 ```
 
-5. Start the development server:
+6. Start the development server:
 
 ```bash
 python manage.py runserver
@@ -217,6 +226,8 @@ Submission flows to verify after backend changes:
 - Fixed volunteer payment summary model lookup and payment status rendering.
 - Fixed broken partner image path on the About page.
 - Added admin portal isolation, role-based staff users, finance review, and automatic admin logout when leaving the portal.
+- Added blog post publishing and story management to the custom admin portal.
+- Added seeded demo content for blog posts, stories, and expanded program pages.
 
 ## Notes
 
