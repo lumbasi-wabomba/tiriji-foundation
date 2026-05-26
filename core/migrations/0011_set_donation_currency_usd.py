@@ -11,7 +11,7 @@ def update_existing_currency(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0010_feedback_responded_at_feedback_response_message_and_more'),
+        ('core', '0001_initial'),
     ]
 
     operations = [

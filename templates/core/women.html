@@ -8,12 +8,12 @@
     <div class="container page-hero-grid">
         <div class="reveal-on-scroll">
             <h1>Women Empowerment</h1>
-            <p>Vocational training, entrepreneurship, leadership, and peer mentorship for women shaping local economies.</p>
+            <p>Vocational training, entrepreneurship, leadership, peer mentorship, and dignity-centered renewal for women shaping local economies.</p>
             <a href="{% url 'donate' %}" class="btn btn-primary">Fund a Workshop</a>
         </div>
         <div class="hero-proof glass-panel reveal-on-scroll">
             <strong>Community enterprise pathway</strong>
-            <span>Skills, confidence, financial literacy, and practical business transformation.</span>
+            <span>Skills, confidence, financial literacy, voice, and practical business transformation.</span>
         </div>
     </div>
 </section>
@@ -42,9 +42,9 @@
                 {% if featured_person %}
                     {{ featured_person.short_bio }}
                 {% else %}
-                    Tiriji’s women programs are built around vocational skills,
-                    entrepreneurship support, financial literacy, and leadership
-                    journeys that strengthen families and communities.
+                    Tiriji invests in regenerative social enterprises for women
+                    and girls through vocational skills, entrepreneurship
+                    support, financial literacy, and leadership journeys.
                 {% endif %}
             </p>
             {% if featured_person.quote %}<blockquote>{{ featured_person.quote }}</blockquote>{% endif %}
@@ -63,7 +63,7 @@
     <div class="container">
         <div class="section-heading reveal-on-scroll">
             <p class="section-label">Workshop System</p>
-            <h2>Training that moves from confidence to income.</h2>
+            <h2>Training that moves from confidence to income, voice, and dignity.</h2>
         </div>
         <div class="timeline-system reveal-on-scroll">
             <div><span>01</span><strong>Skill</strong><p>Hands-on vocational and entrepreneurship training.</p></div>
@@ -85,7 +85,7 @@
         {% empty %}
         <article class="story-card reveal-on-scroll">
             <h3>Business transformation</h3>
-            <p>Women turn training into practical income pathways through mentorship and peer accountability.</p>
+            <p>Women turn training into practical income pathways through mentorship, peer accountability, and local leadership.</p>
         </article>
         <article class="story-card reveal-on-scroll">
             <h3>Leadership circles</h3>

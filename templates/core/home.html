@@ -13,23 +13,23 @@
 
     <div class="container hero-content">
         <div class="hero-copy reveal-on-scroll">
-            <h1>Regenerating Communities Through Education, Women Empowerment & Volunteer Practice</h1>
+            <h1>Regenerating communities through education, women empowerment, wellness, and volunteer practice.</h1>
             <p>
-                Tiriji Foundation is a living movement in Kenya, connecting scholars,
-                women entrepreneurs, mentors, volunteers, and local partners through
-                measurable regenerative action.
+                Tiriji Foundation connects people, resources, and tools to restore
+                physical wellness, spiritual rootedness, ecological balance,
+                reconciled relationships, and practical community livelihoods.
             </p>
             <div class="hero-actions">
                 <a href="{% url 'volunteer' %}" class="btn btn-primary">Become a Volunteer</a>
                 <a href="{% url 'donate' %}" class="btn btn-secondary">Support a Child</a>
-                <a href="#impact" class="btn btn-glass">Explore Our Impact</a>
+                <a href="#impact" class="btn btn-glass">Explore the Work</a>
             </div>
         </div>
 
         <aside class="hero-signal glass-panel reveal-on-scroll">
             <span class="signal-dot"></span>
             <p>Active field network</p>
-            <strong>Children, women, mentors, and volunteers moving through real programs.</strong>
+            <strong>Children, women, mentors, volunteers, land stewards, and peacebuilders moving through real programs.</strong>
         </aside>
     </div>
 </section>
@@ -42,7 +42,7 @@
         </div>
         <div class="impact-stat reveal-on-scroll">
             <strong data-count="120">0</strong>
-            <span>Women empowered</span>
+            <span>Women-led renewal</span>
         </div>
         <div class="impact-stat reveal-on-scroll">
             <strong data-count="20">0</strong>
@@ -61,17 +61,17 @@
             <img src="{% static 'images/hero-children.jpg' %}" alt="Children learning in a Tiriji community program">
         </div>
         <div class="editorial-copy reveal-on-scroll">
-            <p class="section-label">Scholar of the Week</p>
-            <h2>Mentorship that turns school support into a future pathway.</h2>
+            <p class="section-label">Children and Wellness</p>
+            <h2>Care that helps young people grow, learn, heal, and flourish.</h2>
             <p>
-                Education support is paired with life-skills mentorship, confidence
-                building, and community accountability so each child is known,
-                encouraged, and followed over time.
+                Kithoka Amani Children's Home grounds education support in emotional
+                well-being, daily care, mentorship, life skills, and the confidence
+                children need to imagine a bright future.
             </p>
             <div class="story-meta">
-                <span>School support</span>
+                <span>Whole-child care</span>
                 <span>Mentorship</span>
-                <span>Life skills</span>
+                <span>Emotional wellness</span>
             </div>
             <a href="{% url 'children' %}" class="text-link">Follow the children journey</a>
         </div>
@@ -82,18 +82,19 @@
     <div class="container split-story">
         <div class="story-panel reveal-on-scroll">
             <p class="section-label">Women Changing Communities</p>
-            <h2>Economic empowerment designed around dignity, skill, and local leadership.</h2>
+            <h2>Women changing communities through dignity, skill, and local leadership.</h2>
             <p>
-                Tiriji supports women through vocational training, entrepreneurship
-                guidance, peer mentorship, and practical community workshops.
+                Tiriji invests in bold, innovative, and regenerative social
+                enterprises that enhance flourishing for women and girls while
+                strengthening families and local economies.
             </p>
             <a href="{% url 'women' %}" class="btn btn-primary">Explore Women Empowerment</a>
         </div>
         <div class="feature-card reveal-on-scroll">
             <img src="{% static 'images/hero-women-2.jpg' %}" alt="Women in a Tiriji empowerment program">
             <div>
-                <h3>Featured success story</h3>
-                <p>From training room to community enterprise, women build income and leadership together.</p>
+                <h3>Enterprise as renewal</h3>
+                <p>From training room to community enterprise, women build income, voice, and leadership together.</p>
             </div>
         </div>
     </div>
@@ -103,7 +104,7 @@
     <div class="container">
         <div class="section-heading reveal-on-scroll">
             <p class="section-label">Volunteer Journeys</p>
-            <h2>An onboarding ecosystem with visible next steps.</h2>
+            <h2>Volunteer journeys with cultural respect and visible next steps.</h2>
         </div>
         <div class="journey-track reveal-on-scroll" aria-label="Volunteer onboarding status pipeline">
             <div class="journey-step active"><span>01</span><strong>Submitted</strong><p>Application received.</p></div>
@@ -119,7 +120,7 @@
     <div class="container">
         <div class="section-heading reveal-on-scroll">
             <p class="section-label">Current Programs</p>
-            <h2>Operational workstreams, not abstract charity messaging.</h2>
+            <h2>Operational workstreams for inner, social, ecological, and economic renewal.</h2>
         </div>
         <div class="program-showcase-grid">
             {% for program in programs|slice:":3" %}
@@ -139,8 +140,8 @@
             <article class="program-feature reveal-on-scroll">
                 <img src="{% static 'images/program-ngl.jpg' %}" alt="Regenerative leadership program">
                 <div>
-                    <h3>Regenerative Leadership</h3>
-                    <p>Community-centered leadership, mentorship, and healing systems for long-term transformation.</p>
+                    <h3>Now Generation Leadership</h3>
+                    <p>Community-centered leadership, mentorship, peacebuilding, and healing systems for long-term transformation.</p>
                     <a href="{% url 'programs' %}" class="text-link">View programs</a>
                 </div>
             </article>
@@ -156,15 +157,15 @@
             <h2>Donation pathways connected to visible program allocation.</h2>
             <p>
                 Contributions support education materials, mentorship systems,
-                women-led enterprise development, community coordination, and
-                safe volunteer operations.
+                women-led enterprise development, wellness practices, community
+                coordination, and safe volunteer operations.
             </p>
             <a href="{% url 'donate' %}" class="btn btn-primary">Donate Today</a>
         </div>
         <div class="allocation-card reveal-on-scroll" aria-label="Illustrative fund allocation">
-            <div class="allocation-row"><span>Children education</span><strong>40%</strong></div>
+            <div class="allocation-row"><span>Young lives and education</span><strong>40%</strong></div>
             <div class="allocation-bar"><span style="width: 40%"></span></div>
-            <div class="allocation-row"><span>Women empowerment</span><strong>30%</strong></div>
+            <div class="allocation-row"><span>Women-led renewal</span><strong>30%</strong></div>
             <div class="allocation-bar"><span style="width: 30%"></span></div>
             <div class="allocation-row"><span>Field operations</span><strong>20%</strong></div>
             <div class="allocation-bar"><span style="width: 20%"></span></div>
@@ -178,12 +179,12 @@
     <div class="container">
         <div class="section-heading reveal-on-scroll">
             <p class="section-label">Community Gallery</p>
-            <h2>Field moments from an active network.</h2>
+            <h2>Field moments from a living network.</h2>
         </div>
         <div class="mosaic-gallery reveal-on-scroll">
             <img src="{% static 'images/hero-children.jpg' %}" alt="Children program moment">
             <img src="{% static 'images/hero-women.jpg' %}" alt="Women empowerment session">
-            <img src="{% static 'images/program-kenger.jpg' %}" alt="Regenerative community work">
+            <img src="{% static 'images/program-kenger.jpg' %}" alt="Reconciliation and regenerative community work">
             <img src="{% static 'images/program-ngl.jpg' %}" alt="Leadership program gathering">
         </div>
     </div>
@@ -193,7 +194,7 @@
     <div class="container">
         <div class="section-heading reveal-on-scroll">
             <p class="section-label">Trusted Ecosystem</p>
-            <h2>Partners strengthening the operating network.</h2>
+            <h2>Partners strengthening peace, learning, and community renewal.</h2>
         </div>
         {% include "core/partials/partner_showcase.html" with compact=True %}
     </div>
@@ -202,7 +203,7 @@
 <section class="cta cinematic-cta">
     <div class="container reveal-on-scroll">
         <h2>Help turn local courage into regenerative change.</h2>
-        <p>Volunteer, sponsor a child, or fund a community program with Tiriji Foundation.</p>
+        <p>Volunteer, sponsor a child, or fund renewal across body, spirit, land, and community.</p>
         <a href="{% url 'volunteer' %}" class="btn btn-primary">Become a Volunteer</a>
         <a href="{% url 'donate' %}" class="btn btn-glass">Support the Mission</a>
     </div>

@@ -8,12 +8,12 @@
     <div class="container page-hero-grid">
         <div class="reveal-on-scroll">
             <h1>Children Programs</h1>
-            <p>Hope, mentorship, education support, and future pathways for children growing inside real communities.</p>
+            <p>Physical care, emotional safety, education support, mentorship, and future pathways for children growing inside real communities.</p>
             <a href="{% url 'donate' %}" class="btn btn-primary">Support a Child</a>
         </div>
         <div class="hero-proof glass-panel reveal-on-scroll">
-            <strong>Mentorship system</strong>
-            <span>Scholar support, life skills, school follow-up, and community care.</span>
+            <strong>Whole-child care system</strong>
+            <span>Scholar support, life skills, school follow-up, emotional wellness, and community care.</span>
         </div>
     </div>
 </section>
@@ -49,8 +49,9 @@
                 {% if featured_person %}
                     {{ featured_person.short_bio }}
                 {% else %}
-                    Tiriji combines school support with mentorship, character formation,
-                    and consistent adult guidance so children can grow with confidence.
+                    Tiriji combines school support with mentorship, character
+                    formation, emotional well-being, and consistent adult
+                    guidance so children can grow with confidence.
                 {% endif %}
             </p>
             {% if featured_person.quote %}<blockquote>{{ featured_person.quote }}</blockquote>{% endif %}
@@ -66,7 +67,7 @@
         </div>
         <div class="timeline-system reveal-on-scroll">
             <div><span>01</span><strong>Identify</strong><p>Community coordinators understand the child, family context, and school needs.</p></div>
-            <div><span>02</span><strong>Support</strong><p>Education materials, mentorship touchpoints, and school follow-up are organized.</p></div>
+            <div><span>02</span><strong>Support</strong><p>Education materials, daily care, mentorship touchpoints, and school follow-up are organized.</p></div>
             <div><span>03</span><strong>Mentor</strong><p>Mentors build confidence, life skills, leadership, and emotional resilience.</p></div>
             <div><span>04</span><strong>Track</strong><p>Progress, attendance, stories, and needs are reviewed over time.</p></div>
         </div>
@@ -84,7 +85,7 @@
         {% empty %}
         <article class="story-card reveal-on-scroll">
             <h3>Before and after support</h3>
-            <p>School supplies, mentorship, and community care help children move from uncertainty to confidence.</p>
+            <p>School supplies, mentorship, emotional care, and community follow-up help children move from uncertainty to confidence.</p>
         </article>
         <article class="story-card reveal-on-scroll">
             <h3>Mentor circles</h3>
@@ -97,7 +98,7 @@
 <section class="cta cinematic-cta">
     <div class="container reveal-on-scroll">
         <h2>Support a child’s next chapter.</h2>
-        <p>Your giving helps fund school materials, mentorship, and reliable community follow-up.</p>
+        <p>Your giving helps fund school materials, mentorship, emotional care, and reliable community follow-up.</p>
         <a href="{% url 'donate' %}" class="btn btn-primary">Donate</a>
         <a href="{% url 'volunteer' %}" class="btn btn-glass">Mentor With Us</a>
     </div>
