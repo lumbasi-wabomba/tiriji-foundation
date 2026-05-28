@@ -1,14 +1,16 @@
 :root {
-    --primary: #095d2c;
-    --primary-2: #0f7d3d;
-    --primary-3: #073a21;
-    --ink: #102018;
-    --muted: #647067;
-    --earth: #7b684f;
+    --primary: #19694f;
+    --primary-2: #d3833a;
+    --primary-3: #243f35;
+    --ink: #17241f;
+    --muted: #657069;
+    --earth: #846747;
     --cream: #fbf4e7;
-    --cream-2: #f4ead7;
-    --sky: #9ed3e7;
-    --sky-soft: #e8f6fb;
+    --cream-2: #f1e4cf;
+    --sky: #8bc6d8;
+    --sky-soft: #e6f5f1;
+    --spirit: #6d5cae;
+    --sun: #e6b94f;
     --white: #ffffff;
     --danger: #d64545;
     --warning: #b36b00;
@@ -45,8 +47,9 @@ body {
     font-family: var(--font-base);
     color: var(--ink);
     background:
-        radial-gradient(circle at 10% 0%, rgba(158, 211, 231, 0.22), transparent 32rem),
-        linear-gradient(180deg, #fffaf0 0%, #f8f2e7 42%, #ffffff 100%);
+        radial-gradient(circle at 8% 0%, rgba(139, 198, 216, 0.2), transparent 30rem),
+        radial-gradient(circle at 92% 12%, rgba(230, 185, 79, 0.16), transparent 26rem),
+        linear-gradient(180deg, #fffaf0 0%, #f7efe1 42%, #ffffff 100%);
     font-size: 16px;
     line-height: 1.65;
 }
@@ -58,8 +61,8 @@ body::before {
     z-index: -1;
     pointer-events: none;
     background-image:
-        linear-gradient(rgba(9, 93, 44, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(9, 93, 44, 0.035) 1px, transparent 1px);
+        linear-gradient(rgba(25, 105, 79, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(109, 92, 174, 0.028) 1px, transparent 1px);
     background-size: 44px 44px;
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 72%);
 }
@@ -201,7 +204,7 @@ main.py-4 {
 
 .section-label {
     margin: 0 0 14px;
-    color: var(--primary);
+    color: var(--primary-2);
     font-size: 0.78rem;
     font-weight: 900;
     letter-spacing: 0.12em;
@@ -303,7 +306,7 @@ main.py-4 {
     position: fixed;
     inset: 0 0 auto;
     z-index: 1000;
-    background: rgba(9, 93, 44, 0.24);
+    background: rgba(25, 70, 55, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.22);
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
@@ -311,7 +314,7 @@ main.py-4 {
 }
 
 .site-header.shrink {
-    background: rgba(9, 93, 44, 0.92);
+    background: rgba(25, 70, 55, 0.94);
     box-shadow: 0 18px 50px rgba(4, 35, 17, 0.18);
 }
 
@@ -352,8 +355,9 @@ main.py-4 {
 
 .brand-name {
     color: var(--white);
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 900;
+    letter-spacing: 0.02em;
 }
 
 .nav-menu {
@@ -400,8 +404,8 @@ main.py-4 {
 }
 
 .nav-cta.nav-current {
-    color: var(--primary) !important;
-    background: rgba(255, 255, 255, 0.94) !important;
+    color: var(--ink) !important;
+    background: linear-gradient(135deg, rgba(230, 185, 79, 0.98), rgba(255, 255, 255, 0.96)) !important;
     box-shadow: 0 12px 28px rgba(4, 35, 17, 0.2);
 }
 
@@ -502,8 +506,8 @@ main.py-4 {
     inset: 0;
     z-index: -2;
     background:
-        linear-gradient(90deg, rgba(3, 31, 15, 0.88), rgba(9, 93, 44, 0.58) 44%, rgba(6, 29, 15, 0.16)),
-        linear-gradient(0deg, rgba(5, 23, 13, 0.78), transparent 48%);
+        linear-gradient(90deg, rgba(10, 28, 22, 0.9), rgba(25, 105, 79, 0.6) 40%, rgba(109, 92, 174, 0.22)),
+        linear-gradient(0deg, rgba(10, 24, 20, 0.8), transparent 48%);
 }
 
 .hero-content {
@@ -612,8 +616,8 @@ main.py-4 {
     height: 10px;
     margin-right: 8px;
     border-radius: 999px;
-    background: #82e6a5;
-    box-shadow: 0 0 0 8px rgba(130, 230, 165, 0.18);
+    background: var(--sun);
+    box-shadow: 0 0 0 8px rgba(230, 185, 79, 0.2);
 }
 
 .impact-strip {
@@ -1745,6 +1749,10 @@ textarea.form-control,
     position: sticky;
     top: 0;
     height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
     display: flex;
     flex-direction: column;
     gap: 22px;
@@ -1817,6 +1825,10 @@ textarea.form-control,
     transition: transform 260ms ease;
 }
 
+.admin-shell-collapsible .admin-sidebar h1 {
+    padding-right: 54px;
+}
+
 .admin-shell-collapsible.sidebar-open .admin-sidebar {
     transform: translateX(0);
 }
@@ -1832,17 +1844,18 @@ textarea.form-control,
     left: 18px;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    min-height: 46px;
-    padding: 10px 15px;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
     border: 1px solid rgba(9, 93, 44, 0.16);
-    border-radius: 999px;
+    border-radius: 14px;
     color: var(--primary);
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 18px 45px rgba(17, 45, 29, 0.14);
-    font-weight: 900;
     cursor: pointer;
     backdrop-filter: blur(16px);
+    transition: left 260ms ease, color var(--transition), background var(--transition), border-color var(--transition);
 }
 
 .admin-sidebar-toggle span,
@@ -1858,12 +1871,14 @@ textarea.form-control,
 
 .admin-sidebar-toggle span {
     position: relative;
+    transition: background var(--transition);
 }
 
 .admin-sidebar-toggle span::before,
 .admin-sidebar-toggle span::after {
     position: absolute;
     left: 0;
+    transition: transform var(--transition), top var(--transition);
 }
 
 .admin-sidebar-toggle span::before {
@@ -1875,15 +1890,36 @@ textarea.form-control,
 }
 
 .admin-shell-collapsible.sidebar-open .admin-sidebar-toggle {
+    left: calc(min(280px, calc(100vw - 36px)) - 58px);
     color: var(--white);
-    background: rgba(7, 31, 18, 0.94);
+    background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: none;
+}
+
+.admin-shell-collapsible.sidebar-open .admin-sidebar-toggle span,
+.admin-sidebar-state:checked ~ .admin-sidebar-toggle span {
+    background: transparent;
+}
+
+.admin-shell-collapsible.sidebar-open .admin-sidebar-toggle span::before,
+.admin-sidebar-state:checked ~ .admin-sidebar-toggle span::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.admin-shell-collapsible.sidebar-open .admin-sidebar-toggle span::after,
+.admin-sidebar-state:checked ~ .admin-sidebar-toggle span::after {
+    top: 0;
+    transform: rotate(-45deg);
 }
 
 .admin-sidebar-state:checked ~ .admin-sidebar-toggle {
+    left: calc(min(280px, calc(100vw - 36px)) - 58px);
     color: var(--white);
-    background: rgba(7, 31, 18, 0.94);
+    background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: none;
 }
 
 .admin-sidebar-backdrop {
