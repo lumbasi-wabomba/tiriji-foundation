@@ -105,14 +105,51 @@ Create a `.env` file in the project root with the values required by `tiriji/set
 SECRET_KEY=your-secret-key
 DEBUG=True
 DATABASE_URL=postgres://user:password@host:5432/database?sslmode=require
+FIELD_ENCRYPTION_KEY=your-fernet-key
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ```
 
+Generate a local `FIELD_ENCRYPTION_KEY` with:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
 The project expects PostgreSQL from `DATABASE_URL`. Make sure it points to a reachable local or hosted database before starting Django. If the host is unavailable, the server will not boot and data-backed views will fail.
 
 ## Local Setup
+
+The helper script can install dependencies, check the local environment, run migrations, collect static files, and start the Django server:
+
+```bash
+./build.sh help
+./build.sh install
+./build.sh check
+./build.sh migrate
+./build.sh runserver
+```
+
+For a full local flow:
+
+```bash
+./build.sh local
+```
+
+To run on another port:
+
+```bash
+./build.sh runserver 127.0.0.1:8001
+```
+
+For deployment-oriented validation without changing data:
+
+```bash
+./build.sh deploy-check
+```
+
+Manual setup is still available:
 
 1. Create and activate a virtual environment:
 
