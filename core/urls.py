@@ -38,7 +38,7 @@ urlpatterns = [
     # auth
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
-    path('admin-portal/logout/', views.admin_logout, name='admin_logout'),
+    
 
     # admin
     path('admin-portal/', views.admin_portal, name='admin_portal'),

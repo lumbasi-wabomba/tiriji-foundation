@@ -15,8 +15,6 @@ from django_ratelimit.decorators import ratelimit
 from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from celery.result import AsyncResult
-from core.celery_task import process_media_task
 
 import cloudinary
 import time
@@ -878,9 +876,9 @@ def admin_volunteers(request):
             {
                 'cols': [item.volunteer_id, f"{item.first_name} {item.last_name}", item.email, item.phone_number, 
                          item.program_id.title if item.program_id else '-', item.status, item.created_at.strftime('%Y-%m-%d')],
-                'review_url': reverse('admin_volunteer_review', args=[item.email]),
-                'edit_url': reverse('admin_volunteer_edit', args=[item.email]),
-                'delete_url': reverse('admin_volunteer_delete', args=[item.email]),
+                'review_url': reverse('admin_volunteer_review', args=[item.volunteer_id]),
+                'edit_url': reverse('admin_volunteer_edit', args=[item.volunteer_id]),
+                'delete_url': reverse('admin_volunteer_delete', args=[item.volunteer_id]),
             }
             for item in items
         ],
@@ -1060,11 +1058,11 @@ def admin_feedback_mark_accepted(request, feedback_id):
 def admin_feedback_mark_reopened(request, feedback_id):
     return _mark_feedback_status(request, feedback_id, 'reopened', 'Feedback marked as reopened.')
 
-@group_required
-@login_required
-def admin_logout(request):
-    auth_logout(request)
-    return redirect('home')
+# @group_required
+# @login_required
+# def admin_logout(request):
+#     auth_logout(request)
+#     return redirect('home')
  
 #  upload media 
 # -------------------------------------------------------------------------------------------------------------------

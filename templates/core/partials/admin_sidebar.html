@@ -14,5 +14,9 @@
         <a href="{% url 'admin_feedback' %}" {% if 'feedback' in request.resolver_match.url_name %}class="active"{% endif %}>Feedback</a>
         <a href="{% url 'admin_users' %}" {% if 'user' in request.resolver_match.url_name %}class="active"{% endif %}>Users & Roles</a>
     </nav>
-    <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+    <!-- <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a> -->
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline">Logout</button>
+    </form>
 </aside>
