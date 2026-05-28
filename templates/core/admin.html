@@ -34,7 +34,7 @@
                     <span class="status-badge warning">{{ pending_volunteer_count }} to review</span>
                 </div>
                 {% for application in pending_volunteers %}
-                <a class="workflow-row workflow-link" href="{% url 'admin_volunteer_review' application.email %}">
+                <a class="workflow-row workflow-link" href="{% url 'admin_volunteer_review' application.volunteer_id %}">
                     <span title="{{ application.get_status_display }}">
                         {% if application.status == 'payment_pending' %}Payment{% elif application.status == 'under_review' %}Review{% elif application.status == 'submitted' %}New{% elif application.status == 'approved' %}Approved{% elif application.status == 'rejected' %}Rejected{% elif application.status == 'active' %}Active{% elif application.status == 'completed' %}Done{% else %}{{ application.status|title }}{% endif %}
                     </span>

@@ -28,7 +28,7 @@
             {% if member.bio %}
             <p>{{ member.bio|truncatewords:20 }}</p>
             {% endif %}
-            <a href="{% url 'team_member_detail' member.email %}" class="text-link">View Profile →</a>
+            <a href="{% url 'team_member_detail' member.member_id %}" class="text-link">View Profile →</a>
         </div>
         {% empty %}
         <p>No team members available at the moment.</p>

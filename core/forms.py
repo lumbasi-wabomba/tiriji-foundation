@@ -88,11 +88,12 @@ class BlogPostForm(SanitizedModelForm):
 
     class Meta:
         model = BlogPost
-        fields = ['title', 'excerpt', 'body', 'image', 'source_url', 'is_published']
+        fields = ['title', 'excerpt', 'body', 'image_url', 'source_url', 'is_published']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'excerpt': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 8}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control'}),
             'source_url': forms.URLInput(attrs={'class': 'form-control'}),
             'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
@@ -103,7 +104,7 @@ class ResourceForm(SanitizedModelForm):
 
     class Meta:
         model = resources
-        fields = ['title', 'resources_description', 'image_url', 'file_url', 'program_id']
+        fields = ['title', 'resources_description', 'image_url', 'file', 'program_id']
         widgets = {
             'resources_description': forms.Textarea(attrs={'rows': 10}),
         }
@@ -310,6 +311,7 @@ class FeaturedPersonForm(SanitizedModelForm):
             'achievement': forms.TextInput(attrs={'class': 'form-control'}),
             'dream_or_goal': forms.TextInput(attrs={'class': 'form-control'}),
             'quote': forms.TextInput(attrs={'class': 'form-control'}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control'}),
         }
 
 
@@ -327,6 +329,8 @@ class SuccessStoryForm(SanitizedModelForm):
             'intervention': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'outcome': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'quote': forms.TextInput(attrs={'class': 'form-control'}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control'}),
+
         }
 
 
@@ -341,6 +345,7 @@ class InspirationVideoForm(SanitizedModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'video_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'thumbnail_url': forms.URLInput(attrs={'class': 'form-control'}),
         }
 
 
@@ -355,6 +360,7 @@ class PageMediaForm(SanitizedModelForm):
             'media_type': forms.Select(attrs={'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control'}),
             'video_url': forms.URLInput(attrs={'class': 'form-control'}),
             'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
         }

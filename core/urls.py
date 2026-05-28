@@ -13,7 +13,7 @@ urlpatterns = [
     path('programs/', views.programs, name='programs'),
     path('programs/<uuid:program_id>/', views.program_detail, name='program_detail'),        
     path('volunteer/signup/', views.volunteer_signup, name='volunteer_signup'),
-    path('volunteer/payment/<str:volunteer_email>/volunteer_payment_summary/', views.volunteer_payment_summary, name='volunteer_payment_summary'),
+    path('volunteer/payment/<uuid:volunteer_id>/volunteer_payment_summary/', views.volunteer_payment_summary, name='volunteer_payment_summary'),
     path('donate/', views.donate, name='donate'),
     path('donate/payment/<uuid:donation_id>/', views.donation_payment, name='donation_payment'),
     path('events/', views.events, name='events'),
@@ -26,7 +26,7 @@ urlpatterns = [
     path('gallery/', views.gallery, name='gallery'),
     path('gallery/<int:gallery_id>/', views.gallery_detail, name='gallery_detail'),          
     path('team/', views.team, name='team'),
-    path('team/<str:member_id>/', views.team_member_detail, name='team_member_detail'),
+    path('team/<uuid:member_id>/', views.team_member_detail, name='team_member_detail'),
     path('partners/', views.partners, name='partners'),
     path('partners/<int:partner_id>/', views.partner_detail, name='partner_detail'),       
     path('blog/', views.blog, name='blog'),
@@ -38,7 +38,7 @@ urlpatterns = [
     # auth
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
-    path('admin-portal/logout/', views.admin_logout, name='admin_logout'),
+    
 
     # admin
     path('admin-portal/', views.admin_portal, name='admin_portal'),
@@ -46,7 +46,7 @@ urlpatterns = [
     path('admin-portal/users/add/', views.admin_user_add, name='admin_user_add'),
     path('admin-portal/users/<int:user_id>/edit/', views.admin_user_edit, name='admin_user_edit'),         
     path('admin-portal/donations/', views.admin_donations, name='admin_donations'),
-    path('admin-portal/donations/<str:donation_id>/review/', views.admin_donation_review, name='admin_donation_review'),
+    path('admin-portal/donations/<uuid:donation_id>/review/', views.admin_donation_review, name='admin_donation_review'),
 
     path('admin-portal/programs/', views.admin_programs, name='admin_programs'),
     path('admin-portal/programs/add/', views.admin_program_add, name='admin_program_add'),
@@ -78,12 +78,12 @@ urlpatterns = [
     path('admin-portal/resources/<uuid:resource_id>/edit/', views.admin_resource_edit, name='admin_resource_edit'),      
     path('admin-portal/resources/<uuid:resource_id>/delete/', views.admin_resource_delete, name='admin_resource_delete'),
 
-    path('admin-portal/volunteers/<str:volunteer_email>/payment-summary/', views.volunteer_payment_summary, name='admin_volunteer_payment_summary'),
+    path('admin-portal/volunteers/<uuid:volunteer_id>/payment-summary/', views.volunteer_payment_summary, name='admin_volunteer_payment_summary'),
     path('admin-portal/volunteers/', views.admin_volunteers, name='admin_volunteers'),
     path('admin-portal/volunteers/add/', views.admin_volunteer_add, name='admin_volunteer_add'),
-    path('admin-portal/volunteers/<str:volunteer_email>/review/', views.admin_volunteer_review, name='admin_volunteer_review'),
-    path('admin-portal/volunteers/<str:volunteer_email>/edit/', views.admin_volunteer_edit, name='admin_volunteer_edit'),
-    path('admin-portal/volunteers/<str:volunteer_email>/delete/', views.admin_volunteer_delete, name='admin_volunteer_delete'),
+    path('admin-portal/volunteers/<uuid:volunteer_id>/review/', views.admin_volunteer_review, name='admin_volunteer_review'),
+    path('admin-portal/volunteers/<uuid:volunteer_id>/edit/', views.admin_volunteer_edit, name='admin_volunteer_edit'),
+    path('admin-portal/volunteers/<uuid:volunteer_id>/delete/', views.admin_volunteer_delete, name='admin_volunteer_delete'),
 
     path('admin-portal/feedback/', views.admin_feedback, name='admin_feedback'),
     path('admin-portal/feedback/<int:feedback_id>/delete/', views.admin_feedback_delete, name='admin_feedback_delete'),
@@ -99,6 +99,5 @@ urlpatterns = [
     path('admin-portal/feedback/<int:feedback_id>/mark-accepted/', views.admin_feedback_mark_accepted, name='admin_feedback_mark_accepted'),
     path('admin-portal/feedback/<int:feedback_id>/mark-reopened/', views.admin_feedback_mark_reopened, name='admin_feedback_mark_reopened'),
 
-    path('admin-portal/upload-media/', views.upload_media, name='admin_upload_media'),
-    path('admin-portal/upload-media/status/<str:task_id>/', views.upload_media_status, name='upload_media_status'),
+    path('admin-portal/cloudinary-signature/', views.cloudinary_signature, name='cloudinary_signature')
 ]
