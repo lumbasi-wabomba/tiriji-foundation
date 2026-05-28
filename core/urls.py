@@ -99,6 +99,5 @@ urlpatterns = [
     path('admin-portal/feedback/<int:feedback_id>/mark-accepted/', views.admin_feedback_mark_accepted, name='admin_feedback_mark_accepted'),
     path('admin-portal/feedback/<int:feedback_id>/mark-reopened/', views.admin_feedback_mark_reopened, name='admin_feedback_mark_reopened'),
 
-    path('admin-portal/upload-media/', views.upload_media, name='admin_upload_media'),
-    path('admin-portal/upload-media/status/<str:task_id>/', views.upload_media_status, name='upload_media_status'),
+    path('admin-portal/cloudinary-signature/', views.cloudinary_signature, name='cloudinary_signature')
 ]

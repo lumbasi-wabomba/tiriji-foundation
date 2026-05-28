@@ -18,6 +18,11 @@ from django.core.files.base import ContentFile
 from celery.result import AsyncResult
 from core.celery_task import process_media_task
 
+import cloudinary
+import time
+import cloudinary.utils
+
+
 CAREER_OPENINGS = [
     {
         'id': 1,
@@ -1063,61 +1068,90 @@ def admin_logout(request):
  
 #  upload media 
 # -------------------------------------------------------------------------------------------------------------------
-@group_required
-@require_http_methods(["POST"])
-@login_required                                   
+# @group_required
+# @require_http_methods(["POST"])
+# @login_required                                   
+# @ratelimit(key='user', method=ratelimit.ALL, rate='15/h', block=True)
+# def upload_media(request):
+#     media_file = request.FILES.get("file")
+#     if not media_file:
+#         return JsonResponse({"error": "No file provided."}, status=400)
+
+#     try:
+#         temp_path = default_storage.save(
+#             f"temp/{media_file.name}",
+#             ContentFile(media_file.read())
+#         )
+#     except Exception as e:
+#         return JsonResponse({"error": f"Could not save file: {e}"}, status=500)
+
+#     try:
+#         task = process_media_task.delay(temp_path)
+#     except Exception as e:
+#         # Celery/Redis not reachable — clean up and return JSON error
+#         default_storage.delete(temp_path)
+#         return JsonResponse({
+#             "error": f"Processing queue unavailable: {e}. Is Celery running?"
+#         }, status=503)
+
+#     return JsonResponse({
+#         "task_id": task.id,
+#         "status":  "processing",
+#     })
+
+
+# @group_required
+# @require_http_methods(["GET"])
+# def upload_media_status(request, task_id):
+#     try:
+#         task = AsyncResult(task_id)
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)
+
+#     if task.state == "PENDING":
+#         return JsonResponse({"status": "pending"})
+
+#     elif task.state == "SUCCESS":
+#         return JsonResponse({
+#             "status": "done",
+#             "url":    task.result["url"],
+#             "type":   task.result["type"],
+#         })
+
+#     elif task.state == "FAILURE":
+#         return JsonResponse({
+#             "status": "failed",
+#             "error":  str(task.result),
+#         }, status=500)
+
+#     else:
+#         return JsonResponse({"status": task.state.lower()})
+    
+
+@login_required
 @ratelimit(key='user', method=ratelimit.ALL, rate='15/h', block=True)
-def upload_media(request):
-    media_file = request.FILES.get("file")
-    if not media_file:
-        return JsonResponse({"error": "No file provided."}, status=400)
+@group_required
+def cloudinary_signature(request):
+    timestamp = int(time.time())
+    folder = "tiriji"
+    # transformation = "q_auto,f_auto,e_auto_enhance,e_auto_color"
+    
+    params_to_sign = {
+        "timestamp": timestamp,
+        "folder": folder,
+        # "transformations": transformation,
+    }
 
-    try:
-        temp_path = default_storage.save(
-            f"temp/{media_file.name}",
-            ContentFile(media_file.read())
-        )
-    except Exception as e:
-        return JsonResponse({"error": f"Could not save file: {e}"}, status=500)
-
-    try:
-        task = process_media_task.delay(temp_path)
-    except Exception as e:
-        # Celery/Redis not reachable — clean up and return JSON error
-        default_storage.delete(temp_path)
-        return JsonResponse({
-            "error": f"Processing queue unavailable: {e}. Is Celery running?"
-        }, status=503)
+    signature = cloudinary.utils.api_sign_request(
+        params_to_sign,
+        cloudinary.config().api_secret
+    )                                            
 
     return JsonResponse({
-        "task_id": task.id,
-        "status":  "processing",
-    })
-
-
-@group_required
-@require_http_methods(["GET"])
-def upload_media_status(request, task_id):
-    try:
-        task = AsyncResult(task_id)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
-    if task.state == "PENDING":
-        return JsonResponse({"status": "pending"})
-
-    elif task.state == "SUCCESS":
-        return JsonResponse({
-            "status": "done",
-            "url":    task.result["url"],
-            "type":   task.result["type"],
-        })
-
-    elif task.state == "FAILURE":
-        return JsonResponse({
-            "status": "failed",
-            "error":  str(task.result),
-        }, status=500)
-
-    else:
-        return JsonResponse({"status": task.state.lower()})
+        "signature":  signature,
+        "timestamp":  timestamp,
+        "folder":     folder,
+        # "transformations": transformation,
+        "cloud_name": cloudinary.config().cloud_name,
+        "api_key":    cloudinary.config().api_key,
+    })                                              

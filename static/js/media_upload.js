@@ -1,19 +1,14 @@
+// js file for handling media uploads to Cloudinary in the admin portal (for images, videos, files)
 (function () {
   "use strict";
 
-  const UPLOAD_ENDPOINT = "/admin-portal/upload-media/";
-  const STATUS_ENDPOINT = (id) => `/admin-portal/upload-media/status/${id}/`;
-
-  const POLL_MS     = 2500;
-  const MAX_WAIT_MS = 300_000;
-
+  const SIG_ENDPOINT = "/admin-portal/cloudinary-signature/";
   const CSRF = () =>
     document.querySelector('meta[name="csrf-token"]')?.content ||
     document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
     "";
 
   const FIELD_RE = /^(image|video|file|thumbnail|profile_image|profile_logo)_url$/;
-
   const FIELD_META = {
     image:         { accept: "image/*", label: "image",     isImage: true,  isVideo: false },
     video:         { accept: "video/*", label: "video",     isImage: false, isVideo: true  },
@@ -22,6 +17,16 @@
     profile_image: { accept: "image/*", label: "image",     isImage: true,  isVideo: false },
     profile_logo:  { accept: "image/*", label: "logo",      isImage: true,  isVideo: false },
   };
+
+  const IMAGE_EXTS = ["jpg","jpeg","png","gif","webp","bmp","tiff","svg"];
+  const VIDEO_EXTS = ["mp4","mov","avi","mkv","webm","m4v"];
+
+  function resourceType(file) {
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (IMAGE_EXTS.includes(ext)) return "image";
+    if (VIDEO_EXTS.includes(ext)) return "video";
+    return "raw";
+  }
 
   /* ── SVG icons ────────────────────────────────────────────────────────────── */
   const SVG = {
@@ -32,41 +37,63 @@
     x:     `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   };
 
-   function mkEl(tag, cls) {
+  function mkEl(tag, cls) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
     return e;
   }
 
-    async function safeJson(res) {
+  async function safeJson(res) {
     const ct = res.headers.get("content-type") || "";
     if (!ct.includes("application/json")) {
-      /* Django returned HTML — auth redirect, error page, rate-limit page, etc. */
-      const text = await res.text();
       const hint =
-        res.status === 301 || res.status === 302 ? "Session expired — please refresh and log in again." :
+        res.status === 302 || res.status === 301 ? "Session expired — please refresh and log in again." :
         res.status === 403 ? "Permission denied." :
-        res.status === 429 ? "Too many uploads — try again later." :
-        res.status === 503 ? "Upload queue unavailable — is Celery running?" :
-        `Server returned ${res.status} (non-JSON).`;
+        res.status === 429 ? "Too many requests — try again later." :
+        `Server error ${res.status}.`;
       throw new Error(hint);
     }
     return res.json();
   }
 
+  function xhrUpload(url, formData, onProgress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url);
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+      });
+
+      xhr.addEventListener("load", () => {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch {
+          reject(new Error("Cloudinary returned non-JSON response."));
+        }
+      });
+
+      xhr.addEventListener("error",  () => reject(new Error("Network error during upload.")));
+      xhr.addEventListener("abort",  () => reject(new Error("Upload cancelled.")));
+      xhr.send(formData);
+    });
+  }
+
+  /* ── Widget factory ───────────────────────────────────────────────────────── */
   function buildWidget(hiddenInput) {
     const name   = hiddenInput.name || hiddenInput.id || "";
     const prefix = Object.keys(FIELD_META).find(k => name.startsWith(k)) || "file";
     const meta   = FIELD_META[prefix];
     const icon   = SVG[meta.isImage ? "image" : meta.isVideo ? "video" : "file"];
 
+    /* ── DOM skeleton ── */
     const wrap     = mkEl("div", "mu-wrap");
     const zone     = mkEl("div", "mu-zone");
     const clrBtn   = mkEl("button", "mu-clear");
     const idleWrap = mkEl("div", "mu-idle-wrap");
     const rail     = mkEl("div", "mu-rail");
     const bar      = mkEl("div", "mu-bar");
-    const statusEl = mkEl("div", "mu-status is-idle");  
+    const statusEl = mkEl("div", "mu-status is-idle");
     const fileIn   = mkEl("input", "mu-hidden");
 
     zone.tabIndex = 0;
@@ -74,7 +101,7 @@
     zone.setAttribute("aria-label", `Upload ${meta.label}`);
 
     clrBtn.type      = "button";
-    clrBtn.title     = "Remove file";
+    clrBtn.title     = "Remove";
     clrBtn.innerHTML = SVG.x;
 
     fileIn.type   = "file";
@@ -94,7 +121,7 @@
     wrap.appendChild(statusEl);
     wrap.appendChild(rail);
 
-    /* edit form — show existing URL immediately */
+    /* existing URL on edit form */
     const existingUrl = hiddenInput.value.trim();
     if (existingUrl) {
       renderPreview(zone, idleWrap, existingUrl, meta, null);
@@ -102,27 +129,18 @@
       bar.style.width = "100%";
     }
 
-    /* ── Events ───────────────────────────────────────────────────────────── */
-    zone.addEventListener("click", (e) => {
-      if (e.target.closest(".mu-clear")) return;
-      fileIn.click();
-    });
-    zone.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); }
-    });
+    zone.addEventListener("click",   (e) => { if (!e.target.closest(".mu-clear")) fileIn.click(); });
+    zone.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } });
 
     zone.addEventListener("dragover",  (e) => { e.preventDefault(); zone.classList.add("mu-over"); });
     zone.addEventListener("dragleave", ()  => zone.classList.remove("mu-over"));
     zone.addEventListener("drop", (e) => {
       e.preventDefault();
       zone.classList.remove("mu-over");
-      const f = e.dataTransfer.files[0];
-      if (f) startUpload(f);
+      if (e.dataTransfer.files[0]) startUpload(e.dataTransfer.files[0]);
     });
 
-    fileIn.addEventListener("change", () => {
-      if (fileIn.files[0]) startUpload(fileIn.files[0]);
-    });
+    fileIn.addEventListener("change", () => { if (fileIn.files[0]) startUpload(fileIn.files[0]); });
 
     clrBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -132,38 +150,21 @@
       bar.style.width = "0%";
     });
 
-    /* ── Upload flow ──────────────────────────────────────────────────────── */
     async function startUpload(file) {
       renderPreview(zone, idleWrap, null, meta, file);
-      setStatus(statusEl, "working", "Saving to server…");
-      bar.style.width = "15%";
+      setStatus(statusEl, "working", "Preparing upload…");
+      bar.style.width = "5%";
 
-      const fd = new FormData();
-      fd.append("file", file);
-
-      let taskId;
+      let sig;
       try {
-        const res = await fetch(UPLOAD_ENDPOINT, {
-          method:  "POST",
+        const res = await fetch(SIG_ENDPOINT, {
           headers: {
+            "X-Requested-With": "XMLHttpRequest",
             "X-CSRFToken":      CSRF(),
-            "X-Requested-With": "XMLHttpRequest",   
           },
-          body: fd,
         });
-
-        const data = await safeJson(res);
-
-        if (!res.ok || data.error) {
-          throw new Error(data.error || `Server error ${res.status}`);
-        }
-
-        /* { task_id: "...", status: "processing" }
-           Celery worker now has the file — compressing + uploading to Cloudinary */
-        taskId = data.task_id;
-        bar.style.width = "30%";
-        setStatus(statusEl, "working", "Compressing & uploading to Cloudinary…");
-
+        sig = await safeJson(res);
+        if (sig.error) throw new Error(sig.error);
       } catch (err) {
         setStatus(statusEl, "error", `✗ ${err.message}`);
         bar.style.width = "0%";
@@ -171,66 +172,51 @@
         return;
       }
 
-      /* ── Poll until Celery task finishes ────────────────────────────────── */
-      const started = Date.now();
+      const rType  = resourceType(file);
+      const apiUrl = `https://api.cloudinary.com/v1_1/${sig.cloud_name}/${rType}/upload/q_auto:best,f_auto,w_1920,c_limit,e_auto_enhance,e_auto_color/`;
 
-      const timer = setInterval(async () => {
-        if (Date.now() - started > MAX_WAIT_MS) {
-          clearInterval(timer);
-          setStatus(statusEl, "error", "Timed out — try again");
-          bar.style.width = "0%";
-          return;
-        }
+      const fd = new FormData();
+      fd.append("file",           file);
+      fd.append("api_key",        sig.api_key);
+      fd.append("timestamp",      sig.timestamp);
+      fd.append("signature",      sig.signature);
+      fd.append("folder",         sig.folder);
+      fd.append("transformations", sig.transformations);
+      
+        // ← matches signature, no mismatch
+      // if (rType === "image") {
+      //   fd.append("transformation", "q_auto,f_auto");
+      // } else if (rType === "video") {
+      //   fd.append("eager",               "vc_auto,q_auto");
+      //   fd.append("eager_async",         "true");
+      // }
 
-        let data;
-        try {
-          const res = await fetch(STATUS_ENDPOINT(taskId), {
-            headers: { "X-Requested-With": "XMLHttpRequest" },          });
-        
-          data = await safeJson(res);
-        } catch (err) {
-        
-          if (err.message.includes("Session") || err.message.includes("Permission")) {
-            clearInterval(timer);
-            setStatus(statusEl, "error", `✗ ${err.message}`);
-            bar.style.width = "0%";
-          }
-          /* else: silent retry on next interval */
-          return;
-        }
+      setStatus(statusEl, "working", "Uploading…");
 
-        /* Possible states from upload_media_status view:
-             pending  → Celery hasn't picked it up yet
-             done     → { url, type } — write into hidden input
-             failed   → { error } — show message
-             started / retry → still working, nudge progress bar             */
+      try {
+        const data = await xhrUpload(apiUrl, fd, (pct) => {
 
-        if (data.status === "done") {
-          clearInterval(timer);
-          hiddenInput.value = data.url;              
-          renderPreview(zone, idleWrap, data.url, meta, file);
-          setStatus(statusEl, "done", "Ready — file uploaded");
-          bar.style.width = "100%";
+          bar.style.width = pct + "%";
+          setStatus(statusEl, "working", `Uploading… ${pct}%`);
+        });
 
-        } else if (data.status === "failed") {
-          clearInterval(timer);
-          setStatus(statusEl, "error", `✗ Failed: ${data.error || "unknown error"}`);
-          bar.style.width = "0%";
-          clearPreview(zone, idleWrap);
+        if (data.error) throw new Error(data.error.message);
 
-        } else {
-          /* pending / started / retry — nudge the bar forward */
-          const cur = parseFloat(bar.style.width) || 30;
-          bar.style.width = Math.min(cur + 4, 88) + "%";
-        }
+        hiddenInput.value = data.secure_url;
+        renderPreview(zone, idleWrap, data.secure_url, meta, file);
+        setStatus(statusEl, "done", "✓ Uploaded");
+        bar.style.width = "100%";
 
-      }, POLL_MS);
+      } catch (err) {
+        setStatus(statusEl, "error", `✗ ${err.message}`);
+        bar.style.width = "0%";
+        clearPreview(zone, idleWrap);
+      }
     }
 
     return wrap;
   }
 
-  /* ── Preview helpers ──────────────────────────────────────────────────────── */
   function renderPreview(zone, idleWrap, url, meta, file) {
     clearPreview(zone, idleWrap);
     zone.classList.add("mu-filled");
@@ -244,9 +230,7 @@
       zone.appendChild(img);
     } else {
       const box = mkEl("div", "mu-preview-file");
-      const iconSvg = meta.isVideo ? SVG.video : SVG.file;
-      const label = file ? file.name : (url ? "Current file" : "File ready");
-      box.innerHTML = `${iconSvg}<span>${label}</span>`;
+      box.innerHTML = `${meta.isVideo ? SVG.video : SVG.file}<span>${file ? file.name : "Current file"}</span>`;
       zone.appendChild(box);
     }
 
@@ -258,8 +242,7 @@
   function clearPreview(zone, idleWrap) {
     zone.classList.remove("mu-filled");
     idleWrap.style.display = "";
-    zone.querySelectorAll(".mu-preview-img, .mu-preview-file, .mu-replace-hint")
-        .forEach(n => n.remove());
+    zone.querySelectorAll(".mu-preview-img, .mu-preview-file, .mu-replace-hint").forEach(n => n.remove());
   }
 
   function setStatus(statusEl, state, text) {
@@ -273,40 +256,27 @@
     }
   }
 
-  /* ── Block form submit while any upload is still in progress ─────────────── */
   function guardSubmit() {
     document.addEventListener("submit", (e) => {
-      const busy = document.querySelector(".mu-status.is-working");
-      if (busy) {
+      if (document.querySelector(".mu-status.is-working")) {
         e.preventDefault();
-        alert(
-          "Please wait — media is still being compressed and uploaded to Cloudinary.\n\n" +
-          "Submit again once all files show ✓"
-        );
+        alert("Please wait — a file is still uploading.\nSubmit again once you see ✓");
       }
     }, true);
   }
 
-  /* ── Init: scan form and replace all matching URL inputs ─────────────────── */
   function init() {
     guardSubmit();
-
     document.querySelectorAll("input[type='url'], input[type='text']").forEach((input) => {
       const name = input.name || input.id || "";
       if (!FIELD_RE.test(name)) return;
-
-      /* keep original input in DOM (hidden) — form still POSTs the URL value */
       input.classList.add("mu-hidden");
-
-      const widget = buildWidget(input);
-      input.insertAdjacentElement("afterend", widget);
+      input.insertAdjacentElement("afterend", buildWidget(input));
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  document.readyState === "loading"
+    ? document.addEventListener("DOMContentLoaded", init)
+    : init();
 
 })();
