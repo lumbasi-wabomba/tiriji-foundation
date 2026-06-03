@@ -22,7 +22,6 @@ staticfiles/
 
 # Environment Variables
 .env
-docker.env
 
 .wrangler/
 
@@ -30,3 +29,5 @@ docker.env
 .idea/  
 
 # docker 
+docker.env
+
