@@ -75,7 +75,7 @@ class volunteer(models.Model):
         else:
             extra_weeks = self.duration_weeks - 8
             extra_fee = extra_weeks * self.program_id.week_fee 
-            return self.program_id.eight_week_fee + extra_fee
+            return self.program_id.week_fee * 8 + extra_fee
         
 
     def __str__(self):
@@ -272,8 +272,10 @@ class news(models.Model):
             return f"{self.title} news related to {self.event_id.title} event"
         else:
             return self.title
+
+            
 class BlogPost(models.Model):
-    blog_id = models.AutoField(primary_key=True)
+    blog_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=150)
     excerpt = models.TextField()
     body = models.TextField()
@@ -288,6 +290,8 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
+    
+
 class resources(models.Model):
     resource_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50, null=False, blank=False)

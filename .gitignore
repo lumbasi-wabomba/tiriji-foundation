@@ -27,3 +27,7 @@ staticfiles/
 
 .vscode/
 .idea/  
+
+# docker 
+docker.env
+
