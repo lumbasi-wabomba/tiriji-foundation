@@ -12,17 +12,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import cloudinary
-import dj_database_url
 import os
 from dotenv import load_dotenv
 from urllib.parse import parse_qsl, urlparse
+
 # Load environment variables from .env file
 load_dotenv()
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -32,52 +30,28 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY env var must be set")
 
-def env_list(name, default=''):
-    return [item.strip() for item in os.getenv(name, default).split(',') if item.strip()]
-
-
-def env_bool(name, default=False):
-    value = os.getenv(name)
-    if value is None:
-        return default
-    return value.lower() in {'1', 'true', 'yes', 'on'}
-
-
-def normalize_host(value):
-    parsed = urlparse(value if '://' in value else f'//{value}')
-    return parsed.netloc or parsed.path
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = env_bool('DEBUG', False)
-# ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,.koyeb.app')
+DEBUG = False
 
-# for host_env in ('PUBLIC_HOSTNAME', 'KOYEB_PUBLIC_DOMAIN', 'RENDER_EXTERNAL_HOSTNAME'):
-#     host = os.getenv(host_env)
-#     if host:
-#         normalized_host = normalize_host(host)
-#         if normalized_host and normalized_host not in ALLOWED_HOSTS:
-#             ALLOWED_HOSTS.append(normalized_host)
+ALLOWED_HOSTS = ['localhost', '127.0.0.0', '0.0.0.0']
 
-# CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
-# if not DEBUG:
-#     for host in ALLOWED_HOSTS:
-#         if host in {'localhost', '127.0.0.1', '0.0.0.0'}:
-#             continue
-#         origin_host = f'*{host}' if host.startswith('.') else host
-#         origin = f'https://{origin_host}'
-#         if origin not in CSRF_TRUSTED_ORIGINS:
-#             CSRF_TRUSTED_ORIGINS.append(origin)
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS')
+if not DEBUG:
+    for host in ALLOWED_HOSTS:
+        if host in {'localhost', '127.0.0.1', '0.0.0.0'}:
+            continue
+        origin_host = f'*{host}' if host.startswith('.') else host
+        origin = f'https://{origin_host}'
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
 
-# if not DEBUG:
-#     SECURE_SSL_REDIRECT = True
-#     SECURE_HSTS_SECONDS = 31536000
-#     SESSION_COOKIE_SECURE = True
-#     CSRF_COOKIE_SECURE = True
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -159,17 +133,7 @@ cloudinary.config(
     api_key = os.getenv('CLOUDINARY_API_KEY'), 
     api_secret = os.getenv('CLOUDINARY_API_SECRET'),
     secure=True
-)
-
-# celery & redis settings
-CELERY_BROKER_URL        = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND    = "django-db"  
-CELERY_CACHE_BACKEND     = "default"
-CELERY_TASK_SERIALIZER   = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_ACCEPT_CONTENT    = ["json"]
-CELERY_RESULT_EXPIRES    = 3600          
-CELERY_TASK_TRACK_STARTED = True         
+)  
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
